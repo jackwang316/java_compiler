@@ -54,7 +54,7 @@ public class LocatedChar implements Locator {
 		return Character.isLowerCase(character) || (character == '_');
 	}
 	public boolean isDigit() {
-		return Character.isDigit(character);
+		return Character.isDigit(character) || (character == '-') || (character == '+');
 	}
 	public boolean isWhitespace() {
 		return Character.isWhitespace(character);

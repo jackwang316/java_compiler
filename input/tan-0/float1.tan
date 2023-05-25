@@ -1,3 +1,6 @@
 main {
-	print 3.14 \n;
+	print -6.022E-2 \n;
+	print -6.022E+2 \n;
+	print 6.022E+2 \n;
+	print +6.022E+2 \n;
 }

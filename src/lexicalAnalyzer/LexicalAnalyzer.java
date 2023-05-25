@@ -80,8 +80,24 @@ public class LexicalAnalyzer extends ScannerImp implements Scanner {
 			appendSubsequentDigits(buffer);
 			LocatedChar next = input.next();
 			if (next.getCharacter() == 'e' || next.getCharacter() == 'E') {
-				// CONTINUE HERE - leaving this for us to do
+                buffer.append(next.getCharacter());
+                next = input.next();
+                if(next.getCharacter() == '+' || next.getCharacter() == '-') {
+                    buffer.append(next.getCharacter());
+                    if(!input.peek().isDigit()) {
+                        lexicalError("Malformed floating-point literal", next);
+                        return findNextToken();
+                    } 
+                    next = input.next();
+                    buffer.append(next.getCharacter());
+                    appendSubsequentDigits(buffer);
+                } else {
+                    lexicalError("Malformed floating-point literal", next);
+                    return findNextToken();
+                }
 			}
+			next = input.next();
+			input.pushback(next);
 			return FloatingLiteralToken.make(firstChar, buffer.toString());
 		}
 		else {
