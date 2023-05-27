@@ -94,16 +94,18 @@ public class LexicalAnalyzer extends ScannerImp implements Scanner {
                     next = input.next();
                     buffer.append(next.getCharacter());
                     appendSubsequentDigits(buffer);
+                    next = input.next();
                 } else {
                     lexicalError("Malformed floating-point literal", next);
                     return findNextToken();
                 }
 			}
-			next = input.next();
 			input.pushback(next);
+			System.out.print(next);
 			return FloatingLiteralToken.make(firstChar, buffer.toString());
 		}
 		else {
+			System.out.print(buffer.toString());
 			return IntegerLiteralToken.make(firstChar, buffer.toString());
 		}
 	}

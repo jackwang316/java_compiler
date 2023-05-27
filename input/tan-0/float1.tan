@@ -2,5 +2,6 @@ main {
 	print 6.022E-9 \n;
 	print 6.022E+10 \n;
 	#Hello there
-
+	const test := 3.14; #Will this work
+	print test \n;
 }
