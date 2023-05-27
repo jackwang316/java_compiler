@@ -34,6 +34,10 @@ public class LexicalAnalyzer extends ScannerImp implements Scanner {
 	@Override
 	protected Token findNextToken() {
 		LocatedChar ch = nextNonWhitespaceChar();
+		while(ch.isCommentStart()){	//Uses while to handle cases where comments end with # that causes lexical error.
+			skipComment();
+			ch = nextNonWhitespaceChar();
+		}
 		if(ch.isDigit()) {
 			return scanNumber(ch);
 		}
@@ -51,7 +55,6 @@ public class LexicalAnalyzer extends ScannerImp implements Scanner {
 			return findNextToken();
 		}
 	}
-
 
 	private LocatedChar nextNonWhitespaceChar() {
 		LocatedChar ch = input.next();
@@ -173,7 +176,12 @@ public class LexicalAnalyzer extends ScannerImp implements Scanner {
 		}
 	}
 
-	
+	private void skipComment() {
+		LocatedChar ch = input.next();
+		while(!ch.isCommentEnd()) {
+			ch = input.next();
+		}
+	}
 
 	//////////////////////////////////////////////////////////////////////////////
 	// Character-classification routines specific to tan scanning.	
