@@ -3,6 +3,7 @@ package semanticAnalyzer;
 import java.util.Arrays;
 import java.util.List;
 
+import lexicalAnalyzer.Keyword;
 import lexicalAnalyzer.Lextant;
 import logging.TanLogger;
 import parseTree.ParseNode;
@@ -23,6 +24,7 @@ import semanticAnalyzer.signatures.FunctionSignature;
 import semanticAnalyzer.types.PrimitiveType;
 import semanticAnalyzer.types.Type;
 import symbolTable.Binding;
+import symbolTable.Binding.Constancy;
 import symbolTable.Scope;
 import tokens.LextantToken;
 import tokens.Token;
@@ -83,7 +85,35 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 		node.setType(declarationType);
 		
 		identifier.setType(declarationType);
-		addBinding(identifier, declarationType);
+		Constancy constancy = (node.getToken().isLextant(Keyword.CONST)) ? 
+				Constancy.IS_CONSTANT: 
+				Constancy.IS_VARIABLE;
+		addBinding(identifier, declarationType, constancy);
+	}
+	
+	@Override
+	public void visitLeave(AssignmentStatementNode node) {
+		if(node.child(0) instanceof ErrorNode) {
+			node.setType(PrimitiveType.ERROR);
+			return;
+		}
+		
+		IdentifierNode identifier = (IdentifierNode) node.child(0);
+		ParseNode expression = node.child(1);
+		
+		Type expressionType = expression.getType();
+		Type identifierType = identifier.getType();
+		
+		if(!expressionType.equals(identifierType)) {	//Add equivalent for future milestone
+			semanticError("types don't match in AssignmentStatement");
+			return;
+		}
+		
+		if(identifier.getBinding().isConstant()) {
+			semanticError("reassignment to const identifier");
+		}
+		
+		node.setType(expressionType); xxxzz   
 	}
 
 	///////////////////////////////////////////////////////////////////////////
@@ -160,9 +190,9 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 		ParseNode parent = node.getParent();
 		return (parent instanceof DeclarationNode) && (node == parent.child(0));
 	}
-	private void addBinding(IdentifierNode identifierNode, Type type) {
+	private void addBinding(IdentifierNode identifierNode, Type type, Constancy constancy) {
 		Scope scope = identifierNode.getLocalScope();
-		Binding binding = scope.createBinding(identifierNode, type);
+		Binding binding = scope.createBinding(identifierNode, type, constancy);
 		identifierNode.setBinding(binding);
 	}
 	
