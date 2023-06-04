@@ -89,37 +89,40 @@
         Jump         $$general-runtime-error   
         DLabel       $usable-memory-start      
         DLabel       $global-memory-block      
-        DataZ        8                         
+        DataZ        2                         
         Label        $$main                    
-        PushF        0.000000                  
-        PushD        $print-format-floating    
-        Printf                                 
-        PushD        $print-format-newline     
-        Printf                                 
-        PushF        60220000000.000000        
-        PushD        $print-format-floating    
-        Printf                                 
-        PushD        $print-format-newline     
-        Printf                                 
-        PushD        $global-memory-block      
-        PushI        0                         
-        Add                                    %% test
-        PushF        3.140000                  
-        StoreF                                 
-        PushD        $global-memory-block      
-        PushI        0                         
-        Add                                    %% test
-        LoadF                                  
-        PushD        $print-format-floating    
-        Printf                                 
-        PushD        $print-format-newline     
-        Printf                                 
-        PushI        102                       
+        PushI        99                        
         PushD        $print-format-character   
         Printf                                 
         PushD        $print-format-newline     
         Printf                                 
-        PushI        777                       
+        PushD        $global-memory-block      
+        PushI        0                         
+        Add                                    %% test
+        PushI        70                        
+        StoreC                                 
+        PushD        $global-memory-block      
+        PushI        0                         
+        Add                                    %% test
+        LoadC                                  
+        PushD        $print-format-character   
+        Printf                                 
+        PushD        $print-format-newline     
+        Printf                                 
+        PushI        127                       
+        PushD        $print-format-character   
+        Printf                                 
+        PushD        $print-format-newline     
+        Printf                                 
+        PushD        $global-memory-block      
+        PushI        1                         
+        Add                                    %% tested
+        PushI        127                       
+        StoreC                                 
+        PushD        $global-memory-block      
+        PushI        1                         
+        Add                                    %% tested
+        LoadC                                  
         PushD        $print-format-character   
         Printf                                 
         PushD        $print-format-newline     

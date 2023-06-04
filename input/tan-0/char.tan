@@ -1,0 +1,8 @@
+main {
+	print 'c' \n;
+	const test := 'F';
+	print test \n;
+	print %177 \n;
+	const tested := %177;
+	print tested \n;
+}
