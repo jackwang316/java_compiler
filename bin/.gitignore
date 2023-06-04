@@ -1,0 +1,9 @@
+/applications/
+/asmCodeGenerator/
+/inputHandler/
+/lexicalAnalyzer/
+/parseTree/
+/parser/
+/semanticAnalyzer/
+/symbolTable/
+/tokens/
