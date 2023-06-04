@@ -5,6 +5,7 @@ import java.util.Arrays;
 import logging.TanLogger;
 import parseTree.*;
 import parseTree.nodeTypes.BooleanConstantNode;
+import parseTree.nodeTypes.CharacterConstantNode;
 import parseTree.nodeTypes.MainBlockNode;
 import parseTree.nodeTypes.DeclarationNode;
 import parseTree.nodeTypes.ErrorNode;
@@ -324,6 +325,9 @@ public class Parser {
 		if(startsFloatLiteral(nowReading)) {
 			return parseFloatLiteral();
 		}
+		if(startsCharacterLiteral(nowReading)) {
+			return parseCharacterLiteral();
+		}
 		if(startsIntLiteral(nowReading)) {
 			return parseIntLiteral();
 		}
@@ -336,18 +340,17 @@ public class Parser {
 
 		return syntaxErrorNode("literal");
 	}
-	private ParseNode parseFloatLiteral() {
-		if(!startsFloatLiteral(nowReading)) {
-			return syntaxErrorNode("floating constant");
-		}
-		readToken();
-		return new FloatingConstantNode(previouslyRead);
-	}
+
 	private boolean startsFloatLiteral(Token token) {
 		return token instanceof FloatingLiteralToken;
 	}
 	private boolean startsLiteral(Token token) {
-		return startsIntLiteral(token) || startsFloatLiteral(token) || startsIdentifier(token) || startsBooleanLiteral(token);
+		return startsIntLiteral(token) || startsFloatLiteral(token) 
+				|| startsIdentifier(token) || startsBooleanLiteral(token) || startsCharacterLiteral(token);
+	}
+	
+	private boolean startsCharacterLiteral(Token token) {
+		return token instanceof CharacterLiteralToken;
 	}
 
 	// number (literal)
@@ -372,6 +375,22 @@ public class Parser {
 	}
 	private boolean startsIdentifier(Token token) {
 		return token instanceof IdentifierToken;
+	}
+	
+	private ParseNode parseCharacterLiteral() {
+		if(!startsCharacterLiteral(nowReading)) {
+			return syntaxErrorNode("character constant");
+		}
+		readToken();
+		return new CharacterConstantNode(previouslyRead);
+	}
+
+	private ParseNode parseFloatLiteral() {
+		if(!startsFloatLiteral(nowReading)) {
+			return syntaxErrorNode("floating constant");
+		}
+		readToken();
+		return new FloatingConstantNode(previouslyRead);
 	}
 
 	// boolean literal

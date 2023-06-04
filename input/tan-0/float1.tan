@@ -4,4 +4,6 @@ main {
 	#Hello there
 	const test := 3.14; #Will this work
 	print test \n;
+	print 'f' \n;
+	print %777 \n;
 }

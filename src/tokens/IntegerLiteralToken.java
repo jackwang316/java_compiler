@@ -23,6 +23,6 @@ public class IntegerLiteralToken extends TokenImp {
 	
 	@Override
 	protected String rawString() {
-		return "number, " + value;
+		return "int, " + value;
 	}
 }

@@ -10,6 +10,7 @@ import lexicalAnalyzer.Lextant;
 import lexicalAnalyzer.Punctuator;
 import parseTree.*;
 import parseTree.nodeTypes.BooleanConstantNode;
+import parseTree.nodeTypes.CharacterConstantNode;
 import parseTree.nodeTypes.MainBlockNode;
 import parseTree.nodeTypes.DeclarationNode;
 import parseTree.nodeTypes.FloatingConstantNode;
@@ -142,6 +143,9 @@ public class ASMCodeGenerator {
 			else if(node.getType() == PrimitiveType.BOOLEAN) {
 				code.add(LoadC);
 			}	
+			else if(node.getType() == PrimitiveType.CHARACTER) {
+				code.add(LoadC);
+			}
 			else if(node.getType() == PrimitiveType.FLOATING) {
 				code.add(LoadF);
 			}	
@@ -211,6 +215,9 @@ public class ASMCodeGenerator {
 				return StoreI;
 			}
 			if(type == PrimitiveType.BOOLEAN) {
+				return StoreC;
+			}
+			if(type == PrimitiveType.CHARACTER) {
 				return StoreC;
 			}
 			if(type == PrimitiveType.FLOATING) {
@@ -325,6 +332,10 @@ public class ASMCodeGenerator {
 			newValueCode(node);
 			
 			code.add(PushF, node.getValue());
+		}
+		public void visit(CharacterConstantNode node) {
+			newValueCode(node);
+			code.add(PushI, node.getValue());
 		}
 	}
 

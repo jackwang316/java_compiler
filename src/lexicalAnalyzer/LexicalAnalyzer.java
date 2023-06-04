@@ -7,6 +7,7 @@ import inputHandler.InputHandler;
 import inputHandler.LocatedChar;
 import inputHandler.LocatedCharStream;
 import inputHandler.PushbackCharStream;
+import tokens.CharacterLiteralToken;
 import tokens.FloatingLiteralToken;
 import tokens.IdentifierToken;
 import tokens.LextantToken;
@@ -38,6 +39,9 @@ public class LexicalAnalyzer extends ScannerImp implements Scanner {
 			skipComment();
 			ch = nextNonWhitespaceChar();
 		}
+		if(ch.isCharacterStart()) {
+			return scanChar(ch);
+		}
 		if(ch.isDigit()) {
 			return scanNumber(ch);
 		}
@@ -53,6 +57,54 @@ public class LexicalAnalyzer extends ScannerImp implements Scanner {
 		else {
 			lexicalError(ch);
 			return findNextToken();
+		}
+	}
+
+	private Token scanChar(LocatedChar ch) {
+		StringBuffer buffer = new StringBuffer();
+		LocatedChar cur = ch;
+		if(ch.isASCIICharStart()) {
+			for(int i = 0; i < 3; i++) {
+				cur = input.next();
+				if(!cur.isDigit()) {
+					lexicalError("Octal digit is not a digit", cur);
+					input.pushback(cur);
+					return findNextToken();
+				}
+				
+				int val = cur.getCharacter() - '0';
+				if(val > 7 || val < 0) {
+					lexicalError("Octal digit is outside acceptable range", cur);
+					return findNextToken();
+				}
+				buffer.append(cur.getCharacter());
+			}
+			cur = input.next();
+			if(cur.isDigit()) {
+				lexicalError("Too many octal digits provided", cur);
+				return findNextToken();
+			}
+			input.pushback(cur);
+			int octalToDec = Integer.parseInt(buffer.toString(), 8);
+			if(octalToDec > 127 || octalToDec < 0) {
+				lexicalError("Octal value outside acceptable range", cur);
+				return findNextToken();
+			}
+			String result = Character.toString((char) octalToDec);
+			return CharacterLiteralToken.make(ch.getLocation(), result);
+		} else {
+			cur = input.next();
+			char c = cur.getCharacter();
+			if(cur.getCharacter() > 126 || cur.getCharacter() < 32) {
+				lexicalError("Character outside valid range", cur);
+				return findNextToken();
+			}
+			cur = input.next();
+			if(!cur.isCharacterEnd()) {
+				lexicalError("Character not ended with ' ", cur);
+				input.pushback(cur);
+			}
+			return CharacterLiteralToken.make(ch.getLocation(), Character.toString(c));
 		}
 	}
 
@@ -101,11 +153,9 @@ public class LexicalAnalyzer extends ScannerImp implements Scanner {
                 }
 			}
 			input.pushback(next);
-			System.out.print(next);
 			return FloatingLiteralToken.make(firstChar, buffer.toString());
 		}
 		else {
-			System.out.print(buffer.toString());
 			return IntegerLiteralToken.make(firstChar, buffer.toString());
 		}
 	}
@@ -210,6 +260,4 @@ public class LexicalAnalyzer extends ScannerImp implements Scanner {
 		TanLogger log = TanLogger.getLogger("compiler.lexicalAnalyzer");
 		log.severe("Lexical error: invalid character " + errorMsg + " at " + decimal.getLocation());
 	}
-
-	
 }

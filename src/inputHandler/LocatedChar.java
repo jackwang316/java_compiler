@@ -65,4 +65,20 @@ public class LocatedChar implements Locator {
 	public boolean isWhitespace() {
 		return Character.isWhitespace(character);
 	}
+
+	public boolean isCharacterStart() {
+		return isRegCharStart() || isASCIICharStart();
+	}
+	
+	public boolean isRegCharStart() {
+		return character.equals('\'');
+	}
+	
+	public boolean isASCIICharStart() {
+		return character.equals('%');
+	}
+	
+	public boolean isCharacterEnd() {
+		return character.equals('\'');
+	}
 }
