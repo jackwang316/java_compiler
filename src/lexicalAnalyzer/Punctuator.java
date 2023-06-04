@@ -13,11 +13,12 @@ public enum Punctuator implements Lextant {
 	ASSIGN(":="),
 	PRINT_SEPARATOR("\\"),
 	PRINT_SPACE("\\s"),
+	PRINT_TAB_SPACE("\\t"),
 	PRINT_NEWLINE("\\n"),
 	TERMINATOR(";"), 
 	OPEN_BRACE("{"),
 	CLOSE_BRACE("}"),
-	NULL_PUNCTUATOR("");
+	NULL_PUNCTUATOR(""),;
 
 	private String lexeme;
 	private Token prototype;
