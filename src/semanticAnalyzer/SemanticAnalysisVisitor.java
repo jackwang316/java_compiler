@@ -113,7 +113,7 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 			semanticError("reassignment to const identifier");
 		}
 		
-		node.setType(expressionType); xxxzz   
+		node.setType(expressionType); 
 	}
 
 	///////////////////////////////////////////////////////////////////////////

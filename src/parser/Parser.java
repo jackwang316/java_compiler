@@ -361,7 +361,7 @@ public class Parser {
 	private boolean startsIntLiteral(Token token) {
 		return token instanceof IntegerLiteralToken;
 	}
-
+s
 	// identifier (terminal)
 	private ParseNode parseIdentifier() {
 		if(!startsIdentifier(nowReading)) {
