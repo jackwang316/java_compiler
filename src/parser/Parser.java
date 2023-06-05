@@ -17,6 +17,7 @@ import parseTree.nodeTypes.OperatorNode;
 import parseTree.nodeTypes.PrintStatementNode;
 import parseTree.nodeTypes.ProgramNode;
 import parseTree.nodeTypes.SpaceNode;
+import parseTree.nodeTypes.StringConstantNode;
 import tokens.*;
 import lexicalAnalyzer.Keyword;
 import lexicalAnalyzer.Lextant;
@@ -337,15 +338,20 @@ public class Parser {
 		if(startsBooleanLiteral(nowReading)) {
 			return parseBooleanLiteral();
 		}
+		if(startsStringLiteral(nowReading)) {
+			return parseStringLiteral();
+		}
 
 		return syntaxErrorNode("literal");
 	}
-
+	private boolean startsStringLiteral(Token token) {
+		return token instanceof StringLiteralToken;
+	}
 	private boolean startsFloatLiteral(Token token) {
 		return token instanceof FloatingLiteralToken;
 	}
 	private boolean startsLiteral(Token token) {
-		return startsIntLiteral(token) || startsFloatLiteral(token) 
+		return startsIntLiteral(token) || startsFloatLiteral(token) || startsStringLiteral(token)
 				|| startsIdentifier(token) || startsBooleanLiteral(token) || startsCharacterLiteral(token);
 	}
 	
@@ -391,6 +397,14 @@ public class Parser {
 		}
 		readToken();
 		return new FloatingConstantNode(previouslyRead);
+	}
+	
+	private ParseNode parseStringLiteral() {
+		if(!startsStringLiteral(nowReading)) {
+			return syntaxErrorNode("string constant");
+		}
+		readToken();
+		return new StringConstantNode(previouslyRead);
 	}
 
 	// boolean literal
