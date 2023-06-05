@@ -1,0 +1,11 @@
+main {
+    const nickels := 11;
+    const pennies := 5 + 41;
+    const dimes_C@in := 4;
+    
+    const value := dimes_C@in * 10 +
+    			 nickels * 5 +
+    			 pennies;
+    			 
+    print value \s\s value \s\n\n value \n nickels \\ pennies \t dimes_C@in \n;
+}

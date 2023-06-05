@@ -10,6 +10,7 @@ public class RunTime {
 	public static final String CHARACTER_PRINT_FORMAT = "$print-format-character";
 	public static final String NEWLINE_PRINT_FORMAT   = "$print-format-newline";
 	public static final String SPACE_PRINT_FORMAT     = "$print-format-space";
+	public static final String TAB_SPACE_PRINT_FORMAT = "$print-format-tabspace";
 	public static final String BOOLEAN_TRUE_STRING    = "$boolean-true-string";
 	public static final String BOOLEAN_FALSE_STRING   = "$boolean-false-string";
 	public static final String GLOBAL_MEMORY_BLOCK    = "$global-memory-block";
@@ -18,6 +19,7 @@ public class RunTime {
 	
 	public static final String GENERAL_RUNTIME_ERROR = "$$general-runtime-error";
 	public static final String INTEGER_DIVIDE_BY_ZERO_RUNTIME_ERROR = "$$i-divide-by-zero";
+	
 
 	private ASMCodeFragment environmentASM() {
 		ASMCodeFragment result = new ASMCodeFragment(GENERATES_VOID);
@@ -50,6 +52,8 @@ public class RunTime {
 		frag.add(DataS, "%c");
 		frag.add(DLabel, SPACE_PRINT_FORMAT);
 		frag.add(DataS, " ");
+		frag.add(DLabel, TAB_SPACE_PRINT_FORMAT);
+		frag.add(DataS, "\t");
 		frag.add(DLabel, BOOLEAN_TRUE_STRING);
 		frag.add(DataS, "true");
 		frag.add(DLabel, BOOLEAN_FALSE_STRING);
