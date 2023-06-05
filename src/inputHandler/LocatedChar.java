@@ -50,8 +50,11 @@ public class LocatedChar implements Locator {
 	//////////////////////////////////////////////////////////////////////////////
 	// delegates
 	
-	public boolean isLowerCase() {
-		return Character.isLowerCase(character) || (character == '_');
+	public boolean isAlpha() {
+		return Character.isLowerCase(character) || Character.isUpperCase(character)||(character == '_') ||(character == '@');
+	}
+	public boolean isIdentifierSubChar() {
+		return isAlpha() || isDigit();
 	}
 	public boolean isDigit() {
 		return Character.isDigit(character);
