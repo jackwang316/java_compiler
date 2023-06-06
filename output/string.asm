@@ -16,6 +16,10 @@
         DLabel       $print-format-newline     
         DataC        10                        %% "\n"
         DataC        0                         
+        DLabel       $print-format-string      
+        DataC        37                        %% "%s"
+        DataC        115                       
+        DataC        0                         
         DLabel       $print-format-character   
         DataC        37                        %% "%c"
         DataC        99                        
@@ -89,38 +93,48 @@
         Jump         $$general-runtime-error   
         DLabel       $usable-memory-start      
         DLabel       $global-memory-block      
-        DataZ        8                         
+        DataZ        4                         
         Label        $$main                    
-        PushF        0.000000                  
-        PushD        $print-format-floating    
-        Printf                                 
-        PushD        $print-format-newline     
-        Printf                                 
-        PushF        60220000000.000000        
-        PushD        $print-format-floating    
+        PushD        $global-memory-block      
+        PushI        0                         
+        Add                                    %% test
+        DLabel       -String-1-StringLabel     
+        DataI        3                         
+        DataI        9                         
+        DataI        4                         
+        DataC        121                       %% "yolo"
+        DataC        111                       
+        DataC        108                       
+        DataC        111                       
+        DataC        0                         
+        PushD        -String-1-StringLabel     
+        StoreI                                 
+        DLabel       -String-2-StringLabel     
+        DataI        3                         
+        DataI        9                         
+        DataI        7                         
+        DataC        104                       %% "hello\n"
+        DataC        101                       
+        DataC        108                       
+        DataC        108                       
+        DataC        111                       
+        DataC        92                        
+        DataC        110                       
+        DataC        0                         
+        PushD        -String-2-StringLabel     
+        PushI        12                        
+        Add                                    
+        PushD        $print-format-string      
         Printf                                 
         PushD        $print-format-newline     
         Printf                                 
         PushD        $global-memory-block      
         PushI        0                         
         Add                                    %% test
-        PushF        3.140000                  
-        StoreF                                 
-        PushD        $global-memory-block      
-        PushI        0                         
-        Add                                    %% test
-        LoadF                                  
-        PushD        $print-format-floating    
-        Printf                                 
-        PushD        $print-format-newline     
-        Printf                                 
-        PushI        102                       
-        PushD        $print-format-character   
-        Printf                                 
-        PushD        $print-format-newline     
-        Printf                                 
-        PushI        777                       
-        PushD        $print-format-character   
+        LoadC                                  
+        PushI        12                        
+        Add                                    
+        PushD        $print-format-string      
         Printf                                 
         PushD        $print-format-newline     
         Printf                                 

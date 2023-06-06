@@ -346,12 +346,14 @@ public class ASMCodeGenerator {
 		}
 		public void visit(StringConstantNode node) {
 			newValueCode(node);
-			Labeller stringLabel = new Labeller("string");
-			String stringLabelName = stringLabel.newLabel(node.getValue());
+			String stringLabelName = new Labeller("String").newLabel("StringLabel");
 
 			code.add(DLabel, stringLabelName);
-			code.add(PushD, stringLabelName);
+			code.add(DataI, 3);
+			code.add(DataI, 9);
+			code.add(DataI, node.getValue().length());
 			code.add(DataS, node.getValue());
+			code.add(PushD, stringLabelName);
 		}
 	}
 
