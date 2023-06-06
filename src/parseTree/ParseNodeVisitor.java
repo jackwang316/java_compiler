@@ -13,6 +13,7 @@ import parseTree.nodeTypes.OperatorNode;
 import parseTree.nodeTypes.PrintStatementNode;
 import parseTree.nodeTypes.ProgramNode;
 import parseTree.nodeTypes.SpaceNode;
+import parseTree.nodeTypes.TabSpaceNode;
 import parseTree.nodeTypes.StringConstantNode;
 
 // Visitor pattern with pre- and post-order visits
@@ -46,6 +47,7 @@ public interface ParseNodeVisitor {
 	void visit(IntegerConstantNode node);
 	void visit(NewlineNode node);
 	void visit(SpaceNode node);
+	void visit(TabSpaceNode node);
 	void visit(FloatingConstantNode node);
 	void visit(CharacterConstantNode node);
 	void visit(StringConstantNode node);
@@ -127,6 +129,9 @@ public interface ParseNodeVisitor {
 			defaultVisitForLeaf(node);
 		}	
 		public void visit(SpaceNode node) {
+			defaultVisitForLeaf(node);
+		}
+		public void visit(TabSpaceNode node) {
 			defaultVisitForLeaf(node);
 		}
 	}

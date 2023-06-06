@@ -16,10 +16,6 @@
         DLabel       $print-format-newline     
         DataC        10                        %% "\n"
         DataC        0                         
-        DLabel       $print-format-string      
-        DataC        37                        %% "%s"
-        DataC        115                       
-        DataC        0                         
         DLabel       $print-format-character   
         DataC        37                        %% "%c"
         DataC        99                        
@@ -101,7 +97,7 @@
         PushI        99                        
         PushD        $print-format-character   
         Printf                                 
-        PushD        $print-format-newline     
+        PushD        $print-format-tabspace    
         Printf                                 
         PushD        $global-memory-block      
         PushI        0                         
@@ -114,12 +110,12 @@
         LoadC                                  
         PushD        $print-format-character   
         Printf                                 
-        PushD        $print-format-newline     
+        PushD        $print-format-tabspace    
         Printf                                 
         PushI        127                       
         PushD        $print-format-character   
         Printf                                 
-        PushD        $print-format-newline     
+        PushD        $print-format-tabspace    
         Printf                                 
         PushD        $global-memory-block      
         PushI        1                         
@@ -132,6 +128,6 @@
         LoadC                                  
         PushD        $print-format-character   
         Printf                                 
-        PushD        $print-format-newline     
+        PushD        $print-format-tabspace    
         Printf                                 
         Halt                                   
