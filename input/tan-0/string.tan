@@ -1,5 +1,6 @@
 main {
-	const test := "yolo";
+	var test := "yolo";
+	test := "new yolo";
 	print "hello\n" \n;
 	print test \n;
 }

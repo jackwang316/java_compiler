@@ -7,14 +7,13 @@ import lexicalAnalyzer.Lextant;
 import tokens.LextantToken;
 import tokens.Token;
 
-public class DeclarationNode extends ParseNode {
+public class AssignmentStatementNode extends ParseNode {
 
-	public DeclarationNode(Token token) {
+	public AssignmentStatementNode(Token token) {
 		super(token);
-		assert(token.isLextant(Keyword.CONST) || token.isLextant(Keyword.VAR));
 	}
 
-	public DeclarationNode(ParseNode node) {
+	public AssignmentStatementNode(ParseNode node) {
 		super(node);
 	}
 	
@@ -33,10 +32,10 @@ public class DeclarationNode extends ParseNode {
 	////////////////////////////////////////////////////////////
 	// convenience factory
 	
-	public static DeclarationNode withChildren(Token token, ParseNode declaredName, ParseNode initializer) {
-		DeclarationNode node = new DeclarationNode(token);
-		node.appendChild(declaredName);
-		node.appendChild(initializer);
+	public static AssignmentStatementNode withChildren(ParseNode identifier, ParseNode expression) {
+		AssignmentStatementNode node = new AssignmentStatementNode(identifier.getToken());
+		node.appendChild(identifier);
+		node.appendChild(expression);
 		return node;
 	}
 	
