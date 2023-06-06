@@ -178,7 +178,7 @@ public class Parser {
 			ParseNode child = new SpaceNode(previouslyRead);
 			parent.appendChild(child);
 		}
-		else if(nowReading.isLextant(Punctuator.PRINT_TAB_SPACE)) {
+		else if(nowReading.isLextant(Punctuator.PRINT_TAB)) {
 			readToken();
 			ParseNode child = new TabSpaceNode(previouslyRead);
 			parent.appendChild(child);
@@ -188,7 +188,7 @@ public class Parser {
 		} 
 	}
 	private boolean startsPrintSeparator(Token token) {
-		return token.isLextant(Punctuator.PRINT_SEPARATOR, Punctuator.PRINT_SPACE, Punctuator.PRINT_TAB_SPACE, Punctuator.PRINT_NEWLINE);
+		return token.isLextant(Punctuator.PRINT_SEPARATOR, Punctuator.PRINT_SPACE, Punctuator.PRINT_TAB, Punctuator.PRINT_NEWLINE);
 	}
 	
 	
