@@ -4,6 +4,7 @@ import java.util.Arrays;
 
 import logging.TanLogger;
 import parseTree.*;
+import parseTree.nodeTypes.AssignmentStatementNode;
 import parseTree.nodeTypes.BooleanConstantNode;
 import parseTree.nodeTypes.CharacterConstantNode;
 import parseTree.nodeTypes.MainBlockNode;
@@ -104,16 +105,22 @@ public class Parser {
 		if(startsDeclaration(nowReading)) {
 			return parseDeclaration();
 		}
+		if(startsMutation(nowReading)) {
+			return parseMutation();
+		}
 		if(startsPrintStatement(nowReading)) {
 			return parsePrintStatement();
 		}
 		return syntaxErrorNode("statement");
 	}
+	
 	private boolean startsStatement(Token token) {
 		return startsPrintStatement(token) ||
+			   startsMutation(token) ||
 			   startsDeclaration(token);
 	}
 	
+
 	// printStmt -> PRINT printExpressionList TERMINATOR
 	private ParseNode parsePrintStatement() {
 		if(!startsPrintStatement(nowReading)) {
@@ -127,10 +134,15 @@ public class Parser {
 		expect(Punctuator.TERMINATOR);
 		return result;
 	}
+	
 	private boolean startsPrintStatement(Token token) {
 		return token.isLextant(Keyword.PRINT);
 	}	
-
+	
+	private boolean startsMutation(Token token) {
+		return startsIdentifier(token);
+	}
+	
 	// This adds the printExpressions it parses to the children of the given parent
 	// printExpressionList -> printSeparator* (expression printSeparator+)* expression? (note that this is nullable)
 
@@ -157,6 +169,17 @@ public class Parser {
 		return startsExpression(token) || startsPrintSeparator(token) || token.isLextant(Punctuator.TERMINATOR);
 	}
 
+	private ParseNode parseMutation() {
+		if(!startsMutation(nowReading)) {
+			return syntaxErrorNode("reassignment");
+		}
+		ParseNode identifier = parseIdentifier();
+		expect(Punctuator.ASSIGN);
+		ParseNode expression = parseExpression();
+		expect(Punctuator.TERMINATOR);
+		
+		return AssignmentStatementNode.withChildren(identifier, expression);
+	}
 	
 	// This adds the printSeparator it parses to the children of the given parent
 	// printSeparator -> PRINT_SEPARATOR | PRINT_SPACE | PRINT_TAB_SPACE |PRINT_NEWLINE 
@@ -208,7 +231,7 @@ public class Parser {
 		return DeclarationNode.withChildren(declarationToken, identifier, initializer);
 	}
 	private boolean startsDeclaration(Token token) {
-		return token.isLextant(Keyword.CONST);
+		return token.isLextant(Keyword.CONST) || token.isLextant(Keyword.VAR);
 	}
 
 

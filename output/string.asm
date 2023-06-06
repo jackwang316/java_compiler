@@ -27,6 +27,9 @@
         DLabel       $print-format-space       
         DataC        32                        %% " "
         DataC        0                         
+        DLabel       $print-format-tabspace    
+        DataC        9                         %% "\t"
+        DataC        0                         
         DLabel       $boolean-true-string      
         DataC        116                       %% "true"
         DataC        114                       
@@ -109,7 +112,25 @@
         DataC        0                         
         PushD        -String-1-StringLabel     
         StoreI                                 
+        PushD        $global-memory-block      
+        PushI        0                         
+        Add                                    %% test
         DLabel       -String-2-StringLabel     
+        DataI        3                         
+        DataI        9                         
+        DataI        8                         
+        DataC        110                       %% "new yolo"
+        DataC        101                       
+        DataC        119                       
+        DataC        32                        
+        DataC        121                       
+        DataC        111                       
+        DataC        108                       
+        DataC        111                       
+        DataC        0                         
+        PushD        -String-2-StringLabel     
+        StoreI                                 
+        DLabel       -String-3-StringLabel     
         DataI        3                         
         DataI        9                         
         DataI        7                         
@@ -121,7 +142,7 @@
         DataC        92                        
         DataC        110                       
         DataC        0                         
-        PushD        -String-2-StringLabel     
+        PushD        -String-3-StringLabel     
         PushI        12                        
         Add                                    
         PushD        $print-format-string      
