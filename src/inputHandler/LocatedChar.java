@@ -84,4 +84,8 @@ public class LocatedChar implements Locator {
 	public boolean isCharacterEnd() {
 		return character.equals('\'');
 	}
+
+	public boolean isStringStartorEnd() {
+		return character.equals('"');
+	}
 }

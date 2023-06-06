@@ -22,6 +22,7 @@ import parseTree.nodeTypes.PrintStatementNode;
 import parseTree.nodeTypes.ProgramNode;
 import parseTree.nodeTypes.SpaceNode;
 import parseTree.nodeTypes.TabSpaceNode;
+import parseTree.nodeTypes.StringConstantNode;
 import semanticAnalyzer.types.PrimitiveType;
 import semanticAnalyzer.types.Type;
 import symbolTable.Binding;
@@ -147,6 +148,9 @@ public class ASMCodeGenerator {
 			else if(node.getType() == PrimitiveType.CHARACTER) {
 				code.add(LoadC);
 			}
+			else if(node.getType() == PrimitiveType.STRING) {
+				code.add(LoadC);
+			}
 			else if(node.getType() == PrimitiveType.FLOATING) {
 				code.add(LoadF);
 			}	
@@ -225,6 +229,9 @@ public class ASMCodeGenerator {
 			}
 			if(type == PrimitiveType.CHARACTER) {
 				return StoreC;
+			}
+			if(type == PrimitiveType.STRING) {
+				return StoreI;
 			}
 			if(type == PrimitiveType.FLOATING) {
 				return StoreF;
@@ -342,6 +349,17 @@ public class ASMCodeGenerator {
 		public void visit(CharacterConstantNode node) {
 			newValueCode(node);
 			code.add(PushI, node.getValue());
+		}
+		public void visit(StringConstantNode node) {
+			newValueCode(node);
+			String stringLabelName = new Labeller("String").newLabel("StringLabel");
+
+			code.add(DLabel, stringLabelName);
+			code.add(DataI, 3);
+			code.add(DataI, 9);
+			code.add(DataI, node.getValue().length());
+			code.add(DataS, node.getValue());
+			code.add(PushD, stringLabelName);
 		}
 	}
 

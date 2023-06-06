@@ -1,0 +1,5 @@
+main {
+	const test := "yolo";
+	print "hello\n" \n;
+	print test \n;
+}

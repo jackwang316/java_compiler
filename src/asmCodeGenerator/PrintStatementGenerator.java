@@ -3,7 +3,9 @@ package asmCodeGenerator;
 import static asmCodeGenerator.codeStorage.ASMOpcode.Jump;
 import static asmCodeGenerator.codeStorage.ASMOpcode.JumpTrue;
 import static asmCodeGenerator.codeStorage.ASMOpcode.Label;
+import static asmCodeGenerator.codeStorage.ASMOpcode.PushI;
 import static asmCodeGenerator.codeStorage.ASMOpcode.Printf;
+import static asmCodeGenerator.codeStorage.ASMOpcode.Add;
 import static asmCodeGenerator.codeStorage.ASMOpcode.PushD;
 import parseTree.ParseNode;
 import parseTree.nodeTypes.NewlineNode;
@@ -43,9 +45,19 @@ public class PrintStatementGenerator {
 		String format = printFormat(node.getType());
 
 		code.append(visitor.removeValueCode(node));
+		makeStringPrintable(node);
 		convertToStringIfBoolean(node);
 		code.add(PushD, format);
 		code.add(Printf);
+	}
+	
+	private void makeStringPrintable(ParseNode node) {
+		if(node.getType() != PrimitiveType.STRING) {
+			return;
+		}
+		
+		code.add(PushI, 12);
+		code.add(Add);
 	}
 	private void convertToStringIfBoolean(ParseNode node) {
 		if(node.getType() != PrimitiveType.BOOLEAN) {
@@ -73,6 +85,7 @@ public class PrintStatementGenerator {
 		case BOOLEAN:	return RunTime.BOOLEAN_PRINT_FORMAT;
 		case FLOATING: 	return RunTime.FLOATING_PRINT_FORMAT;
 		case CHARACTER: return RunTime.CHARACTER_PRINT_FORMAT;
+		case STRING: 	return RunTime.STRING_PRINT_FORMAT;
 		default:		
 			assert false : "Type " + type + " unimplemented in PrintStatementGenerator.printFormat()";
 			return "";

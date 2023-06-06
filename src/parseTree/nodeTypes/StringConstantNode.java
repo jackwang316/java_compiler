@@ -5,26 +5,27 @@ import parseTree.ParseNodeVisitor;
 import tokens.CharacterLiteralToken;
 import tokens.FloatingLiteralToken;
 import tokens.IntegerLiteralToken;
+import tokens.StringLiteralToken;
 import tokens.Token;
 
-public class CharacterConstantNode extends ParseNode {
-	public CharacterConstantNode(Token token) {
+public class StringConstantNode extends ParseNode {
+	public StringConstantNode(Token token) {
 		super(token);
-		assert(token instanceof CharacterLiteralToken);
+		assert(token instanceof StringLiteralToken);
 	}
-	public CharacterConstantNode(ParseNode node) {
+	public StringConstantNode(ParseNode node) {
 		super(node);
 	}
 
 ////////////////////////////////////////////////////////////
 // attributes
 
-	public char getValue() {
-		return characterToken().getValue();
+	public String getValue() {
+		return stringToken().getValue();
 	}
 
-	public CharacterLiteralToken characterToken() {
-		return (CharacterLiteralToken)token;
+	public StringLiteralToken stringToken() {
+		return (StringLiteralToken)token;
 	}
 
 ///////////////////////////////////////////////////////////
