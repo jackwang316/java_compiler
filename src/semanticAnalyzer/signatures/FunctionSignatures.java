@@ -5,7 +5,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import asmCodeGenerator.codeStorage.ASMOpcode;
+import asmCodeGenerator.operators.IntegerDivideCodeGenerator;
+import asmCodeGenerator.operators.FloatingDivideCodeGenerator;
+import lexicalAnalyzer.Punctuator;
 import semanticAnalyzer.types.Type;
+import semanticAnalyzer.types.PrimitiveType;
 
 
 public class FunctionSignatures extends ArrayList<FunctionSignature> {
@@ -66,7 +71,17 @@ public class FunctionSignatures extends ArrayList<FunctionSignature> {
 	static {
 		// here's one example to get you started with FunctionSignatures: the signatures for addition.		
 		// for this to work, you should statically import PrimitiveType.*
-
+		new FunctionSignatures(Punctuator.ADD,
+			    new FunctionSignature(ASMOpcode.Nop, PrimitiveType.INTEGER, PrimitiveType.INTEGER),
+			    new FunctionSignature(ASMOpcode.Nop, PrimitiveType.FLOATING, PrimitiveType.FLOATING),
+			    new FunctionSignature(ASMOpcode.Add, PrimitiveType.INTEGER, PrimitiveType.INTEGER, PrimitiveType.INTEGER),
+			    new FunctionSignature(ASMOpcode.FAdd, PrimitiveType.FLOATING, PrimitiveType.FLOATING, PrimitiveType.FLOATING)
+			);
+			new FunctionSignatures(Punctuator.DIVIDE,
+					new FunctionSignature(new IntegerDivideCodeGenerator(), PrimitiveType.INTEGER, PrimitiveType.INTEGER, PrimitiveType.INTEGER),
+					new FunctionSignature(new FloatingDivideCodeGenerator(), PrimitiveType.FLOATING, PrimitiveType.FLOATING, PrimitiveType.FLOATING)
+			);
+	
 //		new FunctionSignatures(Punctuator.ADD,
 //		    new FunctionSignature(ASMOpcode.Add, INTEGER, INTEGER, INTEGER),
 //		    new FunctionSignature(ASMOpcode.FAdd, FLOAT, FLOAT, FLOAT)
