@@ -271,16 +271,16 @@ public class ASMCodeGenerator {
 				codeMap.put(node, fragment);
 			}
 			
-			if(operator == Punctuator.SUBTRACT || operator == Punctuator.DIVIDE) {
-			visitUnaryOperatorNode(node);
-			}
-			else if(operator == Punctuator.GREATER) {
-				visitComparisonOperatorNode(node, operator);
-			
-			}
-			else {
-				visitNormalBinaryOperatorNode(node);
-			}
+//			if(operator == Punctuator.SUBTRACT || operator == Punctuator.DIVIDE) {
+//			visitUnaryOperatorNode(node);
+//			}
+//			else if(operator == Punctuator.GREATER) {
+//				visitComparisonOperatorNode(node, operator);
+//			
+//			}
+//			else {
+//				visitNormalBinaryOperatorNode(node);
+//			}
 			
 		}
 		private List<ASMCodeFragment> childValueCode(OperatorNode node){
