@@ -266,10 +266,20 @@ public class ASMCodeGenerator {
 				
 			}
 			else if (variant instanceof SimpleCodeGenerator) {
-				// Implementation, check SimpleCodeGenerator.java
 				SimpleCodeGenerator generator = (SimpleCodeGenerator)variant;
 				ASMCodeFragment fragment = generator.generate(node, childValueCode(node));
 				codeMap.put(node, fragment);
+			}
+			
+			if(operator == Punctuator.SUBTRACT || operator == Punctuator.DIVIDE) {
+			visitUnaryOperatorNode(node);
+			}
+			else if(operator == Punctuator.GREATER) {
+				visitComparisonOperatorNode(node, operator);
+			
+			}
+			else {
+				visitNormalBinaryOperatorNode(node);
 			}
 			
 		}

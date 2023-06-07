@@ -94,33 +94,6 @@
         Label        $$i-divide-by-zero        
         PushD        $errors-int-divide-by-zero 
         Jump         $$general-runtime-error   
-        DLabel       $errors-float-divide-by-zero 
-        DataC        105                       %% "integer divide by zero"
-        DataC        110                       
-        DataC        116                       
-        DataC        101                       
-        DataC        103                       
-        DataC        101                       
-        DataC        114                       
-        DataC        32                        
-        DataC        100                       
-        DataC        105                       
-        DataC        118                       
-        DataC        105                       
-        DataC        100                       
-        DataC        101                       
-        DataC        32                        
-        DataC        98                        
-        DataC        121                       
-        DataC        32                        
-        DataC        122                       
-        DataC        101                       
-        DataC        114                       
-        DataC        111                       
-        DataC        0                         
-        Label        $$f-divide-by-zero        
-        PushD        $errors-float-divide-by-zero 
-        Jump         $$general-runtime-error   
         DLabel       $usable-memory-start      
         DLabel       $global-memory-block      
         DataZ        16                        
@@ -139,7 +112,7 @@
         StoreI                                 
         PushD        $global-memory-block      
         PushI        8                         
-        Add                                    %% dimes_C@in
+        Add                                    %% dimes
         PushI        4                         
         StoreI                                 
         PushD        $global-memory-block      
@@ -147,7 +120,7 @@
         Add                                    %% value
         PushD        $global-memory-block      
         PushI        8                         
-        Add                                    %% dimes_C@in
+        Add                                    %% dimes
         LoadI                                  
         PushI        10                        
         Multiply                               
@@ -203,14 +176,6 @@
         PushD        $global-memory-block      
         PushI        4                         
         Add                                    %% pennies
-        LoadI                                  
-        PushD        $print-format-integer     
-        Printf                                 
-        PushD        $print-format-tabspace    
-        Printf                                 
-        PushD        $global-memory-block      
-        PushI        8                         
-        Add                                    %% dimes_C@in
         LoadI                                  
         PushD        $print-format-integer     
         Printf                                 

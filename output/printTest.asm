@@ -139,7 +139,7 @@
         StoreI                                 
         PushD        $global-memory-block      
         PushI        8                         
-        Add                                    %% dimes_C@in
+        Add                                    %% dimes
         PushI        4                         
         StoreI                                 
         PushD        $global-memory-block      
@@ -147,7 +147,7 @@
         Add                                    %% value
         PushD        $global-memory-block      
         PushI        8                         
-        Add                                    %% dimes_C@in
+        Add                                    %% dimes
         LoadI                                  
         PushI        10                        
         Multiply                               
@@ -203,14 +203,6 @@
         PushD        $global-memory-block      
         PushI        4                         
         Add                                    %% pennies
-        LoadI                                  
-        PushD        $print-format-integer     
-        Printf                                 
-        PushD        $print-format-tabspace    
-        Printf                                 
-        PushD        $global-memory-block      
-        PushI        8                         
-        Add                                    %% dimes_C@in
         LoadI                                  
         PushD        $print-format-integer     
         Printf                                 

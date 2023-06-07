@@ -11,6 +11,7 @@ import asmCodeGenerator.operators.FloatingDivideCodeGenerator;
 import lexicalAnalyzer.Punctuator;
 import semanticAnalyzer.types.Type;
 import semanticAnalyzer.types.PrimitiveType;
+import static semanticAnalyzer.types.PrimitiveType.*;
 
 
 public class FunctionSignatures extends ArrayList<FunctionSignature> {
@@ -45,7 +46,8 @@ public class FunctionSignatures extends ArrayList<FunctionSignature> {
 	public boolean accepts(List<Type> types) {
 		return !acceptingSignature(types).isNull();
 	}
-
+	
+	
 	
 	/////////////////////////////////////////////////////////////////////////////////
 	// access to FunctionSignatures by key object.
@@ -72,15 +74,26 @@ public class FunctionSignatures extends ArrayList<FunctionSignature> {
 		// here's one example to get you started with FunctionSignatures: the signatures for addition.		
 		// for this to work, you should statically import PrimitiveType.*
 		new FunctionSignatures(Punctuator.ADD,
-			    new FunctionSignature(ASMOpcode.Nop, PrimitiveType.INTEGER, PrimitiveType.INTEGER),
-			    new FunctionSignature(ASMOpcode.Nop, PrimitiveType.FLOATING, PrimitiveType.FLOATING),
-			    new FunctionSignature(ASMOpcode.Add, PrimitiveType.INTEGER, PrimitiveType.INTEGER, PrimitiveType.INTEGER),
-			    new FunctionSignature(ASMOpcode.FAdd, PrimitiveType.FLOATING, PrimitiveType.FLOATING, PrimitiveType.FLOATING)
-			);
-			new FunctionSignatures(Punctuator.DIVIDE,
-					new FunctionSignature(new IntegerDivideCodeGenerator(), PrimitiveType.INTEGER, PrimitiveType.INTEGER, PrimitiveType.INTEGER),
-					new FunctionSignature(new FloatingDivideCodeGenerator(), PrimitiveType.FLOATING, PrimitiveType.FLOATING, PrimitiveType.FLOATING)
-			);
+			    new FunctionSignature(ASMOpcode.Nop, INTEGER, INTEGER),
+			    new FunctionSignature(ASMOpcode.Nop, FLOATING, FLOATING),
+			    new FunctionSignature(ASMOpcode.Add, INTEGER, INTEGER, INTEGER),
+			    new FunctionSignature(ASMOpcode.FAdd, FLOATING, FLOATING, FLOATING)
+		);
+		new FunctionSignatures(Punctuator.SUBTRACT,
+			    new FunctionSignature(ASMOpcode.Nop, INTEGER, INTEGER),
+			    new FunctionSignature(ASMOpcode.Nop, FLOATING, FLOATING),
+			    new FunctionSignature(ASMOpcode.Subtract, INTEGER, INTEGER, INTEGER),
+			    new FunctionSignature(ASMOpcode.FSubtract, FLOATING, FLOATING, FLOATING)
+		);
+//		new FunctionSignatures(Punctuator.DIVIDE,
+//				new FunctionSignature(new IntegerDivideCodeGenerator(), PrimitiveType.INTEGER, PrimitiveType.INTEGER, PrimitiveType.INTEGER),
+//				new FunctionSignature(new FloatingDivideCodeGenerator(), PrimitiveType.FLOATING, PrimitiveType.FLOATING, PrimitiveType.FLOATING)
+//		);
+		
+		new FunctionSignatures(Punctuator.DIVIDE,
+				new FunctionSignature(ASMOpcode.Divide, INTEGER, INTEGER, INTEGER),
+				new FunctionSignature(ASMOpcode.FDivide, FLOATING, FLOATING, FLOATING)
+		);
 	
 //		new FunctionSignatures(Punctuator.ADD,
 //		    new FunctionSignature(ASMOpcode.Add, INTEGER, INTEGER, INTEGER),
