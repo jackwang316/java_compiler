@@ -360,38 +360,53 @@ public class ASMCodeGenerator {
 						break;
 					case NOT_EQUAL:
 						code.add(JumpTrue, trueLabel);
+						code.add(Jump, falseLabel);
+						break;
+				}
+			}
+			else if (first_type == FLOATING){
+				code.add(FSubtract);
+				switch (operator) {
+					case GREATER:
+						code.add(JumpFPos, trueLabel);
+						code.add(Jump, falseLabel);
+						break;
+					case GREATER_EQUAL:
+						code.add(JumpFNeg, falseLabel);
+						code.add(Jump, trueLabel);
+						break;
+					case LESS:
+						code.add(JumpFNeg, trueLabel);
+						code.add(Jump, falseLabel);
+						break;
+					case LESS_EQUAL:
+						code.add(JumpFPos, falseLabel);
+						code.add(Jump, trueLabel);
+						break;
+					case EQUAL:
+						code.add(JumpFZero, trueLabel);
+						code.add(Jump, falseLabel);
+						break;
+					case NOT_EQUAL:
+						code.add(JumpFZero, falseLabel);
 						code.add(Jump, trueLabel);
 						break;
 				}
 			}
-			// else if (first_type == FLOATING){
-			// 	code.add(FSubtract);
-			// 	code.add(Subtract);
-			// 	switch (operator) {
-			// 		case GREATER:
-			// 		case GREATER_EQUAL:
-			// 		case LESS:
-			// 		case LESS_EQUAL:
-			// 		case EQUAL:
-			// 		case NOT_EQUAL:
-			// 	}
-			// }
-			// else if (first_type == BOOLEAN){
-			// 	code.add(FSubtract);
-			// 	code.add(Subtract);
-			// 	switch (operator) {
-			// 		case GREATER:
-			// 		case GREATER_EQUAL:
-			// 		case LESS:
-			// 		case LESS_EQUAL:
-			// 		case EQUAL:
-			// 		case NOT_EQUAL:
-			// 	}
-			// }
-			// }
+			else if (first_type == BOOLEAN){
+				code.add(Subtract);
+				switch (operator) {
+					case EQUAL:
+						code.add(JumpFalse, trueLabel);
+						code.add(Jump, falseLabel);
+						break;
+					case NOT_EQUAL:
+						code.add(JumpTrue, trueLabel);
+						code.add(Jump, falseLabel);
+						break;
+				}
+			}
 			
-
-
 			code.add(Label, trueLabel);
 			code.add(PushI, 1);
 			code.add(Jump, joinLabel);

@@ -13,7 +13,7 @@ main {
 	# print float_r3 \n;
 	
 	# Comparison
-	const greater := 2 < 1;
-	print greater\n;
+	const Fgreater := false != true;
+	print Fgreater\n;
 	
 }

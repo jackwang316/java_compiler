@@ -194,15 +194,15 @@
         Printf                                 
         PushD        $global-memory-block      
         PushI        20                        
-        Add                                    %% greater
+        Add                                    %% Fgreater
         Label        -compare-6-arg1           
-        PushI        2                         
+        PushI        0                         
         Label        -compare-6-arg2           
         PushI        1                         
         Label        -compare-6-sub            
         Subtract                               
-        JumpPos      -compare-6-false          
-        Jump         -compare-6-true           
+        JumpTrue     -compare-6-true           
+        Jump         -compare-6-false          
         Label        -compare-6-true           
         PushI        1                         
         Jump         -compare-6-join           
@@ -213,7 +213,7 @@
         StoreC                                 
         PushD        $global-memory-block      
         PushI        20                        
-        Add                                    %% greater
+        Add                                    %% Fgreater
         LoadC                                  
         JumpTrue     -print-boolean-7-true     
         PushD        $boolean-false-string     
