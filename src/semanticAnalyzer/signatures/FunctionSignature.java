@@ -38,6 +38,9 @@ public class FunctionSignature {
 	public Object getVariant() {
 		return whichVariant;
 	}
+	public Type[] getParamTypes() {
+		return paramTypes;
+	}
 	public Type resultType() {
 		return resultType;
 	}
@@ -88,7 +91,6 @@ public class FunctionSignature {
 	private static FunctionSignature addSignature = new FunctionSignature(1, PrimitiveType.INTEGER, PrimitiveType.INTEGER, PrimitiveType.INTEGER);
 	private static FunctionSignature subtractSignature = new FunctionSignature(1, PrimitiveType.INTEGER, PrimitiveType.INTEGER);
 	private static FunctionSignature multiplySignature = new FunctionSignature(1, PrimitiveType.INTEGER, PrimitiveType.INTEGER, PrimitiveType.INTEGER);
-//	private static FunctionSignature divideSignature = new FunctionSignature(1, PrimitiveType.INTEGER, PrimitiveType.INTEGER, PrimitiveType.INTEGER);
 	private static FunctionSignature greaterSignature = new FunctionSignature(1, PrimitiveType.INTEGER, PrimitiveType.INTEGER, PrimitiveType.BOOLEAN);
 
 	
@@ -101,7 +103,6 @@ public class FunctionSignature {
 		case ADD:		return addSignature;
 		case SUBTRACT:  return subtractSignature;
 		case MULTIPLY:	return multiplySignature;
-//		case DIVIDE:	return divideSignature;
 		case GREATER:	return greaterSignature;
 
 		default:

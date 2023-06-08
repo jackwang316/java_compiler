@@ -28,12 +28,14 @@ import parseTree.nodeTypes.SpaceNode;
 import parseTree.nodeTypes.TabSpaceNode;
 import parseTree.nodeTypes.StringConstantNode;
 import semanticAnalyzer.signatures.FunctionSignature;
+import static semanticAnalyzer.types.PrimitiveType.*;
 import semanticAnalyzer.types.PrimitiveType;
 import semanticAnalyzer.types.Type;
 import symbolTable.Binding;
 import symbolTable.Scope;
 import static asmCodeGenerator.codeStorage.ASMCodeFragment.CodeType.*;
 import static asmCodeGenerator.codeStorage.ASMOpcode.*;
+
 
 // do not call the code generator if any errors have occurred during analysis.
 public class ASMCodeGenerator {
@@ -279,9 +281,13 @@ public class ASMCodeGenerator {
 				
 			}
 			else if (variant instanceof SimpleCodeGenerator) {
-				SimpleCodeGenerator generator = (SimpleCodeGenerator)variant;
+				SimpleCodeGenerator generator = (SimpleCodeGenerator) variant;
 				ASMCodeFragment fragment = generator.generate(node, childValueCode(node));
 				codeMap.put(node, fragment);
+			}
+			
+			else if (Punctuator.isComparison(operator)) {
+				visitComparisonOperatorNode(node, (Punctuator)operator);
 			}
 			
 //			if(operator == Punctuator.SUBTRACT || operator == Punctuator.DIVIDE) {
@@ -304,12 +310,15 @@ public class ASMCodeGenerator {
 			return result;
 		}
 		private void visitComparisonOperatorNode(OperatorNode node,
-				Lextant operator) {
+				Punctuator operator) {
 
 			ASMCodeFragment arg1 = removeValueCode(node.child(0));
 			ASMCodeFragment arg2 = removeValueCode(node.child(1));
 			
 			Labeller labeller = new Labeller("compare");
+
+			Type types[] = node.getSignature().getParamTypes();
+			Type first_type = types[0];
 			
 			String startLabel = labeller.newLabel("arg1");
 			String arg2Label  = labeller.newLabel("arg2");
@@ -324,10 +333,64 @@ public class ASMCodeGenerator {
 			code.add(Label, arg2Label);
 			code.append(arg2);
 			code.add(Label, subLabel);
-			code.add(Subtract);
 			
-			code.add(JumpPos, trueLabel);
-			code.add(Jump, falseLabel);
+			// TODO: cahr and string type
+			if (first_type == INTEGER) {
+				code.add(Subtract);
+				switch (operator) {
+					case GREATER:
+						code.add(JumpPos, trueLabel);
+						code.add(Jump, falseLabel);
+						break;
+					case GREATER_EQUAL:
+						code.add(JumpNeg, falseLabel);
+						code.add(Jump, trueLabel);
+						break;
+					case LESS:
+						code.add(JumpNeg, trueLabel);
+						code.add(Jump, falseLabel);
+						break;
+					case LESS_EQUAL:
+						code.add(JumpPos, falseLabel);
+						code.add(Jump, trueLabel);
+						break;
+					case EQUAL:
+						code.add(JumpFalse, trueLabel);
+						code.add(Jump, falseLabel);
+						break;
+					case NOT_EQUAL:
+						code.add(JumpTrue, trueLabel);
+						code.add(Jump, trueLabel);
+						break;
+				}
+			}
+			// else if (first_type == FLOATING){
+			// 	code.add(FSubtract);
+			// 	code.add(Subtract);
+			// 	switch (operator) {
+			// 		case GREATER:
+			// 		case GREATER_EQUAL:
+			// 		case LESS:
+			// 		case LESS_EQUAL:
+			// 		case EQUAL:
+			// 		case NOT_EQUAL:
+			// 	}
+			// }
+			// else if (first_type == BOOLEAN){
+			// 	code.add(FSubtract);
+			// 	code.add(Subtract);
+			// 	switch (operator) {
+			// 		case GREATER:
+			// 		case GREATER_EQUAL:
+			// 		case LESS:
+			// 		case LESS_EQUAL:
+			// 		case EQUAL:
+			// 		case NOT_EQUAL:
+			// 	}
+			// }
+			// }
+			
+
 
 			code.add(Label, trueLabel);
 			code.add(PushI, 1);

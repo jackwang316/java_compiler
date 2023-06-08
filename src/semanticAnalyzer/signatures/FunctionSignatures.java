@@ -10,7 +10,6 @@ import asmCodeGenerator.operators.IntegerDivideCodeGenerator;
 import asmCodeGenerator.operators.FloatingDivideCodeGenerator;
 import lexicalAnalyzer.Punctuator;
 import semanticAnalyzer.types.Type;
-import semanticAnalyzer.types.PrimitiveType;
 import static semanticAnalyzer.types.PrimitiveType.*;
 
 
@@ -85,11 +84,6 @@ public class FunctionSignatures extends ArrayList<FunctionSignature> {
 			    new FunctionSignature(ASMOpcode.Subtract, INTEGER, INTEGER, INTEGER),
 			    new FunctionSignature(ASMOpcode.FSubtract, FLOATING, FLOATING, FLOATING)
 		);
-//		new FunctionSignatures(Punctuator.DIVIDE,
-//				new FunctionSignature(new IntegerDivideCodeGenerator(), PrimitiveType.INTEGER, PrimitiveType.INTEGER, PrimitiveType.INTEGER),
-//				new FunctionSignature(new FloatingDivideCodeGenerator(), PrimitiveType.FLOATING, PrimitiveType.FLOATING, PrimitiveType.FLOATING)
-//		);
-		
 		new FunctionSignatures(Punctuator.DIVIDE,
 				new FunctionSignature(new IntegerDivideCodeGenerator(), INTEGER, INTEGER, INTEGER),
 				new FunctionSignature(new FloatingDivideCodeGenerator(), FLOATING, FLOATING, FLOATING)
@@ -102,6 +96,20 @@ public class FunctionSignatures extends ArrayList<FunctionSignature> {
 				new FunctionSignature(ASMOpcode.Divide, INTEGER, INTEGER, BOOLEAN),
 				new FunctionSignature(ASMOpcode.FDivide, FLOATING, FLOATING, BOOLEAN)
 		);
+
+		for(Punctuator compare: Punctuator.COMPARISION){
+			FunctionSignature i = new FunctionSignature(1, INTEGER, INTEGER, BOOLEAN);
+			FunctionSignature c = new FunctionSignature(1, CHARACTER, CHARACTER, BOOLEAN);
+			FunctionSignature f = new FunctionSignature(1, FLOATING, FLOATING, BOOLEAN);
+			FunctionSignature b = new FunctionSignature(1, BOOLEAN, BOOLEAN, BOOLEAN);
+			
+			if (compare == Punctuator.EQUAL || compare == Punctuator.NOT_EQUAL) {
+				new FunctionSignatures(compare, i, c, f, b);
+			}
+			else {
+				new FunctionSignatures(compare, i, c, f);
+			}
+		}
 	
 //		new FunctionSignatures(Punctuator.ADD,
 //		    new FunctionSignature(ASMOpcode.Add, INTEGER, INTEGER, INTEGER),

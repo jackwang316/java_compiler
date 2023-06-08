@@ -95,13 +95,14 @@
         PushD        $errors-int-divide-by-zero 
         Jump         $$general-runtime-error   
         DLabel       $errors-float-divide-by-zero 
-        DataC        105                       %% "integer divide by zero"
-        DataC        110                       
+        DataC        102                       %% "floating divide by zero"
+        DataC        108                       
+        DataC        111                       
+        DataC        97                        
         DataC        116                       
-        DataC        101                       
+        DataC        105                       
+        DataC        110                       
         DataC        103                       
-        DataC        101                       
-        DataC        114                       
         DataC        32                        
         DataC        100                       
         DataC        105                       
@@ -133,6 +134,7 @@
         PushD        $global-memory-block      
         PushI        4                         
         Add                                    %% pennies
+        Label        -Operator-1-args          
         PushI        5                         
         PushI        41                        
         Add                                    
@@ -145,18 +147,22 @@
         PushD        $global-memory-block      
         PushI        12                        
         Add                                    %% value
+        Label        -Operator-5-args          
+        Label        -Operator-4-args          
+        Label        -Operator-2-args          
         PushD        $global-memory-block      
         PushI        8                         
         Add                                    %% dimes_C@in
         LoadI                                  
         PushI        10                        
-        Multiply                               
+        Divide                                 
+        Label        -Operator-3-args          
         PushD        $global-memory-block      
         PushI        0                         
         Add                                    %% nickels
         LoadI                                  
         PushI        5                         
-        Multiply                               
+        Divide                                 
         Add                                    
         PushD        $global-memory-block      
         PushI        4                         

@@ -124,7 +124,7 @@
         Jump         $$general-runtime-error   
         DLabel       $usable-memory-start      
         DLabel       $global-memory-block      
-        DataZ        12                        
+        DataZ        21                        
         Label        $$main                    
         PushD        $global-memory-block      
         PushI        0                         
@@ -136,17 +136,25 @@
         StoreI                                 
         PushD        $global-memory-block      
         PushI        4                         
-        Add                                    %% r1
+        Add                                    %% rF
         Label        -Operator-2-args          
+        PushF        3.000000                  
+        PushF        2.500000                  
+        FDivide                                
+        StoreF                                 
+        PushD        $global-memory-block      
+        PushI        12                        
+        Add                                    %% r1
+        Label        -Operator-3-args          
         PushI        3                         
         PushI        1                         
         Add                                    
         StoreI                                 
         PushD        $global-memory-block      
-        PushI        8                         
+        PushI        16                        
         Add                                    %% r2
+        Label        -Operator-5-args          
         Label        -Operator-4-args          
-        Label        -Operator-3-args          
         PushI        3                         
         Nop                                    
         PushI        2                         
@@ -162,6 +170,14 @@
         Printf                                 
         PushD        $global-memory-block      
         PushI        4                         
+        Add                                    %% rF
+        LoadF                                  
+        PushD        $print-format-floating    
+        Printf                                 
+        PushD        $print-format-newline     
+        Printf                                 
+        PushD        $global-memory-block      
+        PushI        12                        
         Add                                    %% r1
         LoadI                                  
         PushD        $print-format-integer     
@@ -169,10 +185,43 @@
         PushD        $print-format-newline     
         Printf                                 
         PushD        $global-memory-block      
-        PushI        8                         
+        PushI        16                        
         Add                                    %% r2
         LoadI                                  
         PushD        $print-format-integer     
+        Printf                                 
+        PushD        $print-format-newline     
+        Printf                                 
+        PushD        $global-memory-block      
+        PushI        20                        
+        Add                                    %% greater
+        Label        -compare-6-arg1           
+        PushI        2                         
+        Label        -compare-6-arg2           
+        PushI        1                         
+        Label        -compare-6-sub            
+        Subtract                               
+        JumpPos      -compare-6-false          
+        Jump         -compare-6-true           
+        Label        -compare-6-true           
+        PushI        1                         
+        Jump         -compare-6-join           
+        Label        -compare-6-false          
+        PushI        0                         
+        Jump         -compare-6-join           
+        Label        -compare-6-join           
+        StoreC                                 
+        PushD        $global-memory-block      
+        PushI        20                        
+        Add                                    %% greater
+        LoadC                                  
+        JumpTrue     -print-boolean-7-true     
+        PushD        $boolean-false-string     
+        Jump         -print-boolean-7-join     
+        Label        -print-boolean-7-true     
+        PushD        $boolean-true-string      
+        Label        -print-boolean-7-join     
+        PushD        $print-format-boolean     
         Printf                                 
         PushD        $print-format-newline     
         Printf                                 

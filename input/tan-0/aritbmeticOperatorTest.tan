@@ -1,13 +1,19 @@
 main {
-	const r := 3*1;
+	const r := 3 * 1;
+	const rF := 3.0 * 2.5;
 	const r1 := 3 + 1;
 	const r2 := -3 - 2;
 	# const int_r3 := 3 / 0;
 	# const float_r3 := 3.0 / 0.0;
 	print r \n;
+	print rF \n;
 	print r1 \n;
 	print r2 \n;
 	# print int_r3 \n;
 	# print float_r3 \n;
+	
+	# Comparison
+	const greater := 2 < 1;
+	print greater\n;
 	
 }

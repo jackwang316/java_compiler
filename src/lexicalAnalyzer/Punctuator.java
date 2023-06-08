@@ -11,6 +11,11 @@ public enum Punctuator implements Lextant {
 	MULTIPLY("*"),
 	DIVIDE("/"),
 	GREATER(">"),
+	GREATER_EQUAL(">="),
+	LESS("<"),
+	LESS_EQUAL("<="),
+	EQUAL("=="),
+	NOT_EQUAL("!="),
 	ASSIGN(":="),
 	PRINT_SEPARATOR("\\"),
 	PRINT_SPACE("\\s"),
@@ -49,6 +54,16 @@ public enum Punctuator implements Lextant {
 		return NULL_PUNCTUATOR;
 	}
 	
+	public static final Punctuator COMPARISION[] = new Punctuator[] {
+		GREATER, GREATER_EQUAL, LESS, LESS_EQUAL, EQUAL, NOT_EQUAL
+	};
+	
+	public static boolean isComparison(Lextant lextant) {
+		for (Punctuator c: COMPARISION) {
+			if (c == lextant) return true;
+		}
+		return false;
+	}
 /*
 	//   the following hashtable lookup can replace the implementation of forLexeme above. It is faster but less clear. 
 	private static LexemeMap<Punctuator> lexemeToPunctuator = new LexemeMap<Punctuator>(values(), NULL_PUNCTUATOR);
