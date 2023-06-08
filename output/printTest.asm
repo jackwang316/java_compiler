@@ -123,42 +123,89 @@
         Jump         $$general-runtime-error   
         DLabel       $usable-memory-start      
         DLabel       $global-memory-block      
-        DataZ        2                         
+        DataZ        16                        
         Label        $$main                    
-        PushI        99                        
-        PushD        $print-format-character   
+        PushD        $global-memory-block      
+        PushI        0                         
+        Add                                    %% nickels
+        PushI        11                        
+        StoreI                                 
+        PushD        $global-memory-block      
+        PushI        4                         
+        Add                                    %% pennies
+        PushI        5                         
+        PushI        41                        
+        Add                                    
+        StoreI                                 
+        PushD        $global-memory-block      
+        PushI        8                         
+        Add                                    %% dimes
+        PushI        4                         
+        StoreI                                 
+        PushD        $global-memory-block      
+        PushI        12                        
+        Add                                    %% value
+        PushD        $global-memory-block      
+        PushI        8                         
+        Add                                    %% dimes
+        LoadI                                  
+        PushI        10                        
+        Multiply                               
+        PushD        $global-memory-block      
+        PushI        0                         
+        Add                                    %% nickels
+        LoadI                                  
+        PushI        5                         
+        Multiply                               
+        Add                                    
+        PushD        $global-memory-block      
+        PushI        4                         
+        Add                                    %% pennies
+        LoadI                                  
+        Add                                    
+        StoreI                                 
+        PushD        $global-memory-block      
+        PushI        12                        
+        Add                                    %% value
+        LoadI                                  
+        PushD        $print-format-integer     
         Printf                                 
-        PushD        $print-format-tabspace    
+        PushD        $print-format-space       
+        Printf                                 
+        PushD        $print-format-space       
+        Printf                                 
+        PushD        $global-memory-block      
+        PushI        12                        
+        Add                                    %% value
+        LoadI                                  
+        PushD        $print-format-integer     
+        Printf                                 
+        PushD        $print-format-space       
+        Printf                                 
+        PushD        $print-format-newline     
+        Printf                                 
+        PushD        $print-format-newline     
+        Printf                                 
+        PushD        $global-memory-block      
+        PushI        12                        
+        Add                                    %% value
+        LoadI                                  
+        PushD        $print-format-integer     
+        Printf                                 
+        PushD        $print-format-newline     
         Printf                                 
         PushD        $global-memory-block      
         PushI        0                         
-        Add                                    %% test
-        PushI        70                        
-        StoreC                                 
-        PushD        $global-memory-block      
-        PushI        0                         
-        Add                                    %% test
-        LoadC                                  
-        PushD        $print-format-character   
-        Printf                                 
-        PushD        $print-format-tabspace    
-        Printf                                 
-        PushI        127                       
-        PushD        $print-format-character   
-        Printf                                 
-        PushD        $print-format-tabspace    
+        Add                                    %% nickels
+        LoadI                                  
+        PushD        $print-format-integer     
         Printf                                 
         PushD        $global-memory-block      
-        PushI        1                         
-        Add                                    %% tested
-        PushI        127                       
-        StoreC                                 
-        PushD        $global-memory-block      
-        PushI        1                         
-        Add                                    %% tested
-        LoadC                                  
-        PushD        $print-format-character   
+        PushI        4                         
+        Add                                    %% pennies
+        LoadI                                  
+        PushD        $print-format-integer     
         Printf                                 
-        PushD        $print-format-tabspace    
+        PushD        $print-format-newline     
         Printf                                 
         Halt                                   

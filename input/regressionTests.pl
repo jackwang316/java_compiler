@@ -4,7 +4,7 @@ use Cwd;
 use File::Find;
 use File::Basename;
 
-my $project_location = "C:/Users/Tom/workspace2021";
+my $project_location = "C:\Users\asd88\cmpt379-class";
 my $language_name = "tan";
 my $project_name = "tan-S";
 my $asm_test_extension = "asmt";

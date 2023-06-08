@@ -25,6 +25,7 @@ import parseTree.nodeTypes.SpaceNode;
 import parseTree.nodeTypes.TabSpaceNode;
 import parseTree.nodeTypes.StringConstantNode;
 import semanticAnalyzer.signatures.FunctionSignature;
+import semanticAnalyzer.signatures.FunctionSignatures;
 import semanticAnalyzer.types.PrimitiveType;
 import semanticAnalyzer.types.Type;
 import symbolTable.Binding;
@@ -137,10 +138,12 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 		}
 		
 		Lextant operator = operatorFor(node);
-		FunctionSignature signature = FunctionSignature.signatureOf(operator);
+		// FunctionSignature signature = FunctionSignature.signatureOf(operator);
+		FunctionSignature signature = FunctionSignatures.signature(operator, childTypes);
 		
 		if(signature.accepts(childTypes)) {
 			node.setType(signature.resultType());
+			node.setSignature(signature);
 		}
 		else {
 			typeCheckError(node, childTypes);

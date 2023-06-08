@@ -95,13 +95,14 @@
         PushD        $errors-int-divide-by-zero 
         Jump         $$general-runtime-error   
         DLabel       $errors-float-divide-by-zero 
-        DataC        105                       %% "integer divide by zero"
-        DataC        110                       
+        DataC        102                       %% "floating divide by zero"
+        DataC        108                       
+        DataC        111                       
+        DataC        97                        
         DataC        116                       
-        DataC        101                       
+        DataC        105                       
+        DataC        110                       
         DataC        103                       
-        DataC        101                       
-        DataC        114                       
         DataC        32                        
         DataC        100                       
         DataC        105                       
@@ -123,42 +124,56 @@
         Jump         $$general-runtime-error   
         DLabel       $usable-memory-start      
         DLabel       $global-memory-block      
-        DataZ        2                         
+        DataZ        12                        
         Label        $$main                    
-        PushI        99                        
-        PushD        $print-format-character   
-        Printf                                 
-        PushD        $print-format-tabspace    
-        Printf                                 
         PushD        $global-memory-block      
         PushI        0                         
-        Add                                    %% test
-        PushI        70                        
-        StoreC                                 
+        Add                                    %% r
+        Label        -Operator-1-args          
+        PushI        3                         
+        PushI        1                         
+        Divide                                 
+        StoreI                                 
+        PushD        $global-memory-block      
+        PushI        4                         
+        Add                                    %% r1
+        Label        -Operator-2-args          
+        PushI        3                         
+        PushI        1                         
+        Add                                    
+        StoreI                                 
+        PushD        $global-memory-block      
+        PushI        8                         
+        Add                                    %% r2
+        Label        -Operator-4-args          
+        Label        -Operator-3-args          
+        PushI        3                         
+        Nop                                    
+        PushI        2                         
+        Subtract                               
+        StoreI                                 
         PushD        $global-memory-block      
         PushI        0                         
-        Add                                    %% test
-        LoadC                                  
-        PushD        $print-format-character   
+        Add                                    %% r
+        LoadI                                  
+        PushD        $print-format-integer     
         Printf                                 
-        PushD        $print-format-tabspace    
-        Printf                                 
-        PushI        127                       
-        PushD        $print-format-character   
-        Printf                                 
-        PushD        $print-format-tabspace    
+        PushD        $print-format-newline     
         Printf                                 
         PushD        $global-memory-block      
-        PushI        1                         
-        Add                                    %% tested
-        PushI        127                       
-        StoreC                                 
-        PushD        $global-memory-block      
-        PushI        1                         
-        Add                                    %% tested
-        LoadC                                  
-        PushD        $print-format-character   
+        PushI        4                         
+        Add                                    %% r1
+        LoadI                                  
+        PushD        $print-format-integer     
         Printf                                 
-        PushD        $print-format-tabspace    
+        PushD        $print-format-newline     
+        Printf                                 
+        PushD        $global-memory-block      
+        PushI        8                         
+        Add                                    %% r2
+        LoadI                                  
+        PushD        $print-format-integer     
+        Printf                                 
+        PushD        $print-format-newline     
         Printf                                 
         Halt                                   
