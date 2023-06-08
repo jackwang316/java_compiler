@@ -95,13 +95,14 @@
         PushD        $errors-int-divide-by-zero 
         Jump         $$general-runtime-error   
         DLabel       $errors-float-divide-by-zero 
-        DataC        105                       %% "integer divide by zero"
-        DataC        110                       
+        DataC        102                       %% "floating divide by zero"
+        DataC        108                       
+        DataC        111                       
+        DataC        97                        
         DataC        116                       
-        DataC        101                       
+        DataC        105                       
+        DataC        110                       
         DataC        103                       
-        DataC        101                       
-        DataC        114                       
         DataC        32                        
         DataC        100                       
         DataC        105                       
@@ -123,7 +124,7 @@
         Jump         $$general-runtime-error   
         DLabel       $usable-memory-start      
         DLabel       $global-memory-block      
-        DataZ        24                        
+        DataZ        12                        
         Label        $$main                    
         PushD        $global-memory-block      
         PushI        0                         
@@ -152,22 +153,6 @@
         Subtract                               
         StoreI                                 
         PushD        $global-memory-block      
-        PushI        12                        
-        Add                                    %% int_r3
-        Label        -Operator-5-args          
-        PushI        3                         
-        PushI        1                         
-        Divide                                 
-        StoreI                                 
-        PushD        $global-memory-block      
-        PushI        16                        
-        Add                                    %% float_r3
-        Label        -Operator-6-args          
-        PushF        3.000000                  
-        PushF        1.000000                  
-        FDivide                                
-        StoreF                                 
-        PushD        $global-memory-block      
         PushI        0                         
         Add                                    %% r
         LoadI                                  
@@ -188,22 +173,6 @@
         Add                                    %% r2
         LoadI                                  
         PushD        $print-format-integer     
-        Printf                                 
-        PushD        $print-format-newline     
-        Printf                                 
-        PushD        $global-memory-block      
-        PushI        12                        
-        Add                                    %% int_r3
-        LoadI                                  
-        PushD        $print-format-integer     
-        Printf                                 
-        PushD        $print-format-newline     
-        Printf                                 
-        PushD        $global-memory-block      
-        PushI        16                        
-        Add                                    %% float_r3
-        LoadF                                  
-        PushD        $print-format-floating    
         Printf                                 
         PushD        $print-format-newline     
         Printf                                 

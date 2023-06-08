@@ -102,7 +102,7 @@ public class RunTime {
 		String floatDivideByZeroMessage = "$errors-float-divide-by-zero";
 		
 		frag.add(DLabel, floatDivideByZeroMessage);
-		frag.add(DataS, "integer divide by zero");
+		frag.add(DataS, "floating divide by zero");
 		
 		frag.add(Label, FLOATING_DIVIDE_BY_ZERO_RUNTIME_ERROR);
 		frag.add(PushD, floatDivideByZeroMessage);
