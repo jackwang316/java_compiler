@@ -2,8 +2,6 @@ package asmCodeGenerator;
 
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
-import java.util.ArrayList;
 import java.util.Map;
 
 import asmCodeGenerator.codeStorage.ASMCodeFragment;
@@ -27,9 +25,7 @@ import parseTree.nodeTypes.PrintStatementNode;
 import parseTree.nodeTypes.ProgramNode;
 import parseTree.nodeTypes.SpaceNode;
 import parseTree.nodeTypes.TabSpaceNode;
-import parseTree.nodeTypes.TypeNode;
 import parseTree.nodeTypes.StringConstantNode;
-import semanticAnalyzer.signatures.FunctionSignature;
 import semanticAnalyzer.types.PrimitiveType;
 import semanticAnalyzer.types.Type;
 import symbolTable.Binding;
@@ -264,26 +260,12 @@ public class ASMCodeGenerator {
 		// expressions
 		public void visitLeave(OperatorNode node) {
 			Lextant operator = node.getOperator();
-			FunctionSignature signature = node.getSignature();
-			Object variant = signature.getVariant();
 			
-			if (variant instanceof ASMOpcode) {
-				Labeller labeller = new Labeller("Operator");
-				String startLabel = labeller.newLabel("args");
-				String opLabel   = labeller.newLabel("op");
-				
-				newValueCode(node);
-				code.add(Label, startLabel);
-				for (ParseNode child: node.getChildren()) {
-					code.append(removeValueCode(child));
-				}
-				code.add((ASMOpcode)variant);
-				
+			if(operator == Punctuator.SUBTRACT) {
+				visitUnaryOperatorNode(node);
 			}
-			else if (variant instanceof SimpleCodeGenerator) {
-				SimpleCodeGenerator generator = (SimpleCodeGenerator)variant;
-				ASMCodeFragment fragment = generator.generate(node, childValueCode(node));
-				codeMap.put(node, fragment);
+			else if(operator == Punctuator.GREATER) {
+				visitComparisonOperatorNode(node, operator);
 			}
 			
 		}

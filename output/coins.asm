@@ -16,6 +16,7 @@
         DLabel       $print-format-newline     
         DataC        10                        %% "\n"
         DataC        0                         
+<<<<<<< HEAD
         DLabel       $print-format-string      
         DataC        37                        %% "%s"
         DataC        115                       
@@ -30,6 +31,11 @@
         DLabel       $print-format-tabspace    
         DataC        9                         %% "\t"
         DataC        0                         
+=======
+        DLabel       $print-format-space       
+        DataC        32                        %% " "
+        DataC        0                         
+>>>>>>> master
         DLabel       $boolean-true-string      
         DataC        116                       %% "true"
         DataC        114                       
@@ -149,31 +155,47 @@
         PushD        $global-memory-block      
         PushI        16                        
         Add                                    %% value
+<<<<<<< HEAD
         Label        -Operator-6-args          
         Label        -Operator-5-args          
         Label        -Operator-3-args          
         Label        -Operator-1-args          
+=======
+>>>>>>> master
         PushD        $global-memory-block      
         PushI        0                         
         Add                                    %% quarters
         LoadI                                  
         PushI        25                        
+<<<<<<< HEAD
         Divide                                 
         Label        -Operator-2-args          
+=======
+        Multiply                               
+>>>>>>> master
         PushD        $global-memory-block      
         PushI        4                         
         Add                                    %% dimes
         LoadI                                  
         PushI        10                        
+<<<<<<< HEAD
         Divide                                 
         Add                                    
         Label        -Operator-4-args          
+=======
+        Multiply                               
+        Add                                    
+>>>>>>> master
         PushD        $global-memory-block      
         PushI        8                         
         Add                                    %% nickels
         LoadI                                  
         PushI        5                         
+<<<<<<< HEAD
         Divide                                 
+=======
+        Multiply                               
+>>>>>>> master
         Add                                    
         PushD        $global-memory-block      
         PushI        12                        
@@ -192,9 +214,12 @@
         PushD        $global-memory-block      
         PushI        20                        
         Add                                    %% ncoins
+<<<<<<< HEAD
         Label        -Operator-9-args          
         Label        -Operator-8-args          
         Label        -Operator-7-args          
+=======
+>>>>>>> master
         PushD        $global-memory-block      
         PushI        0                         
         Add                                    %% quarters
@@ -226,27 +251,58 @@
         PushD        $global-memory-block      
         PushI        24                        
         Add                                    %% moredimes
+<<<<<<< HEAD
         Label        -Operator-10-args         
+=======
+        Label        -compare-1-arg1           
+>>>>>>> master
         PushD        $global-memory-block      
         PushI        4                         
         Add                                    %% dimes
         LoadI                                  
+<<<<<<< HEAD
+=======
+        Label        -compare-1-arg2           
+>>>>>>> master
         PushD        $global-memory-block      
         PushI        8                         
         Add                                    %% nickels
         LoadI                                  
+<<<<<<< HEAD
         Divide                                 
+=======
+        Label        -compare-1-sub            
+        Subtract                               
+        JumpPos      -compare-1-true           
+        Jump         -compare-1-false          
+        Label        -compare-1-true           
+        PushI        1                         
+        Jump         -compare-1-join           
+        Label        -compare-1-false          
+        PushI        0                         
+        Jump         -compare-1-join           
+        Label        -compare-1-join           
+>>>>>>> master
         StoreC                                 
         PushD        $global-memory-block      
         PushI        24                        
         Add                                    %% moredimes
         LoadC                                  
+<<<<<<< HEAD
         JumpTrue     -print-boolean-11-true    
         PushD        $boolean-false-string     
         Jump         -print-boolean-11-join    
         Label        -print-boolean-11-true    
         PushD        $boolean-true-string      
         Label        -print-boolean-11-join    
+=======
+        JumpTrue     -print-boolean-2-true     
+        PushD        $boolean-false-string     
+        Jump         -print-boolean-2-join     
+        Label        -print-boolean-2-true     
+        PushD        $boolean-true-string      
+        Label        -print-boolean-2-join     
+>>>>>>> master
         PushD        $print-format-boolean     
         Printf                                 
         PushD        $print-format-newline     
@@ -265,12 +321,21 @@
         PushI        25                        
         Add                                    %% boot
         LoadC                                  
+<<<<<<< HEAD
         JumpTrue     -print-boolean-12-true    
         PushD        $boolean-false-string     
         Jump         -print-boolean-12-join    
         Label        -print-boolean-12-true    
         PushD        $boolean-true-string      
         Label        -print-boolean-12-join    
+=======
+        JumpTrue     -print-boolean-3-true     
+        PushD        $boolean-false-string     
+        Jump         -print-boolean-3-join     
+        Label        -print-boolean-3-true     
+        PushD        $boolean-true-string      
+        Label        -print-boolean-3-join     
+>>>>>>> master
         PushD        $print-format-boolean     
         Printf                                 
         PushD        $print-format-space       
@@ -279,12 +344,21 @@
         PushI        26                        
         Add                                    %% boof
         LoadC                                  
+<<<<<<< HEAD
         JumpTrue     -print-boolean-13-true    
         PushD        $boolean-false-string     
         Jump         -print-boolean-13-join    
         Label        -print-boolean-13-true    
         PushD        $boolean-true-string      
         Label        -print-boolean-13-join    
+=======
+        JumpTrue     -print-boolean-4-true     
+        PushD        $boolean-false-string     
+        Jump         -print-boolean-4-join     
+        Label        -print-boolean-4-true     
+        PushD        $boolean-true-string      
+        Label        -print-boolean-4-join     
+>>>>>>> master
         PushD        $print-format-boolean     
         Printf                                 
         PushD        $print-format-newline     
@@ -293,24 +367,42 @@
         PushI        25                        
         Add                                    %% boot
         LoadC                                  
+<<<<<<< HEAD
         JumpTrue     -print-boolean-14-true    
         PushD        $boolean-false-string     
         Jump         -print-boolean-14-join    
         Label        -print-boolean-14-true    
         PushD        $boolean-true-string      
         Label        -print-boolean-14-join    
+=======
+        JumpTrue     -print-boolean-5-true     
+        PushD        $boolean-false-string     
+        Jump         -print-boolean-5-join     
+        Label        -print-boolean-5-true     
+        PushD        $boolean-true-string      
+        Label        -print-boolean-5-join     
+>>>>>>> master
         PushD        $print-format-boolean     
         Printf                                 
         PushD        $global-memory-block      
         PushI        26                        
         Add                                    %% boof
         LoadC                                  
+<<<<<<< HEAD
         JumpTrue     -print-boolean-15-true    
         PushD        $boolean-false-string     
         Jump         -print-boolean-15-join    
         Label        -print-boolean-15-true    
         PushD        $boolean-true-string      
         Label        -print-boolean-15-join    
+=======
+        JumpTrue     -print-boolean-6-true     
+        PushD        $boolean-false-string     
+        Jump         -print-boolean-6-join     
+        Label        -print-boolean-6-true     
+        PushD        $boolean-true-string      
+        Label        -print-boolean-6-join     
+>>>>>>> master
         PushD        $print-format-boolean     
         Printf                                 
         PushD        $print-format-newline     

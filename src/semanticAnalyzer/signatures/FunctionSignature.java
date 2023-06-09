@@ -61,7 +61,6 @@ public class FunctionSignature {
 		}		
 		return true;
 	}
-	
 	private boolean assignableTo(Type variableType, Type valueType) {
 		if(valueType == PrimitiveType.ERROR && ALL_TYPES_ACCEPT_ERROR_TYPES) {
 			return true;
@@ -89,7 +88,6 @@ public class FunctionSignature {
 	private static FunctionSignature addSignature = new FunctionSignature(1, PrimitiveType.INTEGER, PrimitiveType.INTEGER, PrimitiveType.INTEGER);
 	private static FunctionSignature subtractSignature = new FunctionSignature(1, PrimitiveType.INTEGER, PrimitiveType.INTEGER);
 	private static FunctionSignature multiplySignature = new FunctionSignature(1, PrimitiveType.INTEGER, PrimitiveType.INTEGER, PrimitiveType.INTEGER);
-//	private static FunctionSignature divideSignature = new FunctionSignature(1, PrimitiveType.INTEGER, PrimitiveType.INTEGER, PrimitiveType.INTEGER);
 	private static FunctionSignature greaterSignature = new FunctionSignature(1, PrimitiveType.INTEGER, PrimitiveType.INTEGER, PrimitiveType.BOOLEAN);
 
 	
@@ -102,7 +100,6 @@ public class FunctionSignature {
 		case ADD:		return addSignature;
 		case SUBTRACT:  return subtractSignature;
 		case MULTIPLY:	return multiplySignature;
-//		case DIVIDE:	return divideSignature;
 		case GREATER:	return greaterSignature;
 
 		default:
