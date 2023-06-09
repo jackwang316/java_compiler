@@ -3,4 +3,5 @@ main {
 	test := "new yolo";
 	print "hello\n" \n;
 	print test \n;
+	print "Hello there" \n;
 }

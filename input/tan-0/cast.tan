@@ -1,0 +1,11 @@
+main {
+	var test := <bool> (0);
+	var test2 := <bool> (1);
+	var test3 := <bool> (%000);
+	var test4 := <bool> ('c');
+	
+	print test \n;
+	print test2 \n;
+	print test3 \n;
+	print test4 \n;
+}

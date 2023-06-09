@@ -6,6 +6,13 @@ import java.util.List;
 import java.util.Map;
 
 import asmCodeGenerator.codeStorage.ASMOpcode;
+import asmCodeGenerator.operators.CharToBoolCodeGenerator;
+import asmCodeGenerator.operators.CharToIntGenerator;
+import asmCodeGenerator.operators.IntToBoolCodeGenerator;
+import asmCodeGenerator.operators.IntToCharCodeGenerator;
+import lexicalAnalyzer.Punctuator;
+import semanticAnalyzer.types.Type;
+import static semanticAnalyzer.types.PrimitiveType.*;
 import asmCodeGenerator.operators.IntegerDivideCodeGenerator;
 import asmCodeGenerator.operators.FloatingDivideCodeGenerator;
 import lexicalAnalyzer.Punctuator;
@@ -43,6 +50,7 @@ public class FunctionSignatures extends ArrayList<FunctionSignature> {
 		}
 		return FunctionSignature.nullInstance();
 	}
+	
 	public boolean accepts(List<Type> types) {
 		return !acceptingSignature(types).isNull();
 	}
@@ -107,6 +115,33 @@ public class FunctionSignatures extends ArrayList<FunctionSignature> {
 //		    new FunctionSignature(ASMOpcode.Add, INTEGER, INTEGER, INTEGER),
 //		    new FunctionSignature(ASMOpcode.FAdd, FLOAT, FLOAT, FLOAT)
 //		);
+		
+		new FunctionSignatures(Punctuator.CAST,
+			new FunctionSignature(ASMOpcode.Nop, 
+					BOOLEAN, BOOLEAN, BOOLEAN),
+			new FunctionSignature(ASMOpcode.Nop,
+					CHARACTER, CHARACTER, CHARACTER),
+			new FunctionSignature(ASMOpcode.Nop,
+					INTEGER, CHARACTER, INTEGER),
+			new FunctionSignature(ASMOpcode.Nop,
+					STRING, STRING, STRING),
+			new FunctionSignature(ASMOpcode.Nop,
+					INTEGER, INTEGER, INTEGER),
+			new FunctionSignature(ASMOpcode.Nop,
+					FLOATING, FLOATING, FLOATING),
+			new FunctionSignature(new IntToBoolCodeGenerator(),
+					BOOLEAN, INTEGER, BOOLEAN),
+			new FunctionSignature(ASMOpcode.ConvertF,
+					FLOATING, INTEGER, FLOATING),
+			new FunctionSignature(new CharToIntGenerator(), 
+					INTEGER, CHARACTER, INTEGER),
+			new FunctionSignature(new IntToCharCodeGenerator(),
+					CHARACTER, INTEGER, CHARACTER),
+			new FunctionSignature(new CharToBoolCodeGenerator(),
+					BOOLEAN, CHARACTER, BOOLEAN),
+			new FunctionSignature(ASMOpcode.ConvertI,
+					INTEGER, FLOATING, INTEGER)
+		);
 		
 		// First, we use the operator itself (in this case the Punctuator ADD) as the key.
 		// Then, we give that key two signatures: one an (INT x INT -> INT) and the other

@@ -1,5 +1,6 @@
 package asmCodeGenerator;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.ArrayList;
@@ -26,6 +27,7 @@ import parseTree.nodeTypes.PrintStatementNode;
 import parseTree.nodeTypes.ProgramNode;
 import parseTree.nodeTypes.SpaceNode;
 import parseTree.nodeTypes.TabSpaceNode;
+import parseTree.nodeTypes.TypeNode;
 import parseTree.nodeTypes.StringConstantNode;
 import semanticAnalyzer.signatures.FunctionSignature;
 import semanticAnalyzer.types.PrimitiveType;
@@ -302,6 +304,22 @@ public class ASMCodeGenerator {
 				result.add(removeValueCode(child));
 			}
 			return result;
+		}
+		
+		public void visitLeave(TypeNode node) {
+			newValueCode(node);
+			ASMCodeFragment arg = removeValueCode(node.child(0));
+			code.append(arg);
+			Object variant = node.getSignature().getVariant();
+			if(variant instanceof ASMOpcode) {
+				ASMOpcode opcode = (ASMOpcode) variant;
+				code.add(opcode);
+			}
+			else if(variant instanceof SimpleCodeGenerator) {
+				SimpleCodeGenerator generator = (SimpleCodeGenerator) variant;
+				ASMCodeFragment fragment = generator.generate(node, Collections.singletonList(arg));
+				code.append(fragment);
+			}
 		}
 		private void visitComparisonOperatorNode(OperatorNode node,
 				Lextant operator) {

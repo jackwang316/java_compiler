@@ -101,84 +101,112 @@
         PushD        $global-memory-block      
         PushI        0                         
         Add                                    %% test
-        DLabel       -String-1-StringLabel     
-        DataI        3                         
-        DataI        9                         
-        DataI        4                         
-        DataC        121                       %% "yolo"
-        DataC        111                       
-        DataC        108                       
-        DataC        111                       
-        DataC        0                         
-        PushD        -String-1-StringLabel     
-        StoreI                                 
-        PushD        $global-memory-block      
         PushI        0                         
-        Add                                    %% test
-        DLabel       -String-2-StringLabel     
-        DataI        3                         
-        DataI        9                         
-        DataI        8                         
-        DataC        110                       %% "new yolo"
-        DataC        101                       
-        DataC        119                       
-        DataC        32                        
-        DataC        121                       
-        DataC        111                       
-        DataC        108                       
-        DataC        111                       
-        DataC        0                         
-        PushD        -String-2-StringLabel     
-        StoreI                                 
-        DLabel       -String-3-StringLabel     
-        DataI        3                         
-        DataI        9                         
-        DataI        7                         
-        DataC        104                       %% "hello\n"
-        DataC        101                       
-        DataC        108                       
-        DataC        108                       
-        DataC        111                       
-        DataC        92                        
-        DataC        110                       
-        DataC        0                         
-        PushD        -String-3-StringLabel     
-        PushI        12                        
-        Add                                    
-        PushD        $print-format-string      
-        Printf                                 
-        PushD        $print-format-newline     
-        Printf                                 
+        JumpTrue     -int-to-boolean-cast-1-true 
+        Jump         -int-to-boolean-cast-1-false 
+        Label        -int-to-boolean-cast-1-true 
+        PushI        1                         
+        Jump         -int-to-boolean-cast-1-join 
+        Label        -int-to-boolean-cast-1-false 
+        PushI        0                         
+        Jump         -int-to-boolean-cast-1-join 
+        Label        -int-to-boolean-cast-1-join 
+        StoreC                                 
+        PushD        $global-memory-block      
+        PushI        1                         
+        Add                                    %% test2
+        PushI        1                         
+        JumpTrue     -int-to-boolean-cast-2-true 
+        Jump         -int-to-boolean-cast-2-false 
+        Label        -int-to-boolean-cast-2-true 
+        PushI        1                         
+        Jump         -int-to-boolean-cast-2-join 
+        Label        -int-to-boolean-cast-2-false 
+        PushI        0                         
+        Jump         -int-to-boolean-cast-2-join 
+        Label        -int-to-boolean-cast-2-join 
+        StoreC                                 
+        PushD        $global-memory-block      
+        PushI        2                         
+        Add                                    %% test3
+        PushI        0                         
+        JumpTrue     -char-to-boolean-cast-3-true 
+        Jump         -char-to-boolean-cast-3-false 
+        Label        -char-to-boolean-cast-3-true 
+        PushI        1                         
+        Jump         -char-to-boolean-cast-3-join 
+        Label        -char-to-boolean-cast-3-false 
+        PushI        0                         
+        Jump         -char-to-boolean-cast-3-join 
+        Label        -char-to-boolean-cast-3-join 
+        StoreC                                 
+        PushD        $global-memory-block      
+        PushI        3                         
+        Add                                    %% test4
+        PushI        99                        
+        JumpTrue     -char-to-boolean-cast-4-true 
+        Jump         -char-to-boolean-cast-4-false 
+        Label        -char-to-boolean-cast-4-true 
+        PushI        1                         
+        Jump         -char-to-boolean-cast-4-join 
+        Label        -char-to-boolean-cast-4-false 
+        PushI        0                         
+        Jump         -char-to-boolean-cast-4-join 
+        Label        -char-to-boolean-cast-4-join 
+        StoreC                                 
         PushD        $global-memory-block      
         PushI        0                         
         Add                                    %% test
         LoadC                                  
-        PushI        12                        
-        Add                                    
-        PushD        $print-format-string      
+        JumpTrue     -print-boolean-5-true     
+        PushD        $boolean-false-string     
+        Jump         -print-boolean-5-join     
+        Label        -print-boolean-5-true     
+        PushD        $boolean-true-string      
+        Label        -print-boolean-5-join     
+        PushD        $print-format-boolean     
         Printf                                 
         PushD        $print-format-newline     
         Printf                                 
-        DLabel       -String-4-StringLabel     
-        DataI        3                         
-        DataI        9                         
-        DataI        11                        
-        DataC        72                        %% "Hello there"
-        DataC        101                       
-        DataC        108                       
-        DataC        108                       
-        DataC        111                       
-        DataC        32                        
-        DataC        116                       
-        DataC        104                       
-        DataC        101                       
-        DataC        114                       
-        DataC        101                       
-        DataC        0                         
-        PushD        -String-4-StringLabel     
-        PushI        12                        
-        Add                                    
-        PushD        $print-format-string      
+        PushD        $global-memory-block      
+        PushI        1                         
+        Add                                    %% test2
+        LoadC                                  
+        JumpTrue     -print-boolean-6-true     
+        PushD        $boolean-false-string     
+        Jump         -print-boolean-6-join     
+        Label        -print-boolean-6-true     
+        PushD        $boolean-true-string      
+        Label        -print-boolean-6-join     
+        PushD        $print-format-boolean     
+        Printf                                 
+        PushD        $print-format-newline     
+        Printf                                 
+        PushD        $global-memory-block      
+        PushI        2                         
+        Add                                    %% test3
+        LoadC                                  
+        JumpTrue     -print-boolean-7-true     
+        PushD        $boolean-false-string     
+        Jump         -print-boolean-7-join     
+        Label        -print-boolean-7-true     
+        PushD        $boolean-true-string      
+        Label        -print-boolean-7-join     
+        PushD        $print-format-boolean     
+        Printf                                 
+        PushD        $print-format-newline     
+        Printf                                 
+        PushD        $global-memory-block      
+        PushI        3                         
+        Add                                    %% test4
+        LoadC                                  
+        JumpTrue     -print-boolean-8-true     
+        PushD        $boolean-false-string     
+        Jump         -print-boolean-8-join     
+        Label        -print-boolean-8-true     
+        PushD        $boolean-true-string      
+        Label        -print-boolean-8-join     
+        PushD        $print-format-boolean     
         Printf                                 
         PushD        $print-format-newline     
         Printf                                 
