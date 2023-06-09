@@ -123,42 +123,21 @@
         Jump         $$general-runtime-error   
         DLabel       $usable-memory-start      
         DLabel       $global-memory-block      
-        DataZ        2                         
+        DataZ        4                         
         Label        $$main                    
-        PushI        99                        
-        PushD        $print-format-character   
-        Printf                                 
-        PushD        $print-format-tabspace    
-        Printf                                 
         PushD        $global-memory-block      
         PushI        0                         
-        Add                                    %% test
-        PushI        70                        
-        StoreC                                 
+        Add                                    %% neg
+        PushI        11                        
+        Negate                                 
+        Negate                                 
+        StoreI                                 
         PushD        $global-memory-block      
         PushI        0                         
-        Add                                    %% test
-        LoadC                                  
-        PushD        $print-format-character   
+        Add                                    %% neg
+        LoadI                                  
+        PushD        $print-format-integer     
         Printf                                 
-        PushD        $print-format-tabspace    
-        Printf                                 
-        PushI        127                       
-        PushD        $print-format-character   
-        Printf                                 
-        PushD        $print-format-tabspace    
-        Printf                                 
-        PushD        $global-memory-block      
-        PushI        1                         
-        Add                                    %% tested
-        PushI        127                       
-        StoreC                                 
-        PushD        $global-memory-block      
-        PushI        1                         
-        Add                                    %% tested
-        LoadC                                  
-        PushD        $print-format-character   
-        Printf                                 
-        PushD        $print-format-tabspace    
+        PushD        $print-format-newline     
         Printf                                 
         Halt                                   
