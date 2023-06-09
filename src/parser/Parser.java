@@ -19,8 +19,6 @@ import parseTree.nodeTypes.PrintStatementNode;
 import parseTree.nodeTypes.ProgramNode;
 import parseTree.nodeTypes.SpaceNode;
 import parseTree.nodeTypes.TabSpaceNode;
-import parseTree.nodeTypes.TypeNode;
-import semanticAnalyzer.types.PrimitiveType;
 import parseTree.nodeTypes.StringConstantNode;
 import tokens.*;
 import lexicalAnalyzer.Keyword;
@@ -328,49 +326,12 @@ public class Parser {
 		if(startsUnaryExpression(nowReading)) {
 			return parseUnaryExpression();
 		}
-		if(startsCastExpression(nowReading)) {
-			return parseCastExpression();
-		}
-		if(startsParenthesis(nowReading)) {
-			return parseParenthesisExpression();
-		}
 		return parseLiteral();
 	}
-	private ParseNode parseParenthesisExpression() {
-		if(!startsParenthesis(nowReading)) {
-			return syntaxErrorNode("parenthesis");
-		}
-		readToken();
-		ParseNode expression = parseExpression();
-		expect(Punctuator.CLOSE_PARENTHESIS);
-		return expression;
-	}
-	private boolean startsParenthesis(Token token) {
-		return token.isLextant(Punctuator.OPEN_PARENTHESIS);
-	}
-	
-	private ParseNode parseCastExpression() {
-		if(!startsCastExpression(nowReading)) {
-			return syntaxErrorNode("casting");
-		}
-		readToken();
-		String castType = nowReading.getLexeme();
-		if(!Keyword.isCastType(castType)) {
-			return syntaxErrorNode("invalid cast type");
-		}
-		readToken();
-		expect(Punctuator.GREATER);
-		ParseNode expression = parseParenthesisExpression();
-		return TypeNode.withChildren(expression, PrimitiveType.parseType(castType));
-		
-	}
 	private boolean startsAtomicExpression(Token token) {
-		return startsLiteral(token) || startsUnaryExpression(token) || startsCastExpression(token) || startsParenthesis(token);
+		return startsLiteral(token) || startsUnaryExpression(token);
 	}
 
-	private boolean startsCastExpression(Token token) {
-		return token.isLextant(Punctuator.LESS);
-	}
 	// unaryExpression			-> UNARYOP atomicExpression
 	private ParseNode parseUnaryExpression() {
 		if(!startsUnaryExpression(nowReading)) {
