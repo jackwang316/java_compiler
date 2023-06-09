@@ -285,7 +285,7 @@ public class Parser {
 		}
 		
 		ParseNode left = parseMultiplicativeExpression();
-		while(nowReading.isLextant(Punctuator.ADD, Punctuator.SUBTRACT)) {
+		while(nowReading.isLextant(Punctuator.ADD)) {
 			Token additiveToken = nowReading;
 			readToken();
 			ParseNode right = parseMultiplicativeExpression();
@@ -305,7 +305,7 @@ public class Parser {
 		}
 		
 		ParseNode left = parseAtomicExpression();
-		while(nowReading.isLextant(Punctuator.MULTIPLY, Punctuator.DIVIDE)) {
+		while(nowReading.isLextant(Punctuator.MULTIPLY)) {
 			Token multiplicativeToken = nowReading;
 			readToken();
 			ParseNode right = parseAtomicExpression();

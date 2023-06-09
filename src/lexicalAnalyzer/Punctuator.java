@@ -9,7 +9,6 @@ public enum Punctuator implements Lextant {
 	ADD("+"), 
 	SUBTRACT("-"),
 	MULTIPLY("*"),
-	DIVIDE("/"),
 	GREATER(">"),
 	ASSIGN(":="),
 	PRINT_SEPARATOR("\\"),

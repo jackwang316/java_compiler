@@ -1,13 +1,10 @@
 package asmCodeGenerator;
 
 import java.util.HashMap;
-import java.util.List;
-import java.util.ArrayList;
 import java.util.Map;
 
 import asmCodeGenerator.codeStorage.ASMCodeFragment;
 import asmCodeGenerator.codeStorage.ASMOpcode;
-import asmCodeGenerator.operators.SimpleCodeGenerator;
 import asmCodeGenerator.runtime.RunTime;
 import lexicalAnalyzer.Lextant;
 import lexicalAnalyzer.Punctuator;
@@ -27,7 +24,6 @@ import parseTree.nodeTypes.ProgramNode;
 import parseTree.nodeTypes.SpaceNode;
 import parseTree.nodeTypes.TabSpaceNode;
 import parseTree.nodeTypes.StringConstantNode;
-import semanticAnalyzer.signatures.FunctionSignature;
 import semanticAnalyzer.types.PrimitiveType;
 import semanticAnalyzer.types.Type;
 import symbolTable.Binding;
@@ -262,46 +258,16 @@ public class ASMCodeGenerator {
 		// expressions
 		public void visitLeave(OperatorNode node) {
 			Lextant operator = node.getOperator();
-			FunctionSignature signature = node.getSignature();
-			Object variant = signature.getVariant();
 			
-			if (variant instanceof ASMOpcode) {
-				Labeller labeller = new Labeller("Operator");
-				String startLabel = labeller.newLabel("args");
-				String opLabel   = labeller.newLabel("op");
-				
-				newValueCode(node);
-				code.add(Label, startLabel);
-				for (ParseNode child: node.getChildren()) {
-					code.append(removeValueCode(child));
-				}
-				code.add((ASMOpcode)variant);
-				
+			if(operator == Punctuator.SUBTRACT) {
+				visitUnaryOperatorNode(node);
 			}
-			else if (variant instanceof SimpleCodeGenerator) {
-				SimpleCodeGenerator generator = (SimpleCodeGenerator)variant;
-				ASMCodeFragment fragment = generator.generate(node, childValueCode(node));
-				codeMap.put(node, fragment);
+			else if(operator == Punctuator.GREATER) {
+				visitComparisonOperatorNode(node, operator);
 			}
-			
-//			if(operator == Punctuator.SUBTRACT || operator == Punctuator.DIVIDE) {
-//			visitUnaryOperatorNode(node);
-//			}
-//			else if(operator == Punctuator.GREATER) {
-//				visitComparisonOperatorNode(node, operator);
-//			
-//			}
-//			else {
-//				visitNormalBinaryOperatorNode(node);
-//			}
-			
-		}
-		private List<ASMCodeFragment> childValueCode(OperatorNode node){
-			List<ASMCodeFragment> result = new ArrayList<>();
-			for (ParseNode child: node.getChildren()) {
-				result.add(removeValueCode(child));
+			else {
+				visitNormalBinaryOperatorNode(node);
 			}
-			return result;
 		}
 		private void visitComparisonOperatorNode(OperatorNode node,
 				Lextant operator) {
