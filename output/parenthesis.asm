@@ -100,18 +100,7 @@
         Label        $$main                    
         PushD        $global-memory-block      
         PushI        0                         
-        Add                                    %% what
-        PushF        3.000000                  
-        ConvertI                               
-        PushI        6                         
-        Add                                    
+        Add                                    %% test
+        PushI        5                         
         StoreI                                 
-        PushD        $global-memory-block      
-        PushI        0                         
-        Add                                    %% what
-        LoadI                                  
-        PushD        $print-format-integer     
-        Printf                                 
-        PushD        $print-format-newline     
-        Printf                                 
         Halt                                   
