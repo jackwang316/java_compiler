@@ -13,7 +13,9 @@ main {
 	# print float_r3 \n;
 	
 	# Comparison
-	const Fgreater := false != true;
+	const a := "1234";
+	const b := "12345";
+	const Fgreater := false == false;
 	print Fgreater\n;
 	
 }

@@ -335,7 +335,7 @@ public class ASMCodeGenerator {
 			code.add(Label, subLabel);
 			
 			// TODO: cahr and string type
-			if (first_type == INTEGER) {
+			if (first_type == INTEGER || first_type == CHARACTER) {
 				code.add(Subtract);
 				switch (operator) {
 					case GREATER:
@@ -393,7 +393,20 @@ public class ASMCodeGenerator {
 						break;
 				}
 			}
-			else if (first_type == BOOLEAN){
+			else if (first_type == BOOLEAN) {
+				code.add(Subtract);
+				switch (operator) {
+					case EQUAL:
+						code.add(JumpFalse, trueLabel);
+						code.add(Jump, falseLabel);
+						break;
+					case NOT_EQUAL:
+						code.add(JumpTrue, trueLabel);
+						code.add(Jump, falseLabel);
+						break;
+				}
+			}
+			else if (first_type == STRING) {
 				code.add(Subtract);
 				switch (operator) {
 					case EQUAL:

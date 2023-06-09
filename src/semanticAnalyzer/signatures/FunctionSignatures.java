@@ -102,9 +102,10 @@ public class FunctionSignatures extends ArrayList<FunctionSignature> {
 			FunctionSignature c = new FunctionSignature(1, CHARACTER, CHARACTER, BOOLEAN);
 			FunctionSignature f = new FunctionSignature(1, FLOATING, FLOATING, BOOLEAN);
 			FunctionSignature b = new FunctionSignature(1, BOOLEAN, BOOLEAN, BOOLEAN);
+			FunctionSignature s = new FunctionSignature(1, STRING, STRING, BOOLEAN);
 			
 			if (compare == Punctuator.EQUAL || compare == Punctuator.NOT_EQUAL) {
-				new FunctionSignatures(compare, i, c, f, b);
+				new FunctionSignatures(compare, i, c, f, b, s);
 			}
 			else {
 				new FunctionSignatures(compare, i, c, f);
