@@ -11,11 +11,5 @@ main {
 	print r2 \n;
 	# print int_r3 \n;
 	# print float_r3 \n;
-	
-	# Comparison
-	const a := "1234";
-	const b := "12345";
-	const Fgreater := false == false;
-	print Fgreater\n;
-	
+
 }

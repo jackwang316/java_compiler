@@ -1,0 +1,19 @@
+main {
+	# Comparison
+	const a := "1234";
+	var b := "abc";
+	b := "cde";
+	# b := "abc";
+	
+	# print a\n;
+	# print b\n;
+	
+	
+	# print "1234"\n;
+	const compare := a == a;
+	
+	# const compare2 := a == c;
+	print compare\n;
+	print a;
+	# print compare2\n;
+}

@@ -124,78 +124,26 @@
         Jump         $$general-runtime-error   
         DLabel       $usable-memory-start      
         DLabel       $global-memory-block      
-        DataZ        29                        
+        DataZ        9                         
         Label        $$main                    
         PushD        $global-memory-block      
         PushI        0                         
-        Add                                    %% r
-        Label        -Operator-1-args          
-        PushI        3                         
-        PushI        1                         
-        Divide                                 
-        StoreI                                 
-        PushD        $global-memory-block      
-        PushI        4                         
-        Add                                    %% rF
-        Label        -Operator-2-args          
-        PushF        3.000000                  
-        PushF        2.500000                  
-        FDivide                                
-        StoreF                                 
-        PushD        $global-memory-block      
-        PushI        12                        
-        Add                                    %% r1
-        Label        -Operator-3-args          
-        PushI        3                         
-        PushI        1                         
-        Add                                    
-        StoreI                                 
-        PushD        $global-memory-block      
-        PushI        16                        
-        Add                                    %% r2
-        Label        -Operator-5-args          
-        Label        -Operator-4-args          
-        PushI        3                         
-        Nop                                    
-        PushI        2                         
-        Subtract                               
-        StoreI                                 
-        PushD        $global-memory-block      
-        PushI        0                         
-        Add                                    %% r
-        LoadI                                  
-        PushD        $print-format-integer     
-        Printf                                 
-        PushD        $print-format-newline     
-        Printf                                 
-        PushD        $global-memory-block      
-        PushI        4                         
-        Add                                    %% rF
-        LoadF                                  
-        PushD        $print-format-floating    
-        Printf                                 
-        PushD        $print-format-newline     
-        Printf                                 
-        PushD        $global-memory-block      
-        PushI        12                        
-        Add                                    %% r1
-        LoadI                                  
-        PushD        $print-format-integer     
-        Printf                                 
-        PushD        $print-format-newline     
-        Printf                                 
-        PushD        $global-memory-block      
-        PushI        16                        
-        Add                                    %% r2
-        LoadI                                  
-        PushD        $print-format-integer     
-        Printf                                 
-        PushD        $print-format-newline     
-        Printf                                 
-        PushD        $global-memory-block      
-        PushI        20                        
         Add                                    %% a
-        DLabel       -String-6-StringLabel     
+        DLabel       -String-1-StringLabel     
+        DataI        3                         
+        DataI        9                         
+        DataI        4                         
+        DataC        49                        %% "1234"
+        DataC        50                        
+        DataC        51                        
+        DataC        52                        
+        DataC        0                         
+        PushD        -String-1-StringLabel     
+        StoreI                                 
+        PushD        $global-memory-block      
+        PushI        4                         
+        Add                                    %% b
+        DLabel       -String-2-StringLabel     
         DataI        3                         
         DataI        9                         
         DataI        3                         
@@ -203,78 +151,66 @@
         DataC        98                        
         DataC        99                        
         DataC        0                         
-        PushD        -String-6-StringLabel     
+        PushD        -String-2-StringLabel     
         StoreI                                 
         PushD        $global-memory-block      
-        PushI        24                        
+        PushI        4                         
         Add                                    %% b
-        DLabel       -String-7-StringLabel     
+        DLabel       -String-3-StringLabel     
         DataI        3                         
         DataI        9                         
         DataI        3                         
-        DataC        97                        %% "abc"
-        DataC        98                        
-        DataC        99                        
+        DataC        99                        %% "cde"
+        DataC        100                       
+        DataC        101                       
         DataC        0                         
-        PushD        -String-7-StringLabel     
+        PushD        -String-3-StringLabel     
         StoreI                                 
         PushD        $global-memory-block      
-        PushI        20                        
-        Add                                    %% a
-        LoadC                                  
-        PushI        12                        
-        Add                                    
-        PushD        $print-format-string      
-        Printf                                 
-        PushD        $print-format-newline     
-        Printf                                 
-        PushD        $global-memory-block      
-        PushI        24                        
-        Add                                    %% b
-        LoadC                                  
-        PushI        12                        
-        Add                                    
-        PushD        $print-format-string      
-        Printf                                 
-        PushD        $print-format-newline     
-        Printf                                 
-        PushD        $global-memory-block      
-        PushI        28                        
+        PushI        8                         
         Add                                    %% compare
-        Label        -compare-8-arg1           
+        Label        -compare-4-arg1           
         PushD        $global-memory-block      
-        PushI        20                        
+        PushI        0                         
         Add                                    %% a
         LoadC                                  
-        Label        -compare-8-arg2           
+        Label        -compare-4-arg2           
         PushD        $global-memory-block      
-        PushI        24                        
-        Add                                    %% b
-        LoadC                                  
-        Label        -compare-8-sub            
-        Subtract                               
-        JumpFalse    -compare-8-true           
-        Jump         -compare-8-false          
-        Label        -compare-8-true           
-        PushI        1                         
-        Jump         -compare-8-join           
-        Label        -compare-8-false          
         PushI        0                         
-        Jump         -compare-8-join           
-        Label        -compare-8-join           
+        Add                                    %% a
+        LoadC                                  
+        Label        -compare-4-sub            
+        Subtract                               
+        JumpFalse    -compare-4-true           
+        Jump         -compare-4-false          
+        Label        -compare-4-true           
+        PushI        1                         
+        Jump         -compare-4-join           
+        Label        -compare-4-false          
+        PushI        0                         
+        Jump         -compare-4-join           
+        Label        -compare-4-join           
         StoreC                                 
         PushD        $global-memory-block      
-        PushI        28                        
+        PushI        8                         
         Add                                    %% compare
         LoadC                                  
-        JumpTrue     -print-boolean-9-true     
+        JumpTrue     -print-boolean-5-true     
         PushD        $boolean-false-string     
-        Jump         -print-boolean-9-join     
-        Label        -print-boolean-9-true     
+        Jump         -print-boolean-5-join     
+        Label        -print-boolean-5-true     
         PushD        $boolean-true-string      
-        Label        -print-boolean-9-join     
+        Label        -print-boolean-5-join     
         PushD        $print-format-boolean     
         Printf                                 
         PushD        $print-format-newline     
+        Printf                                 
+        PushD        $global-memory-block      
+        PushI        0                         
+        Add                                    %% a
+        LoadC                                  
+        PushI        12                        
+        Add                                    
+        PushD        $print-format-string      
         Printf                                 
         Halt                                   

@@ -1,6 +1,11 @@
 main {
-	var test := "yolo";
-	test := "new yolo";
-	print "hello\n" \n;
+	var test := "1234";
+	test := "3456";
+	test := "n";
+	# print "hello\n" \n;
 	print test \n;
+	print test \n;
+	print test \n;
+	print test \n;
+	# print newString \n;
 }

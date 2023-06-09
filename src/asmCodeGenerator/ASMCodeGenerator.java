@@ -393,7 +393,7 @@ public class ASMCodeGenerator {
 						break;
 				}
 			}
-			else if (first_type == BOOLEAN) {
+			else if (first_type == BOOLEAN || first_type == STRING) {
 				code.add(Subtract);
 				switch (operator) {
 					case EQUAL:
@@ -406,18 +406,21 @@ public class ASMCodeGenerator {
 						break;
 				}
 			}
-			else if (first_type == STRING) {
-				code.add(Subtract);
-				switch (operator) {
-					case EQUAL:
-						code.add(JumpFalse, trueLabel);
-						code.add(Jump, falseLabel);
-						break;
-					case NOT_EQUAL:
-						code.add(JumpTrue, trueLabel);
-						code.add(Jump, falseLabel);
-						break;
-				}
+			// else if (first_type == STRING) {
+			// 	code.add(Subtract);
+			// 	switch (operator) {
+			// 		case EQUAL:
+			// 			code.add(JumpFalse, trueLabel);
+			// 			code.add(Jump, falseLabel);
+			// 			break;
+			// 		case NOT_EQUAL:
+			// 			code.add(JumpTrue, trueLabel);
+			// 			code.add(Jump, falseLabel);
+			// 			break;
+			// 	}
+			// }
+			else {
+				System.out.println("Unimplemented type!");
 			}
 			
 			code.add(Label, trueLabel);

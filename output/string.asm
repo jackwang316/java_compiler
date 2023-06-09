@@ -133,10 +133,10 @@
         DataI        3                         
         DataI        9                         
         DataI        4                         
-        DataC        121                       %% "yolo"
-        DataC        111                       
-        DataC        108                       
-        DataC        111                       
+        DataC        49                        %% "1234"
+        DataC        50                        
+        DataC        51                        
+        DataC        52                        
         DataC        0                         
         PushD        -String-1-StringLabel     
         StoreI                                 
@@ -146,31 +146,49 @@
         DLabel       -String-2-StringLabel     
         DataI        3                         
         DataI        9                         
-        DataI        8                         
-        DataC        110                       %% "new yolo"
-        DataC        101                       
-        DataC        119                       
-        DataC        32                        
-        DataC        121                       
-        DataC        111                       
-        DataC        108                       
-        DataC        111                       
+        DataI        4                         
+        DataC        51                        %% "3456"
+        DataC        52                        
+        DataC        53                        
+        DataC        54                        
         DataC        0                         
         PushD        -String-2-StringLabel     
         StoreI                                 
+        PushD        $global-memory-block      
+        PushI        0                         
+        Add                                    %% test
         DLabel       -String-3-StringLabel     
         DataI        3                         
         DataI        9                         
-        DataI        7                         
-        DataC        104                       %% "hello\n"
-        DataC        101                       
-        DataC        108                       
-        DataC        108                       
-        DataC        111                       
-        DataC        92                        
-        DataC        110                       
+        DataI        1                         
+        DataC        110                       %% "n"
         DataC        0                         
         PushD        -String-3-StringLabel     
+        StoreI                                 
+        PushD        $global-memory-block      
+        PushI        0                         
+        Add                                    %% test
+        LoadC                                  
+        PushI        12                        
+        Add                                    
+        PushD        $print-format-string      
+        Printf                                 
+        PushD        $print-format-newline     
+        Printf                                 
+        PushD        $global-memory-block      
+        PushI        0                         
+        Add                                    %% test
+        LoadC                                  
+        PushI        12                        
+        Add                                    
+        PushD        $print-format-string      
+        Printf                                 
+        PushD        $print-format-newline     
+        Printf                                 
+        PushD        $global-memory-block      
+        PushI        0                         
+        Add                                    %% test
+        LoadC                                  
         PushI        12                        
         Add                                    
         PushD        $print-format-string      
