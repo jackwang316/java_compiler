@@ -264,12 +264,12 @@ public class Parser {
 		}
 		
 		ParseNode left = parseAdditiveExpression();
-		if(nowReading.isLextant(Punctuator.COMPARISION)) {
+		while(nowReading.isLextant(Punctuator.COMPARISION)) {
 			Token compareToken = nowReading;
 			readToken();
 			ParseNode right = parseAdditiveExpression();
 			
-			return OperatorNode.withChildren(compareToken, left, right);
+			left = OperatorNode.withChildren(compareToken, left, right);
 		}
 		return left;
 

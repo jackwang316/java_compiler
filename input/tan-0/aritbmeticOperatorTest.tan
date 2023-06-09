@@ -1,5 +1,5 @@
 main {
-	const r := 3 * 1;
+	const r := 3 + 1;
 	const rF := 3.0 * 2.5;
 	const r1 := 3 + 1;
 	const r2 := -3 - 2;

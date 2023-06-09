@@ -10,7 +10,7 @@ main {
 	
 	
 	# print "1234"\n;
-	const compare := a == a;
+	const compare := a == "1234";
 	
 	# const compare2 := a == c;
 	print compare\n;

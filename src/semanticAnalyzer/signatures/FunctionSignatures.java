@@ -89,8 +89,8 @@ public class FunctionSignatures extends ArrayList<FunctionSignature> {
 				new FunctionSignature(new FloatingDivideCodeGenerator(), FLOATING, FLOATING, FLOATING)
 		);
 		new FunctionSignatures(Punctuator.MULTIPLY,
-				new FunctionSignature(ASMOpcode.Divide, INTEGER, INTEGER, INTEGER),
-				new FunctionSignature(ASMOpcode.FDivide, FLOATING, FLOATING, FLOATING)
+				new FunctionSignature(ASMOpcode.Multiply, INTEGER, INTEGER, INTEGER),
+				new FunctionSignature(ASMOpcode.FMultiply, FLOATING, FLOATING, FLOATING)
 		);
 		new FunctionSignatures(Punctuator.GREATER,
 				new FunctionSignature(ASMOpcode.Divide, INTEGER, INTEGER, BOOLEAN),
