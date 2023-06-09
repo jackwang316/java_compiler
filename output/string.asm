@@ -159,27 +159,4 @@
         Printf                                 
         PushD        $print-format-newline     
         Printf                                 
-        DLabel       -String-4-StringLabel     
-        DataI        3                         
-        DataI        9                         
-        DataI        11                        
-        DataC        72                        %% "Hello there"
-        DataC        101                       
-        DataC        108                       
-        DataC        108                       
-        DataC        111                       
-        DataC        32                        
-        DataC        116                       
-        DataC        104                       
-        DataC        101                       
-        DataC        114                       
-        DataC        101                       
-        DataC        0                         
-        PushD        -String-4-StringLabel     
-        PushI        12                        
-        Add                                    
-        PushD        $print-format-string      
-        Printf                                 
-        PushD        $print-format-newline     
-        Printf                                 
         Halt                                   

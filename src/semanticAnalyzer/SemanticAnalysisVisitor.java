@@ -5,8 +5,6 @@ import java.util.List;
 
 import lexicalAnalyzer.Keyword;
 import lexicalAnalyzer.Lextant;
-import java.util.ArrayList;
-import lexicalAnalyzer.Punctuator;
 import logging.TanLogger;
 import parseTree.ParseNode;
 import parseTree.ParseNodeVisitor;
@@ -25,7 +23,6 @@ import parseTree.nodeTypes.PrintStatementNode;
 import parseTree.nodeTypes.ProgramNode;
 import parseTree.nodeTypes.SpaceNode;
 import parseTree.nodeTypes.TabSpaceNode;
-import parseTree.nodeTypes.TypeNode;
 import parseTree.nodeTypes.StringConstantNode;
 import semanticAnalyzer.signatures.FunctionSignature;
 import semanticAnalyzer.signatures.FunctionSignatures;
@@ -122,20 +119,7 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 		}
 		node.setType(expressionType);
 	}
-	
-	@Override
-	public void visitLeave(TypeNode node) {
-			ArrayList<Type> types = new ArrayList<>();
-			types.add(node.getType());
-			types.add(node.child(0).getType());
-			FunctionSignature signature = FunctionSignatures.signature(Punctuator.CAST, types);
-			if(signature.resultType().equals(PrimitiveType.ERROR)) {
-				node.setType(PrimitiveType.ERROR);
-				return;
-			}
-			node.setType(signature.resultType());
-			node.setSignature(signature);
-	}
+
 	///////////////////////////////////////////////////////////////////////////
 	// expressions
 	@Override
@@ -219,7 +203,6 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 		}
 		// else parent DeclarationNode does the processing.
 	}
-	
 	private boolean isBeingDeclared(IdentifierNode node) {
 		ParseNode parent = node.getParent();
 		return (parent instanceof DeclarationNode) && (node == parent.child(0));
