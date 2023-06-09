@@ -96,153 +96,81 @@
         Jump         $$general-runtime-error   
         DLabel       $usable-memory-start      
         DLabel       $global-memory-block      
-        DataZ        21                        
+        DataZ        4                         
         Label        $$main                    
         PushD        $global-memory-block      
         PushI        0                         
         Add                                    %% test
+        PushI        0                         
+        JumpTrue     -int-to-boolean-cast-1-true 
+        Jump         -int-to-boolean-cast-1-false 
+        Label        -int-to-boolean-cast-1-true 
+        PushI        1                         
+        Jump         -int-to-boolean-cast-1-join 
+        Label        -int-to-boolean-cast-1-false 
+        PushI        0                         
+        Jump         -int-to-boolean-cast-1-join 
+        Label        -int-to-boolean-cast-1-join 
+        StoreC                                 
+        PushD        $global-memory-block      
+        PushI        1                         
+        Add                                    %% test2
+        PushI        1                         
+        JumpTrue     -int-to-boolean-cast-2-true 
+        Jump         -int-to-boolean-cast-2-false 
+        Label        -int-to-boolean-cast-2-true 
+        PushI        1                         
+        Jump         -int-to-boolean-cast-2-join 
+        Label        -int-to-boolean-cast-2-false 
+        PushI        0                         
+        Jump         -int-to-boolean-cast-2-join 
+        Label        -int-to-boolean-cast-2-join 
+        StoreC                                 
+        PushD        $global-memory-block      
+        PushI        2                         
+        Add                                    %% test3
+        PushI        0                         
+        JumpTrue     -char-to-boolean-cast-3-true 
+        Jump         -char-to-boolean-cast-3-false 
+        Label        -char-to-boolean-cast-3-true 
+        PushI        1                         
+        Jump         -char-to-boolean-cast-3-join 
+        Label        -char-to-boolean-cast-3-false 
+        PushI        0                         
+        Jump         -char-to-boolean-cast-3-join 
+        Label        -char-to-boolean-cast-3-join 
+        StoreC                                 
+        PushD        $global-memory-block      
+        PushI        3                         
+        Add                                    %% test4
         PushI        99                        
-        Nop                                    
-        StoreI                                 
+        JumpTrue     -char-to-boolean-cast-4-true 
+        Jump         -char-to-boolean-cast-4-false 
+        Label        -char-to-boolean-cast-4-true 
+        PushI        1                         
+        Jump         -char-to-boolean-cast-4-join 
+        Label        -char-to-boolean-cast-4-false 
+        PushI        0                         
+        Jump         -char-to-boolean-cast-4-join 
+        Label        -char-to-boolean-cast-4-join 
+        StoreC                                 
         PushD        $global-memory-block      
         PushI        0                         
         Add                                    %% test
-        LoadI                                  
-        PushD        $print-format-integer     
-        Printf                                 
-        PushD        $print-format-newline     
-        Printf                                 
-        PushD        $global-memory-block      
-        PushI        4                         
-        Add                                    %% test2
-        PushI        120                       
-        PushI        127                       
-        BTAnd                                  
-        StoreC                                 
-        PushD        $global-memory-block      
-        PushI        4                         
-        Add                                    %% test2
         LoadC                                  
-        PushD        $print-format-character   
-        Printf                                 
-        PushD        $print-format-newline     
-        Printf                                 
-        PushD        $global-memory-block      
-        PushI        5                         
-        Add                                    %% test6
-        PushI        777                       
-        PushI        127                       
-        BTAnd                                  
-        StoreC                                 
-        PushD        $global-memory-block      
-        PushI        5                         
-        Add                                    %% test6
-        LoadC                                  
-        PushD        $print-format-character   
-        Printf                                 
-        PushD        $print-format-newline     
-        Printf                                 
-        PushD        $global-memory-block      
-        PushI        6                         
-        Add                                    %% test7
-        PushI        99                        
-        JumpTrue     -char-to-boolean-cast-1-true 
-        Jump         -char-to-boolean-cast-1-false 
-        Label        -char-to-boolean-cast-1-true 
-        PushI        1                         
-        Jump         -char-to-boolean-cast-1-join 
-        Label        -char-to-boolean-cast-1-false 
-        PushI        0                         
-        Jump         -char-to-boolean-cast-1-join 
-        Label        -char-to-boolean-cast-1-join 
-        StoreC                                 
-        PushD        $global-memory-block      
-        PushI        6                         
-        Add                                    %% test7
-        LoadC                                  
-        JumpTrue     -print-boolean-2-true     
+        JumpTrue     -print-boolean-5-true     
         PushD        $boolean-false-string     
-        Jump         -print-boolean-2-join     
-        Label        -print-boolean-2-true     
+        Jump         -print-boolean-5-join     
+        Label        -print-boolean-5-true     
         PushD        $boolean-true-string      
-        Label        -print-boolean-2-join     
+        Label        -print-boolean-5-join     
         PushD        $print-format-boolean     
         Printf                                 
         PushD        $print-format-newline     
         Printf                                 
         PushD        $global-memory-block      
-        PushI        7                         
-        Add                                    %% test8
-        PushI        4                         
-        JumpTrue     -int-to-boolean-cast-3-true 
-        Jump         -int-to-boolean-cast-3-false 
-        Label        -int-to-boolean-cast-3-true 
         PushI        1                         
-        Jump         -int-to-boolean-cast-3-join 
-        Label        -int-to-boolean-cast-3-false 
-        PushI        0                         
-        Jump         -int-to-boolean-cast-3-join 
-        Label        -int-to-boolean-cast-3-join 
-        StoreC                                 
-        PushD        $global-memory-block      
-        PushI        7                         
-        Add                                    %% test8
-        LoadC                                  
-        JumpTrue     -print-boolean-4-true     
-        PushD        $boolean-false-string     
-        Jump         -print-boolean-4-join     
-        Label        -print-boolean-4-true     
-        PushD        $boolean-true-string      
-        Label        -print-boolean-4-join     
-        PushD        $print-format-boolean     
-        Printf                                 
-        PushD        $print-format-newline     
-        Printf                                 
-        PushD        $global-memory-block      
-        PushI        8                         
-        Add                                    %% test4
-        PushI        4                         
-        ConvertF                               
-        StoreF                                 
-        PushD        $global-memory-block      
-        PushI        8                         
-        Add                                    %% test4
-        LoadF                                  
-        PushD        $print-format-floating    
-        Printf                                 
-        PushD        $print-format-newline     
-        Printf                                 
-        PushD        $global-memory-block      
-        PushI        16                        
-        Add                                    %% test5
-        PushF        3.330000                  
-        ConvertI                               
-        StoreI                                 
-        PushD        $global-memory-block      
-        PushI        16                        
-        Add                                    %% test5
-        LoadI                                  
-        PushD        $print-format-integer     
-        Printf                                 
-        PushD        $print-format-newline     
-        Printf                                 
-        PushD        $global-memory-block      
-        PushI        20                        
-        Add                                    %% test9
-        PushI        0                         
-        JumpTrue     -int-to-boolean-cast-5-true 
-        Jump         -int-to-boolean-cast-5-false 
-        Label        -int-to-boolean-cast-5-true 
-        PushI        1                         
-        Jump         -int-to-boolean-cast-5-join 
-        Label        -int-to-boolean-cast-5-false 
-        PushI        0                         
-        Jump         -int-to-boolean-cast-5-join 
-        Label        -int-to-boolean-cast-5-join 
-        StoreC                                 
-        PushD        $global-memory-block      
-        PushI        20                        
-        Add                                    %% test9
+        Add                                    %% test2
         LoadC                                  
         JumpTrue     -print-boolean-6-true     
         PushD        $boolean-false-string     
@@ -250,6 +178,34 @@
         Label        -print-boolean-6-true     
         PushD        $boolean-true-string      
         Label        -print-boolean-6-join     
+        PushD        $print-format-boolean     
+        Printf                                 
+        PushD        $print-format-newline     
+        Printf                                 
+        PushD        $global-memory-block      
+        PushI        2                         
+        Add                                    %% test3
+        LoadC                                  
+        JumpTrue     -print-boolean-7-true     
+        PushD        $boolean-false-string     
+        Jump         -print-boolean-7-join     
+        Label        -print-boolean-7-true     
+        PushD        $boolean-true-string      
+        Label        -print-boolean-7-join     
+        PushD        $print-format-boolean     
+        Printf                                 
+        PushD        $print-format-newline     
+        Printf                                 
+        PushD        $global-memory-block      
+        PushI        3                         
+        Add                                    %% test4
+        LoadC                                  
+        JumpTrue     -print-boolean-8-true     
+        PushD        $boolean-false-string     
+        Jump         -print-boolean-8-join     
+        Label        -print-boolean-8-true     
+        PushD        $boolean-true-string      
+        Label        -print-boolean-8-join     
         PushD        $print-format-boolean     
         Printf                                 
         PushD        $print-format-newline     

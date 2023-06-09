@@ -17,6 +17,7 @@ public class CharToBoolCodeGenerator implements SimpleCodeGenerator{
 		String isFalseLabel = label.newLabel("false");
 		String join  = label.newLabel("join");
 
+
 		frag.add(ASMOpcode.JumpTrue, isTrueLabel);
 		frag.add(ASMOpcode.Jump, isFalseLabel);
 
