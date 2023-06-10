@@ -9,9 +9,9 @@ import logging.TanLogger;
 import parseTree.ParseNode;
 import parseTree.ParseNodeVisitor;
 import parseTree.nodeTypes.AssignmentStatementNode;
+import parseTree.nodeTypes.BlockStatementNode;
 import parseTree.nodeTypes.BooleanConstantNode;
 import parseTree.nodeTypes.CharacterConstantNode;
-import parseTree.nodeTypes.MainBlockNode;
 import parseTree.nodeTypes.DeclarationNode;
 import parseTree.nodeTypes.ErrorNode;
 import parseTree.nodeTypes.FloatingConstantNode;
@@ -49,9 +49,11 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 	public void visitLeave(ProgramNode node) {
 		leaveScope(node);
 	}
-	public void visitEnter(MainBlockNode node) {
+	public void visitEnter(BlockStatementNode node) {
+		enterSubscope(node);
 	}
-	public void visitLeave(MainBlockNode node) {
+	public void visitLeave(BlockStatementNode node) {
+		leaveScope(node);
 	}
 	
 	
@@ -61,7 +63,6 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 		Scope scope = Scope.createProgramScope();
 		node.setScope(scope);
 	}	
-	@SuppressWarnings("unused")
 	private void enterSubscope(ParseNode node) {
 		Scope baseScope = node.getLocalScope();
 		Scope scope = baseScope.createSubscope();

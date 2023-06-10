@@ -1,11 +1,9 @@
 main {
-	var test := "1234";
-	test := "3456";
-	test := "n";
-	# print "hello\n" \n;
+	var test := 1234;
+	{
+		var innerScope := "I am inner var";
+		print innerScope;
+	}
+	# print innerScope;
 	print test \n;
-	print test \n;
-	print test \n;
-	print test \n;
-	# print newString \n;
 }

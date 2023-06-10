@@ -13,9 +13,9 @@ import lexicalAnalyzer.Lextant;
 import lexicalAnalyzer.Punctuator;
 import parseTree.*;
 import parseTree.nodeTypes.AssignmentStatementNode;
+import parseTree.nodeTypes.BlockStatementNode;
 import parseTree.nodeTypes.BooleanConstantNode;
 import parseTree.nodeTypes.CharacterConstantNode;
-import parseTree.nodeTypes.MainBlockNode;
 import parseTree.nodeTypes.DeclarationNode;
 import parseTree.nodeTypes.FloatingConstantNode;
 import parseTree.nodeTypes.IdentifierNode;
@@ -184,7 +184,7 @@ public class ASMCodeGenerator {
 				code.append(childCode);
 			}
 		}
-		public void visitLeave(MainBlockNode node) {
+		public void visitLeave(BlockStatementNode node) {
 			newVoidCode(node);
 			for(ParseNode child : node.getChildren()) {
 				ASMCodeFragment childCode = removeVoidCode(child);
@@ -406,19 +406,6 @@ public class ASMCodeGenerator {
 						break;
 				}
 			}
-			// else if (first_type == STRING) {
-			// 	code.add(Subtract);
-			// 	switch (operator) {
-			// 		case EQUAL:
-			// 			code.add(JumpFalse, trueLabel);
-			// 			code.add(Jump, falseLabel);
-			// 			break;
-			// 		case NOT_EQUAL:
-			// 			code.add(JumpTrue, trueLabel);
-			// 			code.add(Jump, falseLabel);
-			// 			break;
-			// 	}
-			// }
 			else {
 				System.out.println("Unimplemented type!");
 			}

@@ -5,9 +5,9 @@ import java.util.Arrays;
 import logging.TanLogger;
 import parseTree.*;
 import parseTree.nodeTypes.AssignmentStatementNode;
+import parseTree.nodeTypes.BlockStatementNode;
 import parseTree.nodeTypes.BooleanConstantNode;
 import parseTree.nodeTypes.CharacterConstantNode;
-import parseTree.nodeTypes.MainBlockNode;
 import parseTree.nodeTypes.DeclarationNode;
 import parseTree.nodeTypes.ErrorNode;
 import parseTree.nodeTypes.FloatingConstantNode;
@@ -57,7 +57,7 @@ public class Parser {
 		ParseNode program = new ProgramNode(nowReading);
 		
 		expect(Keyword.MAIN);
-		ParseNode mainBlock = parseMainBlock();
+		ParseNode mainBlock = parseBlockStatements();
 		program.appendChild(mainBlock);
 		
 		if(!(nowReading instanceof NullToken)) {
@@ -72,14 +72,12 @@ public class Parser {
 	
 	
 	///////////////////////////////////////////////////////////
-	// mainBlock
-	
-	// mainBlock -> { statement* }
-	private ParseNode parseMainBlock() {
-		if(!startsMainBlock(nowReading)) {
+	// mainBlock and subBlock
+	private ParseNode parseBlockStatements() {
+		if(!startsBlockStatements(nowReading)) {
 			return syntaxErrorNode("mainBlock");
 		}
-		ParseNode mainBlock = new MainBlockNode(nowReading);
+		ParseNode mainBlock = new BlockStatementNode(nowReading);
 		expect(Punctuator.OPEN_BRACE);
 		
 		while(startsStatement(nowReading)) {
@@ -89,7 +87,8 @@ public class Parser {
 		expect(Punctuator.CLOSE_BRACE);
 		return mainBlock;
 	}
-	private boolean startsMainBlock(Token token) {
+
+	private boolean startsBlockStatements(Token token) {
 		return token.isLextant(Punctuator.OPEN_BRACE);
 	}
 	
@@ -111,13 +110,17 @@ public class Parser {
 		if(startsPrintStatement(nowReading)) {
 			return parsePrintStatement();
 		}
+		if(startsBlockStatements(nowReading)){
+			return parseBlockStatements();
+		}
 		return syntaxErrorNode("statement");
 	}
 	
 	private boolean startsStatement(Token token) {
 		return startsPrintStatement(token) ||
 			   startsMutation(token) ||
-			   startsDeclaration(token);
+			   startsDeclaration(token) ||
+			   startsBlockStatements(token);
 	}
 	
 
