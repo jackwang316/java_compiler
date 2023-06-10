@@ -12,8 +12,13 @@ public enum Keyword implements Lextant {
 	TRUE("true"),
 	FALSE("false"),
 	MAIN("main"),
+	INT("int"),
+	FLOAT("float"),
+	CHAR("char"),
+	BOOL("bool"),
+	STRING("string"),
 	NULL_KEYWORD("");
-
+	
 	private String lexeme;
 	private Token prototype;
 	
@@ -27,6 +32,12 @@ public enum Keyword implements Lextant {
 	}
 	public Token prototype() {
 		return prototype;
+	}
+	
+	public static boolean isCastType(String lexeme) {
+		return lexeme.equals(INT.lexeme) || lexeme.equals(FLOAT.lexeme) 
+				|| lexeme.equals(CHAR.lexeme) || lexeme.equals(STRING.lexeme) 
+				|| lexeme.equals(BOOL.lexeme);
 	}
 	
 	public static Keyword forLexeme(String lexeme) {
