@@ -1,10 +1,14 @@
 package asmCodeGenerator;
 
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.ArrayList;
 
 import asmCodeGenerator.codeStorage.ASMCodeFragment;
 import asmCodeGenerator.codeStorage.ASMOpcode;
+import asmCodeGenerator.operators.SimpleCodeGenerator;
 import asmCodeGenerator.runtime.RunTime;
 import lexicalAnalyzer.Lextant;
 import lexicalAnalyzer.Punctuator;
@@ -23,6 +27,7 @@ import parseTree.nodeTypes.PrintStatementNode;
 import parseTree.nodeTypes.ProgramNode;
 import parseTree.nodeTypes.SpaceNode;
 import parseTree.nodeTypes.TabSpaceNode;
+import parseTree.nodeTypes.TypeNode;
 import parseTree.nodeTypes.StringConstantNode;
 import semanticAnalyzer.types.PrimitiveType;
 import semanticAnalyzer.types.Type;
@@ -265,8 +270,29 @@ public class ASMCodeGenerator {
 			else if(operator == Punctuator.GREATER) {
 				visitComparisonOperatorNode(node, operator);
 			}
-			else {
-				visitNormalBinaryOperatorNode(node);
+			
+		}
+		private List<ASMCodeFragment> childValueCode(OperatorNode node){
+			List<ASMCodeFragment> result = new ArrayList<>();
+			for (ParseNode child: node.getChildren()) {
+				result.add(removeValueCode(child));
+			}
+			return result;
+		}
+		
+		public void visitLeave(TypeNode node) {
+			newValueCode(node);
+			ASMCodeFragment arg = removeValueCode(node.child(0));
+			code.append(arg);
+			Object variant = node.getSignature().getVariant();
+			if(variant instanceof ASMOpcode) {
+				ASMOpcode opcode = (ASMOpcode) variant;
+				code.add(opcode);
+			}
+			else if(variant instanceof SimpleCodeGenerator) {
+				SimpleCodeGenerator generator = (SimpleCodeGenerator) variant;
+				ASMCodeFragment fragment = generator.generate(node, Collections.singletonList(arg));
+				code.append(fragment);
 			}
 		}
 		private void visitComparisonOperatorNode(OperatorNode node,
