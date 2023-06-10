@@ -1,0 +1,18 @@
+main {
+	var test := <int> ('c');
+	print test \n;
+	var test2 := <char> (120);
+	print test2 \n;
+	var test6 := <char> (777);
+	print test6 \n;
+	var test7 := <bool> ('c');
+	print test7 \n;
+	var test8 := <bool> (4);
+	print test8 \n;
+	var test4 := <float> (4);
+	print test4 \n;
+	var test5 := <int> (3.33);
+	print test5 \n;
+	var test9 := <bool> (0);
+	print test9 \n;
+}
