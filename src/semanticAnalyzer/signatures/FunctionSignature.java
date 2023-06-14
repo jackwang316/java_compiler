@@ -1,9 +1,12 @@
 package semanticAnalyzer.signatures;
 
+
+import java.util.ArrayList;
 import java.util.List;
 
 import semanticAnalyzer.types.PrimitiveType;
 import semanticAnalyzer.types.Type;
+import semanticAnalyzer.types.TypeVariable;
 import lexicalAnalyzer.Lextant;
 import lexicalAnalyzer.Punctuator;
 
@@ -13,16 +16,24 @@ public class FunctionSignature {
 	private Type resultType;
 	private Type[] paramTypes;
 	Object whichVariant;
-	
+	private List<TypeVariable> typeVariables;
 	
 	///////////////////////////////////////////////////////////////
 	// construction
 	
-	public FunctionSignature(Object whichVariant, Type ...types) {
-		assert(types.length >= 1);
+	public FunctionSignature(Object whichVariant, Type... types) {
+		assert (types.length >= 1);
 		storeParamTypes(types);
-		resultType = types[types.length-1];
+		resultType = types[types.length - 1];
 		this.whichVariant = whichVariant;
+		findTypeVariables();
+	}
+	private void findTypeVariables() {
+		typeVariables = new ArrayList<TypeVariable>();
+		for (Type type : paramTypes) {
+			type.addTypeVariables(typeVariables);
+		}
+		resultType.addTypeVariables(typeVariables);
 	}
 	private void storeParamTypes(Type[] types) {
 		paramTypes = new Type[types.length-1];
@@ -56,7 +67,7 @@ public class FunctionSignature {
 		if(types.size() != paramTypes.length) {
 			return false;
 		}
-		
+		resetTypeVariables();
 		for(int i=0; i<paramTypes.length; i++) {
 			if(!assignableTo(paramTypes[i], types.get(i))) {
 				return false;
@@ -64,11 +75,19 @@ public class FunctionSignature {
 		}		
 		return true;
 	}
+
 	private boolean assignableTo(Type variableType, Type valueType) {
-		if(valueType == PrimitiveType.ERROR && ALL_TYPES_ACCEPT_ERROR_TYPES) {
+		if (valueType == PrimitiveType.ERROR && ALL_TYPES_ACCEPT_ERROR_TYPES) {
 			return true;
-		}	
+		}
 		return variableType.equals(valueType);
+	}
+	private void resetTypeVariables(){
+		for(TypeVariable variable : typeVariables) {
+			// TODO: reset the type variable
+			// Not too sure
+			variable.reset();
+		}
 	}
 	
 	// Null object pattern

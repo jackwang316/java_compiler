@@ -1,5 +1,7 @@
 package semanticAnalyzer.types;
 
+import java.util.List;
+
 import lexicalAnalyzer.Keyword;
 
 public enum PrimitiveType implements Type {
@@ -30,23 +32,27 @@ public enum PrimitiveType implements Type {
 	}
 	
 	public static Type parseType(String type) {
-		if(type.equals(Keyword.FLOAT.getLexeme())) {
+		if (type.equals(Keyword.FLOAT.getLexeme())) {
 			return PrimitiveType.FLOATING;
-		}
-		else if(type.equals(Keyword.INT.getLexeme())) {
+		} else if (type.equals(Keyword.INT.getLexeme())) {
 			return PrimitiveType.INTEGER;
-		}
-		else if(type.equals(Keyword.CHAR.getLexeme())) {
+		} else if (type.equals(Keyword.CHAR.getLexeme())) {
 			return PrimitiveType.CHARACTER;
-		}
-		else if(type.equals(Keyword.STRING.getLexeme())) {
+		} else if (type.equals(Keyword.STRING.getLexeme())) {
 			return PrimitiveType.STRING;
-		}
-		else if(type.equals(Keyword.BOOL.getLexeme())) {
+		} else if (type.equals(Keyword.BOOL.getLexeme())) {
 			return PrimitiveType.BOOLEAN;
-		}
-		else {
+		} else {
 			return PrimitiveType.ERROR;
 		}
+	}
+	
+	@Override
+	public boolean equivalent(Type otherType) {
+		return this == otherType;
+	}
+	@Override
+	public void addTypeVariables(List<TypeVariable> typeVariables) {
+		return;
 	}
 }

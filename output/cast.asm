@@ -94,75 +94,19 @@
         Label        $$i-divide-by-zero        
         PushD        $errors-int-divide-by-zero 
         Jump         $$general-runtime-error   
-        DLabel       $errors-float-divide-by-zero 
-        DataC        102                       %% "floating divide by zero"
-        DataC        108                       
-        DataC        111                       
-        DataC        97                        
-        DataC        116                       
-        DataC        105                       
-        DataC        110                       
-        DataC        103                       
-        DataC        32                        
-        DataC        100                       
-        DataC        105                       
-        DataC        118                       
-        DataC        105                       
-        DataC        100                       
-        DataC        101                       
-        DataC        32                        
-        DataC        98                        
-        DataC        121                       
-        DataC        32                        
-        DataC        122                       
-        DataC        101                       
-        DataC        114                       
-        DataC        111                       
-        DataC        0                         
-        Label        $$f-divide-by-zero        
-        PushD        $errors-float-divide-by-zero 
-        Jump         $$general-runtime-error   
         DLabel       $usable-memory-start      
         DLabel       $global-memory-block      
-        DataZ        20                        
+        DataZ        21                        
         Label        $$main                    
         PushD        $global-memory-block      
         PushI        0                         
-        Add                                    %% r
-        Label        -Operator-1-args          
-        PushI        3                         
-        PushI        1                         
-        Add                                    
-        StoreI                                 
-        PushD        $global-memory-block      
-        PushI        4                         
-        Add                                    %% rF
-        Label        -Operator-2-args          
-        PushF        3.000000                  
-        PushF        2.500000                  
-        FMultiply                              
-        StoreF                                 
-        PushD        $global-memory-block      
-        PushI        12                        
-        Add                                    %% r1
-        Label        -Operator-3-args          
-        PushI        3                         
-        PushI        1                         
-        Add                                    
-        StoreI                                 
-        PushD        $global-memory-block      
-        PushI        16                        
-        Add                                    %% r2
-        Label        -Operator-5-args          
-        Label        -Operator-4-args          
-        PushI        3                         
+        Add                                    %% test
+        PushI        99                        
         Nop                                    
-        PushI        2                         
-        Subtract                               
         StoreI                                 
         PushD        $global-memory-block      
         PushI        0                         
-        Add                                    %% r
+        Add                                    %% test
         LoadI                                  
         PushD        $print-format-integer     
         Printf                                 
@@ -170,25 +114,143 @@
         Printf                                 
         PushD        $global-memory-block      
         PushI        4                         
-        Add                                    %% rF
+        Add                                    %% test2
+        PushI        120                       
+        PushI        127                       
+        BTAnd                                  
+        StoreC                                 
+        PushD        $global-memory-block      
+        PushI        4                         
+        Add                                    %% test2
+        LoadC                                  
+        PushD        $print-format-character   
+        Printf                                 
+        PushD        $print-format-newline     
+        Printf                                 
+        PushD        $global-memory-block      
+        PushI        5                         
+        Add                                    %% test6
+        PushI        777                       
+        PushI        127                       
+        BTAnd                                  
+        StoreC                                 
+        PushD        $global-memory-block      
+        PushI        5                         
+        Add                                    %% test6
+        LoadC                                  
+        PushD        $print-format-character   
+        Printf                                 
+        PushD        $print-format-newline     
+        Printf                                 
+        PushD        $global-memory-block      
+        PushI        6                         
+        Add                                    %% test7
+        PushI        99                        
+        JumpTrue     -char-to-boolean-cast-1-true 
+        Jump         -char-to-boolean-cast-1-false 
+        Label        -char-to-boolean-cast-1-true 
+        PushI        1                         
+        Jump         -char-to-boolean-cast-1-join 
+        Label        -char-to-boolean-cast-1-false 
+        PushI        0                         
+        Jump         -char-to-boolean-cast-1-join 
+        Label        -char-to-boolean-cast-1-join 
+        StoreC                                 
+        PushD        $global-memory-block      
+        PushI        6                         
+        Add                                    %% test7
+        LoadC                                  
+        JumpTrue     -print-boolean-2-true     
+        PushD        $boolean-false-string     
+        Jump         -print-boolean-2-join     
+        Label        -print-boolean-2-true     
+        PushD        $boolean-true-string      
+        Label        -print-boolean-2-join     
+        PushD        $print-format-boolean     
+        Printf                                 
+        PushD        $print-format-newline     
+        Printf                                 
+        PushD        $global-memory-block      
+        PushI        7                         
+        Add                                    %% test8
+        PushI        4                         
+        JumpTrue     -int-to-boolean-cast-3-true 
+        Jump         -int-to-boolean-cast-3-false 
+        Label        -int-to-boolean-cast-3-true 
+        PushI        1                         
+        Jump         -int-to-boolean-cast-3-join 
+        Label        -int-to-boolean-cast-3-false 
+        PushI        0                         
+        Jump         -int-to-boolean-cast-3-join 
+        Label        -int-to-boolean-cast-3-join 
+        StoreC                                 
+        PushD        $global-memory-block      
+        PushI        7                         
+        Add                                    %% test8
+        LoadC                                  
+        JumpTrue     -print-boolean-4-true     
+        PushD        $boolean-false-string     
+        Jump         -print-boolean-4-join     
+        Label        -print-boolean-4-true     
+        PushD        $boolean-true-string      
+        Label        -print-boolean-4-join     
+        PushD        $print-format-boolean     
+        Printf                                 
+        PushD        $print-format-newline     
+        Printf                                 
+        PushD        $global-memory-block      
+        PushI        8                         
+        Add                                    %% test4
+        PushI        4                         
+        ConvertF                               
+        StoreF                                 
+        PushD        $global-memory-block      
+        PushI        8                         
+        Add                                    %% test4
         LoadF                                  
         PushD        $print-format-floating    
         Printf                                 
         PushD        $print-format-newline     
         Printf                                 
         PushD        $global-memory-block      
-        PushI        12                        
-        Add                                    %% r1
+        PushI        16                        
+        Add                                    %% test5
+        PushF        3.330000                  
+        ConvertI                               
+        StoreI                                 
+        PushD        $global-memory-block      
+        PushI        16                        
+        Add                                    %% test5
         LoadI                                  
         PushD        $print-format-integer     
         Printf                                 
         PushD        $print-format-newline     
         Printf                                 
         PushD        $global-memory-block      
-        PushI        16                        
-        Add                                    %% r2
-        LoadI                                  
-        PushD        $print-format-integer     
+        PushI        20                        
+        Add                                    %% test9
+        PushI        0                         
+        JumpTrue     -int-to-boolean-cast-5-true 
+        Jump         -int-to-boolean-cast-5-false 
+        Label        -int-to-boolean-cast-5-true 
+        PushI        1                         
+        Jump         -int-to-boolean-cast-5-join 
+        Label        -int-to-boolean-cast-5-false 
+        PushI        0                         
+        Jump         -int-to-boolean-cast-5-join 
+        Label        -int-to-boolean-cast-5-join 
+        StoreC                                 
+        PushD        $global-memory-block      
+        PushI        20                        
+        Add                                    %% test9
+        LoadC                                  
+        JumpTrue     -print-boolean-6-true     
+        PushD        $boolean-false-string     
+        Jump         -print-boolean-6-join     
+        Label        -print-boolean-6-true     
+        PushD        $boolean-true-string      
+        Label        -print-boolean-6-join     
+        PushD        $print-format-boolean     
         Printf                                 
         PushD        $print-format-newline     
         Printf                                 

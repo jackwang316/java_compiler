@@ -94,42 +94,62 @@
         Label        $$i-divide-by-zero        
         PushD        $errors-int-divide-by-zero 
         Jump         $$general-runtime-error   
+        DLabel       $errors-float-divide-by-zero 
+        DataC        102                       %% "floating divide by zero"
+        DataC        108                       
+        DataC        111                       
+        DataC        97                        
+        DataC        116                       
+        DataC        105                       
+        DataC        110                       
+        DataC        103                       
+        DataC        32                        
+        DataC        100                       
+        DataC        105                       
+        DataC        118                       
+        DataC        105                       
+        DataC        100                       
+        DataC        101                       
+        DataC        32                        
+        DataC        98                        
+        DataC        121                       
+        DataC        32                        
+        DataC        122                       
+        DataC        101                       
+        DataC        114                       
+        DataC        111                       
+        DataC        0                         
+        Label        $$f-divide-by-zero        
+        PushD        $errors-float-divide-by-zero 
+        Jump         $$general-runtime-error   
         DLabel       $usable-memory-start      
         DLabel       $global-memory-block      
-        DataZ        2                         
+        DataZ        8                         
         Label        $$main                    
-        PushI        99                        
-        PushD        $print-format-character   
+        PushF        0.000000                  
+        PushD        $print-format-floating    
+        Printf                                 
+        PushD        $print-format-newline     
+        Printf                                 
+        PushF        60220000000.000000        
+        PushD        $print-format-floating    
         Printf                                 
         PushD        $print-format-newline     
         Printf                                 
         PushD        $global-memory-block      
         PushI        0                         
         Add                                    %% test
-        PushI        70                        
-        StoreC                                 
+        PushF        3.140000                  
+        StoreF                                 
         PushD        $global-memory-block      
         PushI        0                         
         Add                                    %% test
-        LoadC                                  
-        PushD        $print-format-character   
+        LoadF                                  
+        PushD        $print-format-floating    
         Printf                                 
         PushD        $print-format-newline     
         Printf                                 
-        PushI        127                       
-        PushD        $print-format-character   
-        Printf                                 
-        PushD        $print-format-newline     
-        Printf                                 
-        PushD        $global-memory-block      
-        PushI        1                         
-        Add                                    %% tested
-        PushI        127                       
-        StoreC                                 
-        PushD        $global-memory-block      
-        PushI        1                         
-        Add                                    %% tested
-        LoadC                                  
+        PushI        102                       
         PushD        $print-format-character   
         Printf                                 
         PushD        $print-format-newline     
