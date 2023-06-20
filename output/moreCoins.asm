@@ -16,8 +16,19 @@
         DLabel       $print-format-newline     
         DataC        10                        %% "\n"
         DataC        0                         
+        DLabel       $print-format-string      
+        DataC        37                        %% "%s"
+        DataC        115                       
+        DataC        0                         
+        DLabel       $print-format-character   
+        DataC        37                        %% "%c"
+        DataC        99                        
+        DataC        0                         
         DLabel       $print-format-space       
         DataC        32                        %% " "
+        DataC        0                         
+        DLabel       $print-format-tabspace    
+        DataC        9                         %% "\t"
         DataC        0                         
         DLabel       $boolean-true-string      
         DataC        116                       %% "true"
@@ -83,6 +94,34 @@
         Label        $$i-divide-by-zero        
         PushD        $errors-int-divide-by-zero 
         Jump         $$general-runtime-error   
+        DLabel       $errors-float-divide-by-zero 
+        DataC        102                       %% "floating divide by zero"
+        DataC        108                       
+        DataC        111                       
+        DataC        97                        
+        DataC        116                       
+        DataC        105                       
+        DataC        110                       
+        DataC        103                       
+        DataC        32                        
+        DataC        100                       
+        DataC        105                       
+        DataC        118                       
+        DataC        105                       
+        DataC        100                       
+        DataC        101                       
+        DataC        32                        
+        DataC        98                        
+        DataC        121                       
+        DataC        32                        
+        DataC        122                       
+        DataC        101                       
+        DataC        114                       
+        DataC        111                       
+        DataC        0                         
+        Label        $$f-divide-by-zero        
+        PushD        $errors-float-divide-by-zero 
+        Jump         $$general-runtime-error   
         DLabel       $usable-memory-start      
         DLabel       $global-memory-block      
         DataZ        32                        
@@ -120,12 +159,19 @@
         PushD        $global-memory-block      
         PushI        24                        
         Add                                    %% value
+        Label        -Operator-10-args         
+        Label        -Operator-9-args          
+        Label        -Operator-7-args          
+        Label        -Operator-5-args          
+        Label        -Operator-3-args          
+        Label        -Operator-1-args          
         PushD        $global-memory-block      
         PushI        0                         
         Add                                    %% toonies
         LoadI                                  
         PushI        200                       
         Multiply                               
+        Label        -Operator-2-args          
         PushD        $global-memory-block      
         PushI        4                         
         Add                                    %% loonies
@@ -133,6 +179,7 @@
         PushI        100                       
         Multiply                               
         Add                                    
+        Label        -Operator-4-args          
         PushD        $global-memory-block      
         PushI        8                         
         Add                                    %% quarters
@@ -140,6 +187,7 @@
         PushI        25                        
         Multiply                               
         Add                                    
+        Label        -Operator-6-args          
         PushD        $global-memory-block      
         PushI        12                        
         Add                                    %% dimes
@@ -147,6 +195,7 @@
         PushI        10                        
         Multiply                               
         Add                                    
+        Label        -Operator-8-args          
         PushD        $global-memory-block      
         PushI        16                        
         Add                                    %% nickels
@@ -171,6 +220,11 @@
         PushD        $global-memory-block      
         PushI        28                        
         Add                                    %% ncoins
+        Label        -Operator-15-args         
+        Label        -Operator-14-args         
+        Label        -Operator-13-args         
+        Label        -Operator-12-args         
+        Label        -Operator-11-args         
         PushD        $global-memory-block      
         PushI        0                         
         Add                                    %% toonies

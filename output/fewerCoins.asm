@@ -146,7 +146,7 @@
         Add                                    %% nickels
         LoadI                                  
         PushI        5                         
-        Divide                                 
+        Multiply                               
         PushD        $global-memory-block      
         PushI        4                         
         Add                                    %% pennies

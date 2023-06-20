@@ -155,14 +155,14 @@
         Add                                    %% dimes_C@in
         LoadI                                  
         PushI        10                        
-        Divide                                 
+        Multiply                               
         Label        -Operator-3-args          
         PushD        $global-memory-block      
         PushI        0                         
         Add                                    %% nickels
         LoadI                                  
         PushI        5                         
-        Divide                                 
+        Multiply                               
         Add                                    
         PushD        $global-memory-block      
         PushI        4                         
