@@ -2,7 +2,9 @@ package semanticAnalyzer.signatures;
 
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import semanticAnalyzer.types.PrimitiveType;
 import semanticAnalyzer.types.Type;
@@ -16,7 +18,7 @@ public class FunctionSignature {
 	private Type resultType;
 	private Type[] paramTypes;
 	Object whichVariant;
-	private List<TypeVariable> typeVariables;
+	private Set<TypeVariable> typeVariables;
 	
 	///////////////////////////////////////////////////////////////
 	// construction
@@ -29,7 +31,7 @@ public class FunctionSignature {
 		findTypeVariables();
 	}
 	private void findTypeVariables() {
-		typeVariables = new ArrayList<TypeVariable>();
+		typeVariables = new HashSet<TypeVariable>();
 		for (Type type : paramTypes) {
 			type.addTypeVariables(typeVariables);
 		}
@@ -75,21 +77,17 @@ public class FunctionSignature {
 		}		
 		return true;
 	}
-
-	private boolean assignableTo(Type variableType, Type valueType) {
-		if (valueType == PrimitiveType.ERROR && ALL_TYPES_ACCEPT_ERROR_TYPES) {
-			return true;
-		}
-		return variableType.equals(valueType);
-	}
 	private void resetTypeVariables(){
 		for(TypeVariable variable : typeVariables) {
-			// TODO: reset the type variable
-			// Not too sure
 			variable.reset();
 		}
 	}
-	
+	private boolean assignableTo(Type formalType, Type actualType) {
+		if (actualType == PrimitiveType.ERROR && ALL_TYPES_ACCEPT_ERROR_TYPES) {
+			return true;
+		}
+		return formalType.equivalent(actualType);
+	}
 	// Null object pattern
 	private static FunctionSignature neverMatchedSignature = new FunctionSignature(1, PrimitiveType.ERROR) {
 		public boolean accepts(List<Type> types) {
@@ -127,6 +125,14 @@ public class FunctionSignature {
 		default:
 			return neverMatchedSignature;
 		}
+	}
+
+	public List<Type> typeVariableSettings() {
+		List<Type> results = new ArrayList<Type>();
+		for (TypeVariable typeVariable : typeVariables) {
+			results.add(typeVariable.concreteType());
+		}
+		return results;
 	}
 
 }

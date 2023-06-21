@@ -29,6 +29,7 @@ public enum Punctuator implements Lextant {
 	CAST(""),
 	OPEN_BRACKET("["),
 	CLOSE_BRACKET("]"),
+	INDEXING(":"), // can use " " or ":"
 	NULL_PUNCTUATOR("");
 
 	private String lexeme;

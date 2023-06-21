@@ -13,7 +13,10 @@ import asmCodeGenerator.operators.CharToIntGenerator;
 import asmCodeGenerator.operators.IntToBoolCodeGenerator;
 import asmCodeGenerator.operators.IntToCharCodeGenerator;
 import lexicalAnalyzer.Punctuator;
+import semanticAnalyzer.types.Array;
 import semanticAnalyzer.types.Type;
+import semanticAnalyzer.types.TypeVariable;
+
 import static semanticAnalyzer.types.PrimitiveType.*;
 
 public class FunctionSignatures extends ArrayList<FunctionSignature> {
@@ -98,6 +101,11 @@ public class FunctionSignatures extends ArrayList<FunctionSignature> {
 		new FunctionSignatures(Punctuator.GREATER,
 				new FunctionSignature(ASMOpcode.Divide, INTEGER, INTEGER, BOOLEAN),
 				new FunctionSignature(ASMOpcode.FDivide, FLOATING, FLOATING, BOOLEAN)
+		);
+
+		TypeVariable T = new TypeVariable("T");
+		new FunctionSignatures(Punctuator.INDEXING,
+				new FunctionSignature(new Array(T), INTEGER, T)
 		);
 
 		for(Punctuator compare: Punctuator.COMPARISION){

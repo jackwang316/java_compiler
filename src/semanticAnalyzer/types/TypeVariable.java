@@ -1,6 +1,7 @@
 package semanticAnalyzer.types;
 
 import java.util.List;
+import java.util.Set;
 
 public class TypeVariable implements Type{
     String name;
@@ -15,6 +16,7 @@ public class TypeVariable implements Type{
         constraint = PrimitiveType.NO_TYPE;
     }
 
+    // Avoid confilct with .equals()
     public boolean equivalent(Type otherType) {
         if (constraint == PrimitiveType.NO_TYPE) {
             setConstraint(otherType);
@@ -45,8 +47,13 @@ public class TypeVariable implements Type{
     }
 
     @Override
-    public void addTypeVariables(List<TypeVariable> typeVariables) {
+    public void addTypeVariables(Set<TypeVariable> typeVariables) {
         typeVariables.add(this);
         
+    }
+
+    @Override
+    public Type concreteType() {
+        return constraint.concreteType();
     }
 }

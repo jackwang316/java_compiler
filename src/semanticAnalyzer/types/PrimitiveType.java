@@ -1,12 +1,13 @@
 package semanticAnalyzer.types;
 
 import java.util.List;
-
+import java.util.Set;
 import lexicalAnalyzer.Keyword;
 
 public enum PrimitiveType implements Type {
 	BOOLEAN(1),
 	CHARACTER(1),
+
 	INTEGER(4),
 	STRING(4),
 	FLOATING(8),
@@ -52,7 +53,11 @@ public enum PrimitiveType implements Type {
 		return this == otherType;
 	}
 	@Override
-	public void addTypeVariables(List<TypeVariable> typeVariables) {
+	public void addTypeVariables(Set<TypeVariable> typeVariables) {
 		return;
+	}
+	@Override
+	public Type concreteType() {
+		return this;
 	}
 }
