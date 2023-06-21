@@ -72,6 +72,7 @@ public class RunTime {
 		
 		generalRuntimeError(frag);
 		integerDivideByZeroError(frag);
+		floatingDivideByZeroError(frag);
 		
 		return frag;
 	}
@@ -87,14 +88,26 @@ public class RunTime {
 		frag.add(Halt);
 		return frag;
 	}
+
 	private void integerDivideByZeroError(ASMCodeFragment frag) {
 		String intDivideByZeroMessage = "$errors-int-divide-by-zero";
-		
+
 		frag.add(DLabel, intDivideByZeroMessage);
 		frag.add(DataS, "integer divide by zero");
-		
+
 		frag.add(Label, INTEGER_DIVIDE_BY_ZERO_RUNTIME_ERROR);
 		frag.add(PushD, intDivideByZeroMessage);
+		frag.add(Jump, GENERAL_RUNTIME_ERROR);
+	}
+	
+	private void floatingDivideByZeroError(ASMCodeFragment frag) {
+		String floatDivideByZeroMessage = "$errors-float-divide-by-zero";
+		
+		frag.add(DLabel, floatDivideByZeroMessage);
+		frag.add(DataS, "floating divide by zero");
+		
+		frag.add(Label, FLOATING_DIVIDE_BY_ZERO_RUNTIME_ERROR);
+		frag.add(PushD, floatDivideByZeroMessage);
 		frag.add(Jump, GENERAL_RUNTIME_ERROR);
 	}
 	
