@@ -18,7 +18,7 @@ public class PromotedSignature {
         this.typeVariableSettings = signature.typeVariableSettings();
     }
 
-    static List<PromotedSignature> promotedSignature(FunctionSignatures signatures, List<Type> types) {
+    public static List<PromotedSignature> promotedSignature(FunctionSignatures signatures, List<Type> types) {
         List<PromotedSignature> results = new ArrayList<PromotedSignature>();
 
         for (FunctionSignature signature : signatures) {
@@ -27,7 +27,7 @@ public class PromotedSignature {
         return results;
     }
     
-    public int numPormotions() {
+    public int numPromotions() {
         int result = 0;
         for (Promotion promotion : promotions) {
             if (!promotion.isNull()) {
@@ -35,6 +35,15 @@ public class PromotedSignature {
             }
         }
         return result;
+    }
+
+    public Type resultType() {
+        setTypeVariabales();
+        return signature.resultType().concreteType();
+    }
+
+    private void setTypeVariabales() {
+        signature.setTypeVariables(typeVariableSettings);
     }
 
     private static List<PromotedSignature> findAll(FunctionSignature signature, List<Type> types) {
@@ -67,6 +76,23 @@ public class PromotedSignature {
         }
         return;
     }
+
+    public static PromotedSignature nullInstance() {
+        return null;
+    }
+
+    public boolean accepts(List<Type> childTypes) {
+        setTypeVariabales();
+        return signature.accepts(childTypes);
+    }
+
+    public Object getVariant() {
+        return signature.getVariant();
+    }
+
+	public Promotion promotion(int i) {
+		return promotions.get(i);
+	}
 
     
 }

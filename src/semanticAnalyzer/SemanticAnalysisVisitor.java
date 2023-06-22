@@ -29,6 +29,7 @@ import parseTree.nodeTypes.TypeNode;
 import parseTree.nodeTypes.StringConstantNode;
 import semanticAnalyzer.signatures.FunctionSignature;
 import semanticAnalyzer.signatures.FunctionSignatures;
+import semanticAnalyzer.signatures.PromotedSignature;
 import semanticAnalyzer.types.PrimitiveType;
 import semanticAnalyzer.types.Type;
 import symbolTable.Binding;
@@ -38,6 +39,10 @@ import tokens.LextantToken;
 import tokens.Token;
 
 class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
+	/**
+	 *
+	 */
+	private static final int MAX_NUM_PROMOTIONS = 2;
 	@Override
 	public void visitLeave(ParseNode node) {
 		throw new RuntimeException("Node class unimplemented in SemanticAnalysisVisitor: " + node.getClass());
@@ -155,7 +160,18 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 		}
 		
 		Lextant operator = operatorFor(node);
-		FunctionSignature signature = FunctionSignatures.signature(operator, childTypes);
+		// FunctionSignature signature = FunctionSignatures.signature(operator, childTypes);
+		FunctionSignatures signatures = FunctionSignatures.signaturesOf(operator);
+		List<PromotedSignature> promotedSignatures = PromotedSignature.promotedSignature(signatures, childTypes);
+		List<List<PromotedSignature>> byNumPromotions = new ArrayList<>();
+		for (int i = 0; i<MAX_NUM_PROMOTIONS; i++){
+			byNumPromotions.add(new ArrayList<PromotedSignature>());	
+		}
+		for (PromotedSignature promotedSignature : promotedSignatures) {
+			byNumPromotions.get(promotedSignature.numPromotions()).add(promotedSignature);
+		}
+
+		PromotedSignature signature = selectPromotedSignature(byNumPromotions);
 		
 		if(signature.accepts(childTypes)) {
 			node.setType(signature.resultType().concreteType());
@@ -166,6 +182,27 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 			node.setType(PrimitiveType.ERROR);
 		}
 	}
+
+	private PromotedSignature selectPromotedSignature(List<List<PromotedSignature>> byNumPromotions) {
+		for (int i = 0; i < MAX_NUM_PROMOTIONS; i++) {
+			switch (byNumPromotions.get(i).size()) {
+				case 0:
+
+					break;
+				case 1:
+					return byNumPromotions.get(i).get(0);
+
+				default:
+				case 2:
+					multipleInterpretationsError();
+					return PromotedSignature.nullInstance();
+			}
+		}
+		typeCheckError(null, null);
+		return PromotedSignature.nullInstance();
+	}
+	
+
 	private Lextant operatorFor(OperatorNode node) {
 		LextantToken token = (LextantToken) node.getToken();
 		return token.getLextant();
@@ -232,6 +269,9 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 	
 	///////////////////////////////////////////////////////////////////////////
 	// error logging/printing
+	private void multipleInterpretationsError() {
+		logError("Multiple interpretations of operator possible");
+	}
 	private void semanticError(String message) {
 		logError("Semantic error " + message);
 	}
