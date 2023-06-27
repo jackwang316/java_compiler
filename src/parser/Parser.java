@@ -77,17 +77,17 @@ public class Parser {
 	// mainBlock and subBlock
 	private ParseNode parseBlockStatements() {
 		if(!startsBlockStatements(nowReading)) {
-			return syntaxErrorNode("mainBlock");
+			return syntaxErrorNode("BlockStatements");
 		}
-		ParseNode mainBlock = new BlockStatementNode(nowReading);
+		ParseNode blockStatement = new BlockStatementNode(nowReading);
 		expect(Punctuator.OPEN_BRACE);
 		
 		while(startsStatement(nowReading)) {
 			ParseNode statement = parseStatement();
-			mainBlock.appendChild(statement);
+			blockStatement.appendChild(statement);
 		}
 		expect(Punctuator.CLOSE_BRACE);
-		return mainBlock;
+		return blockStatement;
 	}
 
 	private boolean startsBlockStatements(Token token) {
