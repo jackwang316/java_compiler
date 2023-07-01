@@ -123,12 +123,6 @@ public class FunctionSignatures extends ArrayList<FunctionSignature> {
 				new FunctionSignatures(compare, i, c, f);
 			}
 		}
-	
-
-//		new FunctionSignatures(Punctuator.ADD,
-//		    new FunctionSignature(ASMOpcode.Add, INTEGER, INTEGER, INTEGER),
-//		    new FunctionSignature(ASMOpcode.FAdd, FLOAT, FLOAT, FLOAT)
-//		);
 		
 		new FunctionSignatures(Punctuator.CAST,
 			new FunctionSignature(ASMOpcode.Nop, 

@@ -20,6 +20,7 @@ import parseTree.nodeTypes.CharacterConstantNode;
 import parseTree.nodeTypes.DeclarationNode;
 import parseTree.nodeTypes.FloatingConstantNode;
 import parseTree.nodeTypes.IdentifierNode;
+import parseTree.nodeTypes.IfStatementNode;
 import parseTree.nodeTypes.IntegerConstantNode;
 import parseTree.nodeTypes.NewlineNode;
 import parseTree.nodeTypes.OperatorNode;
@@ -28,6 +29,7 @@ import parseTree.nodeTypes.ProgramNode;
 import parseTree.nodeTypes.SpaceNode;
 import parseTree.nodeTypes.TabSpaceNode;
 import parseTree.nodeTypes.TypeNode;
+import parseTree.nodeTypes.WhileStatementNode;
 import parseTree.nodeTypes.StringConstantNode;
 import semanticAnalyzer.signatures.FunctionSignature;
 import static semanticAnalyzer.types.PrimitiveType.*;
@@ -200,6 +202,42 @@ public class ASMCodeGenerator {
 		public void visitLeave(PrintStatementNode node) {
 			newVoidCode(node);
 			new PrintStatementGenerator(code, this).generate(node);	
+		}
+		public void visitLeave(IfStatementNode node) {
+			newVoidCode(node);
+			ASMCodeFragment expressionCode = removeValueCode(node.child(0));
+			ASMCodeFragment ifBodyCode = removeVoidCode(node.child(1));
+
+			Labeller labeller = new Labeller("if-statement");
+			String elseLabel  = labeller.newLabel("else");
+			String endLabel   = labeller.newLabel("end");
+
+			code.append(expressionCode);
+			code.add(JumpFalse, elseLabel);
+			code.append(ifBodyCode);
+			code.add(Jump, endLabel);
+			code.add(Label, elseLabel);
+			if(node.nChildren() == 3) {
+				ASMCodeFragment elseBodyCode = removeVoidCode(node.child(2));
+				code.append(elseBodyCode);
+			}
+			code.add(Label, endLabel);
+		}
+		public void visitLeave(WhileStatementNode node) {
+			newVoidCode(node);
+			ASMCodeFragment expressionCode = removeValueCode(node.child(0));
+			ASMCodeFragment whileBodyCode = removeVoidCode(node.child(1));
+
+			Labeller labeller = new Labeller("while-statement");
+			String startLabel = labeller.newLabel("start");
+			String endLabel   = labeller.newLabel("end");
+
+			code.add(Label, startLabel);
+			code.append(expressionCode);
+			code.add(JumpFalse, endLabel);
+			code.append(whileBodyCode);
+			code.add(Jump, startLabel);
+			code.add(Label, endLabel);
 		}
 		public void visit(NewlineNode node) {
 			newVoidCode(node);

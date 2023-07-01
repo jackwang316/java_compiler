@@ -18,6 +18,7 @@ import parseTree.nodeTypes.DeclarationNode;
 import parseTree.nodeTypes.ErrorNode;
 import parseTree.nodeTypes.FloatingConstantNode;
 import parseTree.nodeTypes.IdentifierNode;
+import parseTree.nodeTypes.IfStatementNode;
 import parseTree.nodeTypes.IntegerConstantNode;
 import parseTree.nodeTypes.NewlineNode;
 import parseTree.nodeTypes.OperatorNode;
@@ -26,6 +27,7 @@ import parseTree.nodeTypes.ProgramNode;
 import parseTree.nodeTypes.SpaceNode;
 import parseTree.nodeTypes.TabSpaceNode;
 import parseTree.nodeTypes.TypeNode;
+import parseTree.nodeTypes.WhileStatementNode;
 import parseTree.nodeTypes.StringConstantNode;
 import semanticAnalyzer.signatures.FunctionSignature;
 import semanticAnalyzer.signatures.FunctionSignatures;
@@ -79,6 +81,14 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 	// statements and declarations
 	@Override
 	public void visitLeave(PrintStatementNode node) {
+	}
+	@Override
+	public void visitLeave(IfStatementNode node){
+		assertCorrectType(node, PrimitiveType.BOOLEAN, node.child(0).getType());
+	}
+	@Override 
+	public void visitLeave(WhileStatementNode node){
+		assertCorrectType(node, PrimitiveType.BOOLEAN, node.child(0).getType());
 	}
 	@Override
 	public void visitLeave(DeclarationNode node) {
@@ -245,5 +255,11 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 	private void logError(String message) {
 		TanLogger log = TanLogger.getLogger("compiler.semanticAnalyzer");
 		log.severe(message);
+	}
+	private void assertCorrectType(ParseNode node, Type expectedType, Type actualType) {
+		if(!expectedType.equals(actualType)) {
+			semanticError("expected " + expectedType + ", got " + actualType);
+			node.setType(PrimitiveType.ERROR);
+		}
 	}
 }
