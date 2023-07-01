@@ -1,0 +1,6 @@
+main {
+	var testa := "abc";
+	var b := "cde";
+	
+	print testa;
+}

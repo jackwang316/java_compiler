@@ -1,3 +1,5 @@
+        DLabel       $array-create             
+        DataZ        4                         
         Jump         $$main                    
         DLabel       $eat-location-zero        
         DataZ        8                         
@@ -148,104 +150,29 @@
         Jump         $$general-runtime-error   
         DLabel       $usable-memory-start      
         DLabel       $global-memory-block      
-        DataZ        9                         
+        DataZ        4                         
         Label        $$main                    
         PushD        $global-memory-block      
         PushI        0                         
-        Add                                    %% a
-        DLabel       -String-1-StringLabel     
-        DataI        3                         
-        DataI        9                         
-        DataI        4                         
-        DataC        49                        %% "1234"
-        DataC        50                        
-        DataC        51                        
-        DataC        52                        
-        DataC        0                         
-        PushD        -String-1-StringLabel     
-        PStack                                 
+        Add                                    %% neg
+        Label        -Operator-4-args          
+        PushI        2                         
+        Label        -Operator-3-args          
+        Label        -Operator-2-args          
+        Label        -Operator-1-args          
+        PushI        11                        
+        Negate                                 
+        Negate                                 
+        Negate                                 
+        Add                                    
         StoreI                                 
-        PushD        $global-memory-block      
-        PushI        4                         
-        Add                                    %% b
-        DLabel       -String-2-StringLabel     
-        DataI        3                         
-        DataI        9                         
-        DataI        3                         
-        DataC        97                        %% "abc"
-        DataC        98                        
-        DataC        99                        
-        DataC        0                         
-        PushD        -String-2-StringLabel     
-        PStack                                 
-        StoreI                                 
-        PushD        $global-memory-block      
-        PushI        4                         
-        Add                                    %% b
-        DLabel       -String-3-StringLabel     
-        DataI        3                         
-        DataI        9                         
-        DataI        3                         
-        DataC        99                        %% "cde"
-        DataC        100                       
-        DataC        101                       
-        DataC        0                         
-        PushD        -String-3-StringLabel     
-        PStack                                 
-        StoreI                                 
-        PushD        $global-memory-block      
-        PushI        8                         
-        Add                                    %% compare
-        Label        -compare-5-arg1           
         PushD        $global-memory-block      
         PushI        0                         
-        Add                                    %% a
-        LoadC                                  
-        Label        -compare-5-arg2           
-        DLabel       -String-4-StringLabel     
-        DataI        3                         
-        DataI        9                         
-        DataI        4                         
-        DataC        49                        %% "1234"
-        DataC        50                        
-        DataC        51                        
-        DataC        52                        
-        DataC        0                         
-        PushD        -String-4-StringLabel     
-        PStack                                 
-        Label        -compare-5-sub            
-        Subtract                               
-        JumpFalse    -compare-5-true           
-        Jump         -compare-5-false          
-        Label        -compare-5-true           
-        PushI        1                         
-        Jump         -compare-5-join           
-        Label        -compare-5-false          
-        PushI        0                         
-        Jump         -compare-5-join           
-        Label        -compare-5-join           
-        StoreC                                 
-        PushD        $global-memory-block      
-        PushI        8                         
-        Add                                    %% compare
-        LoadC                                  
-        JumpTrue     -print-boolean-6-true     
-        PushD        $boolean-false-string     
-        Jump         -print-boolean-6-join     
-        Label        -print-boolean-6-true     
-        PushD        $boolean-true-string      
-        Label        -print-boolean-6-join     
-        PushD        $print-format-boolean     
+        Add                                    %% neg
+        LoadI                                  
+        PushD        $print-format-integer     
         Printf                                 
         PushD        $print-format-newline     
-        Printf                                 
-        PushD        $global-memory-block      
-        PushI        0                         
-        Add                                    %% a
-        LoadC                                  
-        PushI        12                        
-        Add                                    
-        PushD        $print-format-string      
         Printf                                 
         Halt                                   
         Label        -mem-manager-make-tags    

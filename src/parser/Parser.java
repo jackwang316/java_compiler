@@ -1,9 +1,12 @@
 package parser;
 
+import java.security.Key;
+import java.util.ArrayList;
 import java.util.Arrays;
 
 import logging.TanLogger;
 import parseTree.*;
+import parseTree.nodeTypes.ArrayNode;
 import parseTree.nodeTypes.AssignmentStatementNode;
 import parseTree.nodeTypes.BlockStatementNode;
 import parseTree.nodeTypes.BooleanConstantNode;
@@ -21,6 +24,7 @@ import parseTree.nodeTypes.SpaceNode;
 import parseTree.nodeTypes.TabSpaceNode;
 import parseTree.nodeTypes.TypeNode;
 import semanticAnalyzer.types.PrimitiveType;
+import semanticAnalyzer.types.Type;
 import parseTree.nodeTypes.StringConstantNode;
 import tokens.*;
 import lexicalAnalyzer.Keyword;
@@ -337,8 +341,51 @@ public class Parser {
 		if(startsParenthesis(nowReading)) {
 			return parseParenthesisExpression();
 		}
+		if(startsDynamicArrayCreation(nowReading)){
+			return parseDynamicArrayCreation();
+		}
+		if(startsStaticArrayCreation(nowReading)){
+			return parseStaticArrayCreation();
+		}
 		return parseLiteral();
 	}
+
+	private ParseNode parseStaticArrayCreation() {
+		if(!startsStaticArrayCreation(nowReading)) {
+			return syntaxErrorNode("array creation");
+		}
+		Token current = nowReading;
+		ArrayList<ParseNode> list = new ArrayList<ParseNode>();
+		do {
+			readToken();
+
+			if(nowReading.isLextant(Punctuator.CLOSE_BRACKET)) {
+				break;
+			}
+
+			list.add(parseExpression());
+		} while (nowReading.isLextant(Punctuator.COMMA));
+		expect(Punctuator.CLOSE_BRACKET);
+		return ArrayNode.staticMake(current, list);
+	}
+
+	private ParseNode parseDynamicArrayCreation() {
+		if(!startsDynamicArrayCreation(nowReading)) {
+			return syntaxErrorNode("array creation");
+		}
+		Token current = nowReading;
+		readToken();
+		expect(Punctuator.OPEN_BRACKET);
+		if(!Keyword.isCastType(nowReading.getLexeme())) {
+			return syntaxErrorNode("invalid cast type");
+		}
+		Type type = PrimitiveType.parseType(nowReading.getLexeme());
+		readToken();
+		expect(Punctuator.CLOSE_BRACKET);
+		ParseNode expression = parseParenthesisExpression();
+		return ArrayNode.dynamicMake(current, type, expression);
+	}
+
 	private ParseNode parseParenthesisExpression() {
 		if(!startsParenthesis(nowReading)) {
 			return syntaxErrorNode("parenthesis");
@@ -348,6 +395,7 @@ public class Parser {
 		expect(Punctuator.CLOSE_PARENTHESIS);
 		return expression;
 	}
+
 	private boolean startsParenthesis(Token token) {
 		return token.isLextant(Punctuator.OPEN_PARENTHESIS);
 	}
@@ -367,8 +415,19 @@ public class Parser {
 		return TypeNode.withChildren(expression, PrimitiveType.parseType(castType));
 		
 	}
+
 	private boolean startsAtomicExpression(Token token) {
-		return startsLiteral(token) || startsUnaryExpression(token) || startsCastExpression(token) || startsParenthesis(token);
+		return startsLiteral(token) || startsUnaryExpression(token) 
+		|| startsCastExpression(token) || startsParenthesis(token)
+		|| startsDynamicArrayCreation(token) || startsStaticArrayCreation(token);
+	}
+
+	private boolean startsStaticArrayCreation(Token token) {
+		return token.isLextant(Punctuator.OPEN_BRACKET);
+	}
+
+	private boolean startsDynamicArrayCreation(Token token) {
+		return token.isLextant(Keyword.NEW);
 	}
 
 	private boolean startsCastExpression(Token token) {
@@ -385,8 +444,9 @@ public class Parser {
 		
 		return OperatorNode.withChildren(operatorToken, child);
 	}
+
 	private boolean startsUnaryExpression(Token token) {
-		return token.isLextant(Punctuator.SUBTRACT, Punctuator.ADD);
+		return token.isLextant(Punctuator.ADD, Punctuator.SUBTRACT, Keyword.LENGTH);
 	}
 	
 	// literal -> number | identifier | booleanConstant
@@ -415,12 +475,15 @@ public class Parser {
 
 		return syntaxErrorNode("literal");
 	}
+
 	private boolean startsStringLiteral(Token token) {
 		return token instanceof StringLiteralToken;
 	}
+
 	private boolean startsFloatLiteral(Token token) {
 		return token instanceof FloatingLiteralToken;
 	}
+
 	private boolean startsLiteral(Token token) {
 		return startsIntLiteral(token) || startsFloatLiteral(token) || startsStringLiteral(token)
 				|| startsIdentifier(token) || startsBooleanLiteral(token) || startsCharacterLiteral(token);
@@ -438,6 +501,7 @@ public class Parser {
 		readToken();
 		return new IntegerConstantNode(previouslyRead);
 	}
+
 	private boolean startsIntLiteral(Token token) {
 		return token instanceof IntegerLiteralToken;
 	}
@@ -450,6 +514,7 @@ public class Parser {
 		readToken();
 		return new IdentifierNode(previouslyRead);
 	}
+
 	private boolean startsIdentifier(Token token) {
 		return token instanceof IdentifierToken;
 	}
@@ -503,16 +568,19 @@ public class Parser {
 		}
 		readToken();
 	}	
+
 	private ErrorNode syntaxErrorNode(String expectedSymbol) {
 		syntaxError(nowReading, "expecting " + expectedSymbol);
 		ErrorNode errorNode = new ErrorNode(nowReading);
 		readToken();
 		return errorNode;
 	}
+
 	private void syntaxError(Token token, String errorDescription) {
 		String message = "" + token.getLocation() + " " + errorDescription;
 		error(message);
 	}
+
 	private void error(String message) {
 		TanLogger log = TanLogger.getLogger("compiler.Parser");
 		log.severe("syntax error: " + message);
