@@ -82,8 +82,8 @@ public class FunctionSignatures extends ArrayList<FunctionSignature> {
 			    new FunctionSignature(ASMOpcode.FAdd, FLOATING, FLOATING, FLOATING)
 		);
 		new FunctionSignatures(Punctuator.SUBTRACT,
-			    new FunctionSignature(ASMOpcode.Nop, INTEGER, INTEGER),
-			    new FunctionSignature(ASMOpcode.Nop, FLOATING, FLOATING),
+			    new FunctionSignature(ASMOpcode.Negate, INTEGER, INTEGER),
+			    new FunctionSignature(ASMOpcode.FNegate, FLOATING, FLOATING),
 			    new FunctionSignature(ASMOpcode.Subtract, INTEGER, INTEGER, INTEGER),
 			    new FunctionSignature(ASMOpcode.FSubtract, FLOATING, FLOATING, FLOATING)
 		);
