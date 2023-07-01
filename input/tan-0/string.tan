@@ -1,6 +1,9 @@
 main {
-	var test := "yolo";
-	test := "new yolo";
-	print "hello\n" \n;
+	var test := 1234;
+	{
+		var innerScope := "I am inner var";
+		print innerScope;
+	}
+	# print innerScope;
 	print test \n;
 }

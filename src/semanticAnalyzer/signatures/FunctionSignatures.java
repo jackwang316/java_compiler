@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Map;
 
 import asmCodeGenerator.codeStorage.ASMOpcode;
+import asmCodeGenerator.operators.IntegerDivideCodeGenerator;
+import asmCodeGenerator.operators.FloatingDivideCodeGenerator;
 import asmCodeGenerator.operators.CharToBoolCodeGenerator;
 import asmCodeGenerator.operators.CharToIntGenerator;
 import asmCodeGenerator.operators.IntToBoolCodeGenerator;
@@ -73,11 +75,54 @@ public class FunctionSignatures extends ArrayList<FunctionSignature> {
 	static {
 		// here's one example to get you started with FunctionSignatures: the signatures for addition.		
 		// for this to work, you should statically import PrimitiveType.*
+		new FunctionSignatures(Punctuator.ADD,
+			    new FunctionSignature(ASMOpcode.Nop, INTEGER, INTEGER),
+			    new FunctionSignature(ASMOpcode.Nop, FLOATING, FLOATING),
+			    new FunctionSignature(ASMOpcode.Add, INTEGER, INTEGER, INTEGER),
+			    new FunctionSignature(ASMOpcode.FAdd, FLOATING, FLOATING, FLOATING)
+		);
+		new FunctionSignatures(Punctuator.SUBTRACT,
+			    new FunctionSignature(ASMOpcode.Negate, INTEGER, INTEGER),
+			    new FunctionSignature(ASMOpcode.FNegate, FLOATING, FLOATING),
+			    new FunctionSignature(ASMOpcode.Subtract, INTEGER, INTEGER, INTEGER),
+			    new FunctionSignature(ASMOpcode.FSubtract, FLOATING, FLOATING, FLOATING)
+		);
+		new FunctionSignatures(Punctuator.DIVIDE,
+				new FunctionSignature(new IntegerDivideCodeGenerator(), INTEGER, INTEGER, INTEGER),
+				new FunctionSignature(new FloatingDivideCodeGenerator(), FLOATING, FLOATING, FLOATING)
+		);
+		new FunctionSignatures(Punctuator.MULTIPLY,
+				new FunctionSignature(ASMOpcode.Multiply, INTEGER, INTEGER, INTEGER),
+				new FunctionSignature(ASMOpcode.FMultiply, FLOATING, FLOATING, FLOATING)
+		);
+		new FunctionSignatures(Punctuator.GREATER,
+				new FunctionSignature(ASMOpcode.Divide, INTEGER, INTEGER, BOOLEAN),
+				new FunctionSignature(ASMOpcode.FDivide, FLOATING, FLOATING, BOOLEAN)
+		);
+		new FunctionSignatures(Punctuator.LOGICAL_AND,
+				new FunctionSignature(ASMOpcode.And, BOOLEAN, BOOLEAN, BOOLEAN)
+		);
+		new FunctionSignatures(Punctuator.LOGICAL_OR,
+				new FunctionSignature(ASMOpcode.Or, BOOLEAN, BOOLEAN, BOOLEAN)
+		);
+		new FunctionSignatures(Punctuator.LOGICAL_NOT,
+				new FunctionSignature(ASMOpcode.BNegate, BOOLEAN, BOOLEAN)
+		);
 
-//		new FunctionSignatures(Punctuator.ADD,
-//		    new FunctionSignature(ASMOpcode.Add, INTEGER, INTEGER, INTEGER),
-//		    new FunctionSignature(ASMOpcode.FAdd, FLOAT, FLOAT, FLOAT)
-//		);
+		for(Punctuator compare: Punctuator.COMPARISION){
+			FunctionSignature i = new FunctionSignature(1, INTEGER, INTEGER, BOOLEAN);
+			FunctionSignature c = new FunctionSignature(1, CHARACTER, CHARACTER, BOOLEAN);
+			FunctionSignature f = new FunctionSignature(1, FLOATING, FLOATING, BOOLEAN);
+			FunctionSignature b = new FunctionSignature(1, BOOLEAN, BOOLEAN, BOOLEAN);
+			FunctionSignature s = new FunctionSignature(1, STRING, STRING, BOOLEAN);
+			
+			if (compare == Punctuator.EQUAL || compare == Punctuator.NOT_EQUAL) {
+				new FunctionSignatures(compare, i, c, f, b, s);
+			}
+			else {
+				new FunctionSignatures(compare, i, c, f);
+			}
+		}
 		
 		new FunctionSignatures(Punctuator.CAST,
 			new FunctionSignature(ASMOpcode.Nop, 

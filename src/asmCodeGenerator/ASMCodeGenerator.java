@@ -14,12 +14,13 @@ import lexicalAnalyzer.Lextant;
 import lexicalAnalyzer.Punctuator;
 import parseTree.*;
 import parseTree.nodeTypes.AssignmentStatementNode;
+import parseTree.nodeTypes.BlockStatementNode;
 import parseTree.nodeTypes.BooleanConstantNode;
 import parseTree.nodeTypes.CharacterConstantNode;
-import parseTree.nodeTypes.MainBlockNode;
 import parseTree.nodeTypes.DeclarationNode;
 import parseTree.nodeTypes.FloatingConstantNode;
 import parseTree.nodeTypes.IdentifierNode;
+import parseTree.nodeTypes.IfStatementNode;
 import parseTree.nodeTypes.IntegerConstantNode;
 import parseTree.nodeTypes.NewlineNode;
 import parseTree.nodeTypes.OperatorNode;
@@ -28,13 +29,17 @@ import parseTree.nodeTypes.ProgramNode;
 import parseTree.nodeTypes.SpaceNode;
 import parseTree.nodeTypes.TabSpaceNode;
 import parseTree.nodeTypes.TypeNode;
+import parseTree.nodeTypes.WhileStatementNode;
 import parseTree.nodeTypes.StringConstantNode;
+import semanticAnalyzer.signatures.FunctionSignature;
+import static semanticAnalyzer.types.PrimitiveType.*;
 import semanticAnalyzer.types.PrimitiveType;
 import semanticAnalyzer.types.Type;
 import symbolTable.Binding;
 import symbolTable.Scope;
 import static asmCodeGenerator.codeStorage.ASMCodeFragment.CodeType.*;
 import static asmCodeGenerator.codeStorage.ASMOpcode.*;
+
 
 // do not call the code generator if any errors have occurred during analysis.
 public class ASMCodeGenerator {
@@ -183,7 +188,7 @@ public class ASMCodeGenerator {
 				code.append(childCode);
 			}
 		}
-		public void visitLeave(MainBlockNode node) {
+		public void visitLeave(BlockStatementNode node) {
 			newVoidCode(node);
 			for(ParseNode child : node.getChildren()) {
 				ASMCodeFragment childCode = removeVoidCode(child);
@@ -197,6 +202,42 @@ public class ASMCodeGenerator {
 		public void visitLeave(PrintStatementNode node) {
 			newVoidCode(node);
 			new PrintStatementGenerator(code, this).generate(node);	
+		}
+		public void visitLeave(IfStatementNode node) {
+			newVoidCode(node);
+			ASMCodeFragment expressionCode = removeValueCode(node.child(0));
+			ASMCodeFragment ifBodyCode = removeVoidCode(node.child(1));
+
+			Labeller labeller = new Labeller("if-statement");
+			String elseLabel  = labeller.newLabel("else");
+			String endLabel   = labeller.newLabel("end");
+
+			code.append(expressionCode);
+			code.add(JumpFalse, elseLabel);
+			code.append(ifBodyCode);
+			code.add(Jump, endLabel);
+			code.add(Label, elseLabel);
+			if(node.nChildren() == 3) {
+				ASMCodeFragment elseBodyCode = removeVoidCode(node.child(2));
+				code.append(elseBodyCode);
+			}
+			code.add(Label, endLabel);
+		}
+		public void visitLeave(WhileStatementNode node) {
+			newVoidCode(node);
+			ASMCodeFragment expressionCode = removeValueCode(node.child(0));
+			ASMCodeFragment whileBodyCode = removeVoidCode(node.child(1));
+
+			Labeller labeller = new Labeller("while-statement");
+			String startLabel = labeller.newLabel("start");
+			String endLabel   = labeller.newLabel("end");
+
+			code.add(Label, startLabel);
+			code.append(expressionCode);
+			code.add(JumpFalse, endLabel);
+			code.append(whileBodyCode);
+			code.add(Jump, startLabel);
+			code.add(Label, endLabel);
 		}
 		public void visit(NewlineNode node) {
 			newVoidCode(node);
@@ -263,13 +304,43 @@ public class ASMCodeGenerator {
 		// expressions
 		public void visitLeave(OperatorNode node) {
 			Lextant operator = node.getOperator();
+			FunctionSignature signature = node.getSignature();
+			Object variant = signature.getVariant();
 			
-			if(operator == Punctuator.SUBTRACT) {
-				visitUnaryOperatorNode(node);
+			if (variant instanceof ASMOpcode) {
+				Labeller labeller = new Labeller("Operator");
+				String startLabel = labeller.newLabel("args");
+				String opLabel   = labeller.newLabel("op");
+				
+				newValueCode(node);
+				code.add(Label, startLabel);
+				for (ParseNode child: node.getChildren()) {
+					code.append(removeValueCode(child));
+				}
+				code.add((ASMOpcode)variant);
+				
 			}
-			else if(operator == Punctuator.GREATER) {
-				visitComparisonOperatorNode(node, operator);
+			
+			else if (variant instanceof SimpleCodeGenerator) {
+				SimpleCodeGenerator generator = (SimpleCodeGenerator) variant;
+				ASMCodeFragment fragment = generator.generate(node, childValueCode(node));
+				codeMap.put(node, fragment);
 			}
+			
+			else if (Punctuator.isComparison(operator)) {
+				visitComparisonOperatorNode(node, (Punctuator)operator);
+			}
+			
+//			if(operator == Punctuator.SUBTRACT || operator == Punctuator.DIVIDE) {
+//			visitUnaryOperatorNode(node);
+//			}
+//			else if(operator == Punctuator.GREATER) {
+//				visitComparisonOperatorNode(node, operator);
+//			
+//			}
+//			else {
+//				visitNormalBinaryOperatorNode(node);
+//			}
 			
 		}
 		private List<ASMCodeFragment> childValueCode(OperatorNode node){
@@ -296,12 +367,15 @@ public class ASMCodeGenerator {
 			}
 		}
 		private void visitComparisonOperatorNode(OperatorNode node,
-				Lextant operator) {
+				Punctuator operator) {
 
 			ASMCodeFragment arg1 = removeValueCode(node.child(0));
 			ASMCodeFragment arg2 = removeValueCode(node.child(1));
 			
 			Labeller labeller = new Labeller("compare");
+
+			Type types[] = node.getSignature().getParamTypes();
+			Type first_type = types[0];
 			
 			String startLabel = labeller.newLabel("arg1");
 			String arg2Label  = labeller.newLabel("arg2");
@@ -316,11 +390,83 @@ public class ASMCodeGenerator {
 			code.add(Label, arg2Label);
 			code.append(arg2);
 			code.add(Label, subLabel);
-			code.add(Subtract);
 			
-			code.add(JumpPos, trueLabel);
-			code.add(Jump, falseLabel);
-
+			// TODO: cahr and string type
+			if (first_type == INTEGER || first_type == CHARACTER) {
+				code.add(Subtract);
+				switch (operator) {
+					case GREATER:
+						code.add(JumpPos, trueLabel);
+						code.add(Jump, falseLabel);
+						break;
+					case GREATER_EQUAL:
+						code.add(JumpNeg, falseLabel);
+						code.add(Jump, trueLabel);
+						break;
+					case LESS:
+						code.add(JumpNeg, trueLabel);
+						code.add(Jump, falseLabel);
+						break;
+					case LESS_EQUAL:
+						code.add(JumpPos, falseLabel);
+						code.add(Jump, trueLabel);
+						break;
+					case EQUAL:
+						code.add(JumpFalse, trueLabel);
+						code.add(Jump, falseLabel);
+						break;
+					case NOT_EQUAL:
+						code.add(JumpTrue, trueLabel);
+						code.add(Jump, falseLabel);
+						break;
+				}
+			}
+			else if (first_type == FLOATING){
+				code.add(FSubtract);
+				switch (operator) {
+					case GREATER:
+						code.add(JumpFPos, trueLabel);
+						code.add(Jump, falseLabel);
+						break;
+					case GREATER_EQUAL:
+						code.add(JumpFNeg, falseLabel);
+						code.add(Jump, trueLabel);
+						break;
+					case LESS:
+						code.add(JumpFNeg, trueLabel);
+						code.add(Jump, falseLabel);
+						break;
+					case LESS_EQUAL:
+						code.add(JumpFPos, falseLabel);
+						code.add(Jump, trueLabel);
+						break;
+					case EQUAL:
+						code.add(JumpFZero, trueLabel);
+						code.add(Jump, falseLabel);
+						break;
+					case NOT_EQUAL:
+						code.add(JumpFZero, falseLabel);
+						code.add(Jump, trueLabel);
+						break;
+				}
+			}
+			else if (first_type == BOOLEAN || first_type == STRING) {
+				code.add(Subtract);
+				switch (operator) {
+					case EQUAL:
+						code.add(JumpFalse, trueLabel);
+						code.add(Jump, falseLabel);
+						break;
+					case NOT_EQUAL:
+						code.add(JumpTrue, trueLabel);
+						code.add(Jump, falseLabel);
+						break;
+				}
+			}
+			else {
+				System.out.println("Unimplemented type!");
+			}
+			
 			code.add(Label, trueLabel);
 			code.add(PushI, 1);
 			code.add(Jump, joinLabel);

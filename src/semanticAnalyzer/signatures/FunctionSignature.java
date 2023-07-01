@@ -38,6 +38,9 @@ public class FunctionSignature {
 	public Object getVariant() {
 		return whichVariant;
 	}
+	public Type[] getParamTypes() {
+		return paramTypes;
+	}
 	public Type resultType() {
 		return resultType;
 	}
