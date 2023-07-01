@@ -424,7 +424,7 @@ public class Parser {
 		return OperatorNode.withChildren(operatorToken, child);
 	}
 	private boolean startsUnaryExpression(Token token) {
-		return token.isLextant(Punctuator.ADD, Punctuator.SUBTRACT);
+		return token.isLextant(Punctuator.ADD, Punctuator.SUBTRACT, Punctuator.LOGICAL_NOT);
 	}
 	
 	// literal -> number | identifier | booleanConstant

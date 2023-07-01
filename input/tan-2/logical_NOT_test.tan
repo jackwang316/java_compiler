@@ -1,0 +1,4 @@
+main{
+	const not_true:= !true;
+	print not_true\n;
+}
