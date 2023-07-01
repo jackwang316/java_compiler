@@ -156,7 +156,7 @@
         Label        -Operator-5-args          
         Label        -Operator-4-args          
         PushI        3                         
-        Nop                                    
+        Negate                                 
         PushI        2                         
         Subtract                               
         StoreI                                 

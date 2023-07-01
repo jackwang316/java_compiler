@@ -94,7 +94,6 @@
         Label        $$i-divide-by-zero        
         PushD        $errors-int-divide-by-zero 
         Jump         $$general-runtime-error   
-<<<<<<< HEAD
         DLabel       $errors-float-divide-by-zero 
         DataC        102                       %% "floating divide by zero"
         DataC        108                       
@@ -123,8 +122,6 @@
         Label        $$f-divide-by-zero        
         PushD        $errors-float-divide-by-zero 
         Jump         $$general-runtime-error   
-=======
->>>>>>> master
         DLabel       $usable-memory-start      
         DLabel       $global-memory-block      
         DataZ        2                         
