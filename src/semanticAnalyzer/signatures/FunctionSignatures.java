@@ -99,6 +99,15 @@ public class FunctionSignatures extends ArrayList<FunctionSignature> {
 				new FunctionSignature(ASMOpcode.Divide, INTEGER, INTEGER, BOOLEAN),
 				new FunctionSignature(ASMOpcode.FDivide, FLOATING, FLOATING, BOOLEAN)
 		);
+		new FunctionSignatures(Punctuator.LOGICAL_AND,
+				new FunctionSignature(ASMOpcode.And, BOOLEAN, BOOLEAN, BOOLEAN)
+		);
+		new FunctionSignatures(Punctuator.LOGICAL_OR,
+				new FunctionSignature(ASMOpcode.Or, BOOLEAN, BOOLEAN, BOOLEAN)
+		);
+		new FunctionSignatures(Punctuator.LOGICAL_NOT,
+				new FunctionSignature(ASMOpcode.BNegate, BOOLEAN, BOOLEAN)
+		);
 
 		for(Punctuator compare: Punctuator.COMPARISION){
 			FunctionSignature i = new FunctionSignature(1, INTEGER, INTEGER, BOOLEAN);

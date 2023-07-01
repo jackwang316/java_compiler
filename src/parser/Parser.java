@@ -243,7 +243,9 @@ public class Parser {
 	
 	///////////////////////////////////////////////////////////
 	// expressions
-	// expr                     -> comparisonExpression
+	// expr                     -> LogicalOrExpression
+	// LogicalOrExpression      -> LogicalAndExpression [OR LogicalAndExpression]*
+	// LogicalAndExpression     -> ComparisonExpression [AND ComparisonExpression]*
 	// comparisonExpression     -> additiveExpression [> additiveExpression]?
 	// additiveExpression       -> multiplicativeExpression [+ multiplicativeExpression]*  (left-assoc)
 	// multiplicativeExpression -> atomicExpression [MULT atomicExpression]*  (left-assoc)
@@ -256,9 +258,45 @@ public class Parser {
 		if(!startsExpression(nowReading)) {
 			return syntaxErrorNode("expression");
 		}
-		return parseComparisonExpression();
+		return parseLogicalOrExpression();
 	}
 	private boolean startsExpression(Token token) {
+		return startsLogicalOrExpression(token);
+	}
+	private ParseNode parseLogicalOrExpression() {
+		if(!startsLogicalOrExpression(nowReading)) {
+			return syntaxErrorNode("logical or expression");
+		}
+		
+		ParseNode left = parseLogicalAndExpression();
+		while(nowReading.isLextant(Punctuator.LOGICAL_OR)) {
+			Token orToken = nowReading;
+			readToken();
+			ParseNode right = parseLogicalAndExpression();
+			
+			left = OperatorNode.withChildren(orToken, left, right);
+		}
+		return left;
+	}
+	private boolean startsLogicalOrExpression(Token token) {
+		return startsLogicalAndExpression(token);
+	}
+	private ParseNode parseLogicalAndExpression() {
+		if(!startsLogicalAndExpression(nowReading)) {
+			return syntaxErrorNode("logical and expression");
+		}
+		
+		ParseNode left = parseComparisonExpression();
+		while(nowReading.isLextant(Punctuator.LOGICAL_AND)) {
+			Token andToken = nowReading;
+			readToken();
+			ParseNode right = parseComparisonExpression();
+			
+			left = OperatorNode.withChildren(andToken, left, right);
+		}
+		return left;
+	}
+	private boolean startsLogicalAndExpression(Token token) {
 		return startsComparisonExpression(token);
 	}
 

@@ -1,0 +1,21 @@
+main {
+	const and_true := true && true;
+	const and_false := (5 == 5) && false;
+	const and_false2 := false && false;
+	const and_false3 := (5 == 3) && false;
+	
+	print and_true\n;
+	print and_false\n;
+	print and_false2\n;
+	print and_false3\n;
+	
+	const or_true := true || true;
+	const or_true2 := true || false;
+	const or_true3 := false || true;
+	const or_false := (5 == 3) && false;
+	
+	print or_true\n;
+	print or_true2\n;
+	print or_true3\n;
+	print or_false\n;
+}
