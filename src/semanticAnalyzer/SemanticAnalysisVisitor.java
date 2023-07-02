@@ -3,6 +3,7 @@ package semanticAnalyzer;
 import java.util.Arrays; 	
 import java.util.List;
 
+import asmCodeGenerator.operators.LengthCodeGenerator;
 import lexicalAnalyzer.Keyword;
 import lexicalAnalyzer.Lextant;
 import java.util.ArrayList;
@@ -10,6 +11,7 @@ import lexicalAnalyzer.Punctuator;
 import logging.TanLogger;
 import parseTree.ParseNode;
 import parseTree.ParseNodeVisitor;
+import parseTree.nodeTypes.ArrayNode;
 import parseTree.nodeTypes.AssignmentStatementNode;
 import parseTree.nodeTypes.BlockStatementNode;
 import parseTree.nodeTypes.BooleanConstantNode;
@@ -31,8 +33,10 @@ import parseTree.nodeTypes.WhileStatementNode;
 import parseTree.nodeTypes.StringConstantNode;
 import semanticAnalyzer.signatures.FunctionSignature;
 import semanticAnalyzer.signatures.FunctionSignatures;
+import semanticAnalyzer.types.Array;
 import semanticAnalyzer.types.PrimitiveType;
 import semanticAnalyzer.types.Type;
+import semanticAnalyzer.types.TypeVariable;
 import symbolTable.Binding;
 import symbolTable.Binding.Constancy;
 import symbolTable.Scope;
@@ -163,8 +167,9 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 			
 			childTypes = Arrays.asList(left.getType(), right.getType());		
 		}
-		
+
 		Lextant operator = operatorFor(node);
+
 		FunctionSignature signature = FunctionSignatures.signature(operator, childTypes);
 		
 		if(signature.accepts(childTypes)) {
@@ -179,6 +184,32 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 	private Lextant operatorFor(OperatorNode node) {
 		LextantToken token = (LextantToken) node.getToken();
 		return token.getLextant();
+	}
+
+	@Override
+	public void visitLeave(ArrayNode node){
+		if(!node.isDynamic()) {
+			ArrayList<Type> types = new ArrayList<Type>();
+			for(ParseNode child: node.getChildren()) {
+				Type childType = child.getType();
+				boolean found=false;
+				for(Type type: types) {
+					if(type.equivalent(childType)) {
+						found=true;
+						break;
+					}
+				}
+				if(!found) {
+					types.add(childType);
+				}
+			}
+
+			Type selectedType = PrimitiveType.ERROR;
+			if(types.size()==1) {
+				selectedType = types.get(0);
+				node.setType(selectedType);
+			}
+		}
 	}
 
 
@@ -244,6 +275,13 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 	// error logging/printing
 	private void semanticError(String message) {
 		logError("Semantic error " + message);
+	}
+
+	private void typeCheckError(ParseNode node, Type operandTypes){
+		Token token = node.getToken();
+		
+		logError("operator " + token.getLexeme() + " not defined for type " 
+				 + operandTypes  + " at " + token.getLocation());
 	}
 	
 	private void typeCheckError(ParseNode node, List<Type> operandTypes) {

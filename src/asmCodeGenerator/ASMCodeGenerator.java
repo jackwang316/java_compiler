@@ -4,15 +4,19 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.sql.PseudoColumnUsage;
 import java.util.ArrayList;
 
+import asmCodeGenerator.codeStorage.ASMCodeChunk;
 import asmCodeGenerator.codeStorage.ASMCodeFragment;
 import asmCodeGenerator.codeStorage.ASMOpcode;
 import asmCodeGenerator.operators.SimpleCodeGenerator;
+import asmCodeGenerator.runtime.MemoryManager;
 import asmCodeGenerator.runtime.RunTime;
 import lexicalAnalyzer.Lextant;
 import lexicalAnalyzer.Punctuator;
 import parseTree.*;
+import parseTree.nodeTypes.ArrayNode;
 import parseTree.nodeTypes.AssignmentStatementNode;
 import parseTree.nodeTypes.BlockStatementNode;
 import parseTree.nodeTypes.BooleanConstantNode;
@@ -33,6 +37,8 @@ import parseTree.nodeTypes.WhileStatementNode;
 import parseTree.nodeTypes.StringConstantNode;
 import semanticAnalyzer.signatures.FunctionSignature;
 import static semanticAnalyzer.types.PrimitiveType.*;
+
+import semanticAnalyzer.types.Array;
 import semanticAnalyzer.types.PrimitiveType;
 import semanticAnalyzer.types.Type;
 import symbolTable.Binding;
@@ -44,6 +50,13 @@ import static asmCodeGenerator.codeStorage.ASMOpcode.*;
 // do not call the code generator if any errors have occurred during analysis.
 public class ASMCodeGenerator {
 	ParseNode root;
+	public static final int ARRAY_IDENTIFIER = 5;
+	public static final int ADDRESS_LENGTH = 4;
+	public static final int HEADER_LENGTH = 16;
+	public static final int REFERENCES_STATUS = 0x100;
+	private static final int STRING_ID = 3;
+	private static final int STRING_HEADER_LENGTH = 12;
+	private static final int STRING_STATUS = 5;
 
 	public static ASMCodeFragment generate(ParseNode syntaxTree) {
 		ASMCodeGenerator codeGenerator = new ASMCodeGenerator(syntaxTree);
@@ -56,11 +69,11 @@ public class ASMCodeGenerator {
 	
 	public ASMCodeFragment makeASM() {
 		ASMCodeFragment code = new ASMCodeFragment(GENERATES_VOID);
-		
+		code.append(MemoryManager.codeForInitialization());
 		code.append( RunTime.getEnvironment() );
 		code.append( globalVariableBlockASM() );
 		code.append( programASM() );
-//		code.append( MemoryManager.codeForAfterApplication() );
+		code.append( MemoryManager.codeForAfterApplication() );
 		
 		return code;
 	}
@@ -91,6 +104,7 @@ public class ASMCodeGenerator {
 
 
 	protected class CodeVisitor extends ParseNodeVisitor.Default {
+		
 		private Map<ParseNode, ASMCodeFragment> codeMap;
 		ASMCodeFragment code;
 		
@@ -165,6 +179,9 @@ public class ASMCodeGenerator {
 			else if(node.getType() == PrimitiveType.FLOATING) {
 				code.add(LoadF);
 			}	
+			else if(node.getType() instanceof Array) {
+				code.add(LoadI);
+			}
 			else {
 				assert false : "node " + node;
 			}
@@ -295,6 +312,9 @@ public class ASMCodeGenerator {
 			if(type == PrimitiveType.FLOATING) {
 				return StoreF;
 			}
+			if(type instanceof Array) {
+				return StoreI;
+			}
 			assert false: "Type " + type + " unimplemented in opcodeForStore()";
 			return null;
 		}
@@ -366,6 +386,103 @@ public class ASMCodeGenerator {
 				code.append(fragment);
 			}
 		}
+
+		public void visitLeave(ArrayNode node) {
+			if (node.isDynamic()) {
+				newValueCode(node);
+				Type type = node.getType();
+				int status = getStatus(type);	
+				int length = parseInt(node);
+				int typeSize = isArrayOrString(type) ? PrimitiveType.INTEGER.getSize() : type.getSize();
+				code.add(PushI, length);
+				code.add(Duplicate);
+				code.add(JumpNeg, RunTime.NEGATIVE_INDEX_RUNTIME_ERROR);
+				int totalSize = length * type.getSize() + HEADER_LENGTH;
+				code.add(PushI, totalSize);
+				code.add(Call, MemoryManager.MEM_MANAGER_ALLOCATE);
+				String tempLoc = RunTime.ARR_LOC;
+				code.add(PushD, tempLoc);
+				code.add(Exchange);
+				code.add(StoreI);
+				appendToPtr(code, tempLoc, 0, ARRAY_IDENTIFIER);
+				appendToPtr(code, tempLoc, ADDRESS_LENGTH, status);
+				appendToPtr(code, tempLoc, 2 * ADDRESS_LENGTH, typeSize);
+				appendToPtr(code, tempLoc, 3 * ADDRESS_LENGTH, length);
+
+				for(int i = 0; i < length; i++) {
+					appendToPtr(code, tempLoc, HEADER_LENGTH + i * typeSize, 0);
+				}
+				code.add(ASMOpcode.PushD, RunTime.ARR_LOC);
+				code.add(ASMOpcode.LoadI);
+
+			} else {
+				newAddressCode(node);
+				Type type = node.getType();
+				int status = getStatus(type);
+				int length = node.nChildren();
+				int typeSize = isArrayOrString(type) ? PrimitiveType.INTEGER.getSize() : type.getSize();
+				int totalSize = length * type.getSize() + HEADER_LENGTH;
+				code.add(PushI, totalSize);
+				code.add(Call, MemoryManager.MEM_MANAGER_ALLOCATE);
+				String tempLoc = RunTime.ARR_LOC;
+				code.add(PushD, tempLoc);
+				code.add(Exchange);
+				code.add(StoreI);
+				appendToPtr(code, tempLoc, 0, ARRAY_IDENTIFIER);
+				appendToPtr(code, tempLoc, ADDRESS_LENGTH, status);
+				appendToPtr(code, tempLoc, 2 * ADDRESS_LENGTH, typeSize);
+				appendToPtr(code, tempLoc, 3 * ADDRESS_LENGTH, length);
+
+				List<ParseNode> children = node.getChildren();
+
+				for(int i = 0; i< length; i++) {
+					ASMCodeFragment frag = removeValueCode(children.get(i));
+					System.out.println(frag);
+					appendToPtr(code, tempLoc, HEADER_LENGTH + i * typeSize, frag, opcodeForStore(type));
+				}
+				code.add(Duplicate);
+			} 
+		}
+
+		public int parseInt(ParseNode node) {
+			String token = node.child(0).getToken().getLexeme();
+			if(token.equals("-")) {
+				return Integer.parseInt(token + node.child(0).child(0).getToken().getLexeme());
+			}
+			return Integer.parseInt(token);
+		}
+
+		public int getStatus(Type type) {
+			if(isArrayOrString(type)) {
+				return REFERENCES_STATUS;
+			}
+			else {
+				return 0;
+			}
+		}
+
+		public boolean isArrayOrString(Type type){
+			return type instanceof Array || type == PrimitiveType.STRING;
+		}
+
+		private void appendToPtr(ASMCodeFragment code, String location, int offset, ASMCodeFragment val, ASMOpcode asmOpcode) {
+			code.add(PushD, location);
+			code.add(LoadI);
+			code.add(PushI, offset);
+			code.add(Add);
+			code.append(val);
+			code.add(asmOpcode);
+		}
+
+		private void appendToPtr(ASMCodeFragment code, String location, int offset, int val) {
+			code.add(PushD, location);
+			code.add(LoadI);
+			code.add(PushI, offset);
+			code.add(Add);
+			code.add(PushI, val);
+			code.add(StoreI);
+		}
+
 		private void visitComparisonOperatorNode(OperatorNode node,
 				Punctuator operator) {
 
@@ -509,6 +626,7 @@ public class ASMCodeGenerator {
 			return null;
 		}
 
+
 		///////////////////////////////////////////////////////////////////////////
 		// leaf nodes (ErrorNode not necessary)
 		public void visit(BooleanConstantNode node) {
@@ -537,14 +655,35 @@ public class ASMCodeGenerator {
 		}
 		public void visit(StringConstantNode node) {
 			newValueCode(node);
-			String stringLabelName = new Labeller("String").newLabel("StringLabel");
+			String value = node.getValue();
+			int totalLength = (value.length() + 1) * PrimitiveType.CHARACTER.getSize() + STRING_HEADER_LENGTH;
+			String loc = RunTime.STR_LOC;
+			code.add(PushI, totalLength);
+			code.add(Call, MemoryManager.MEM_MANAGER_ALLOCATE);
+			code.add(PushD, loc);
+			code.add(Exchange);
+			code.add(StoreI);
+			appendToPtr(code, loc, 0, STRING_ID);
+			appendToPtr(code, loc, ADDRESS_LENGTH, STRING_STATUS);
+			appendToPtr(code, loc, 2 * ADDRESS_LENGTH, value.length());
+			
+			char[] strArr = value.toCharArray();
 
-			code.add(DLabel, stringLabelName);
-			code.add(DataI, 3);
-			code.add(DataI, 9);
-			code.add(DataI, node.getValue().length());
-			code.add(DataS, node.getValue());
-			code.add(PushD, stringLabelName);
+			for(int i = 0; i < strArr.length; i++) {
+				ASMCodeFragment frag = new ASMCodeFragment(GENERATES_VALUE);
+				frag.add(PushI, strArr[i]);
+				appendToPtr(code, loc, STRING_HEADER_LENGTH + (i * PrimitiveType.CHARACTER.getSize()), frag, StoreC);
+			}
+
+			ASMCodeFragment frag = new ASMCodeFragment(GENERATES_VALUE);
+			frag.add(PushI, 0);
+			appendToPtr(code, loc, STRING_HEADER_LENGTH + (strArr.length * PrimitiveType.CHARACTER.getSize()), frag, StoreC);
+
+			Macros.loadIFrom(code, loc);
+			code.add(Duplicate);
+			code.add(PushI, 12);
+			code.add(Add);
+			code.add(LoadI);
 		}
 	}
 
