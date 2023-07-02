@@ -3,6 +3,7 @@ package semanticAnalyzer;
 import java.util.Arrays; 	
 import java.util.List;
 
+import asmCodeGenerator.operators.LengthCodeGenerator;
 import lexicalAnalyzer.Keyword;
 import lexicalAnalyzer.Lextant;
 import java.util.ArrayList;
@@ -33,6 +34,7 @@ import semanticAnalyzer.signatures.FunctionSignatures;
 import semanticAnalyzer.types.Array;
 import semanticAnalyzer.types.PrimitiveType;
 import semanticAnalyzer.types.Type;
+import semanticAnalyzer.types.TypeVariable;
 import symbolTable.Binding;
 import symbolTable.Binding.Constancy;
 import symbolTable.Scope;
@@ -155,8 +157,9 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 			
 			childTypes = Arrays.asList(left.getType(), right.getType());		
 		}
-		
+
 		Lextant operator = operatorFor(node);
+
 		FunctionSignature signature = FunctionSignatures.signature(operator, childTypes);
 		
 		if(signature.accepts(childTypes)) {
@@ -175,24 +178,28 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 
 	@Override
 	public void visitLeave(ArrayNode node){
-		if(node.isDynamic()){
-		 	if(!node.child(0).getType().equivalent(PrimitiveType.INTEGER)) {
-				typeCheckError(node, node.child(0).getType());
-				node.setType(PrimitiveType.ERROR);
-				return;
+		if(!node.isDynamic()) {
+			ArrayList<Type> types = new ArrayList<Type>();
+			for(ParseNode child: node.getChildren()) {
+				Type childType = child.getType();
+				boolean found=false;
+				for(Type type: types) {
+					if(type.equivalent(childType)) {
+						found=true;
+						break;
+					}
+				}
+				if(!found) {
+					types.add(childType);
+				}
 			}
-			Type type = node.getType();
-			while (type instanceof Array) {
-				type = ((Array)type).getSubtype();
-			}
-		}
-			
-		List<Type> childTypes = new ArrayList<>();
-		for(ParseNode child: node.getChildren()){
-			childTypes.add(child.getType());
-		}
-		node.setSubtype(childTypes.get(0));
 
+			Type selectedType = PrimitiveType.ERROR;
+			if(types.size()==1) {
+				selectedType = types.get(0);
+				node.setType(selectedType);
+			}
+		}
 	}
 
 

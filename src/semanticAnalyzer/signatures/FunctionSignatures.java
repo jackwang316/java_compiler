@@ -7,13 +7,19 @@ import java.util.Map;
 
 import asmCodeGenerator.codeStorage.ASMOpcode;
 import asmCodeGenerator.operators.IntegerDivideCodeGenerator;
+import asmCodeGenerator.operators.LengthCodeGenerator;
 import asmCodeGenerator.operators.FloatingDivideCodeGenerator;
 import asmCodeGenerator.operators.CharToBoolCodeGenerator;
 import asmCodeGenerator.operators.CharToIntGenerator;
 import asmCodeGenerator.operators.IntToBoolCodeGenerator;
 import asmCodeGenerator.operators.IntToCharCodeGenerator;
+import lexicalAnalyzer.Keyword;
 import lexicalAnalyzer.Punctuator;
+import semanticAnalyzer.types.Array;
+import semanticAnalyzer.types.PrimitiveType;
 import semanticAnalyzer.types.Type;
+import semanticAnalyzer.types.TypeVariable;
+
 import static semanticAnalyzer.types.PrimitiveType.*;
 
 public class FunctionSignatures extends ArrayList<FunctionSignature> {
@@ -115,7 +121,11 @@ public class FunctionSignatures extends ArrayList<FunctionSignature> {
 			}
 		}
 	
-
+		TypeVariable T = new TypeVariable("T");
+		new FunctionSignatures(Keyword.LENGTH,
+			new FunctionSignature(new LengthCodeGenerator(), new Array(T), INTEGER),
+			new FunctionSignature(new LengthCodeGenerator(), INTEGER, INTEGER)
+		);
 //		new FunctionSignatures(Punctuator.ADD,
 //		    new FunctionSignature(ASMOpcode.Add, INTEGER, INTEGER, INTEGER),
 //		    new FunctionSignature(ASMOpcode.FAdd, FLOAT, FLOAT, FLOAT)

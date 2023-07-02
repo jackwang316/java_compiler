@@ -358,7 +358,7 @@ public class ASMCodeGenerator {
 				int totalSize = length * type.getSize() + HEADER_LENGTH;
 				code.add(PushI, totalSize);
 				code.add(Call, MemoryManager.MEM_MANAGER_ALLOCATE);
-				String tempLoc = RunTime.ARR_LOC_1;
+				String tempLoc = RunTime.ARR_LOC;
 				code.add(PushD, tempLoc);
 				code.add(Exchange);
 				code.add(StoreI);
@@ -370,17 +370,20 @@ public class ASMCodeGenerator {
 				for(int i = 0; i < length; i++) {
 					appendToPtr(code, tempLoc, HEADER_LENGTH + i * typeSize, 0);
 				}
+				code.add(ASMOpcode.PushD, RunTime.ARR_LOC);
+				code.add(ASMOpcode.LoadI);
 
 			} else {
 				newAddressCode(node);
-				Type type = node.getSubtype();
+				Type type = node.getType();
+				System.out.println(node.getType());
 				int status = getStatus(type);
 				int length = node.nChildren();
 				int typeSize = isArrayOrString(type) ? PrimitiveType.INTEGER.getSize() : type.getSize();
 				int totalSize = length * type.getSize() + HEADER_LENGTH;
 				code.add(PushI, totalSize);
 				code.add(Call, MemoryManager.MEM_MANAGER_ALLOCATE);
-				String tempLoc = RunTime.ARR_LOC_1;
+				String tempLoc = RunTime.ARR_LOC;
 				code.add(PushD, tempLoc);
 				code.add(Exchange);
 				code.add(StoreI);
@@ -394,6 +397,17 @@ public class ASMCodeGenerator {
 				for(int i = 0; i< length; i++) {
 					appendToPtr(code, tempLoc, HEADER_LENGTH + i * typeSize, removeValueCode(children.get(i)), opcodeForStore(type));
 				}
+				code.add(Duplicate);
+				// code.add(PushD, tempLoc);
+				// code.add(Exchange);
+				// code.add(StoreI);
+				// code.add(ASMOpcode.PushD, RunTime.ARR_LOC);
+				// code.add(ASMOpcode.LoadI);
+				// code.add(Duplicate);
+				// code.add(PushI, 12);
+				// code.add(Add);
+				// code.add(LoadI);
+				// code.add(PStack);
 			} 
 		}
 

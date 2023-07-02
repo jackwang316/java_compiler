@@ -170,73 +170,136 @@
         Label        $$negative-array-index    
         PushD        $errors-negative-array-index 
         Jump         $$general-runtime-error   
-        DLabel       $array-location-1         
-        DataI        0                         
-        DLabel       $array-location-2         
-        DataI        0                         
-        DLabel       $array-location-3         
-        DataI        0                         
-        DLabel       $array-location-4         
-        DataI        0                         
-        DLabel       $array-location-5         
+        DLabel       $array-location           
         DataI        0                         
         DLabel       $usable-memory-start      
         DLabel       $global-memory-block      
-        DataZ        0                         
+        DataZ        8                         
         Label        $$main                    
         PushD        $global-memory-block      
         PushI        0                         
-        Add                                    %% test2
+        Add                                    %% test
         PushI        24                        
         Call         -mem-manager-allocate     
-        PushD        $array-location-1         
+        PushD        $array-location           
         Exchange                               
         StoreI                                 
-        PushD        $array-location-1         
+        PushD        $array-location           
         LoadI                                  
         PushI        0                         
         Add                                    
         PushI        5                         
         StoreI                                 
-        PushD        $array-location-1         
+        PushD        $array-location           
         LoadI                                  
         PushI        4                         
         Add                                    
         PushI        0                         
         StoreI                                 
-        PushD        $array-location-1         
+        PushD        $array-location           
         LoadI                                  
         PushI        8                         
         Add                                    
         PushI        4                         
         StoreI                                 
-        PushD        $array-location-1         
+        PushD        $array-location           
         LoadI                                  
         PushI        12                        
         Add                                    
         PushI        2                         
         StoreI                                 
-        PushD        $array-location-1         
+        PushD        $array-location           
         LoadI                                  
         PushI        16                        
         Add                                    
-        PushI        3                         
+        PushI        1                         
         StoreI                                 
-        PushD        $array-location-1         
+        PushD        $array-location           
         LoadI                                  
         PushI        20                        
         Add                                    
-        PushI        6                         
+        PushI        2                         
         StoreI                                 
-        PushD        $array-location-1         
+        Duplicate                              
+        LoadI                                  
+        StoreI                                 
+        PushD        $global-memory-block      
+        PushI        4                         
+        Add                                    %% test2
+        PushI        5                         
+        Duplicate                              
+        JumpNeg      $$negative-array-index    
+        PushI        36                        
+        Call         -mem-manager-allocate     
+        PushD        $array-location           
+        Exchange                               
+        StoreI                                 
+        PushD        $array-location           
+        LoadI                                  
+        PushI        0                         
+        Add                                    
+        PushI        5                         
+        StoreI                                 
+        PushD        $array-location           
+        LoadI                                  
+        PushI        4                         
+        Add                                    
+        PushI        0                         
+        StoreI                                 
+        PushD        $array-location           
+        LoadI                                  
+        PushI        8                         
+        Add                                    
+        PushI        4                         
+        StoreI                                 
+        PushD        $array-location           
+        LoadI                                  
+        PushI        12                        
+        Add                                    
+        PushI        5                         
+        StoreI                                 
+        PushD        $array-location           
+        LoadI                                  
+        PushI        16                        
+        Add                                    
+        PushI        0                         
+        StoreI                                 
+        PushD        $array-location           
+        LoadI                                  
+        PushI        20                        
+        Add                                    
+        PushI        0                         
+        StoreI                                 
+        PushD        $array-location           
+        LoadI                                  
+        PushI        24                        
+        Add                                    
+        PushI        0                         
+        StoreI                                 
+        PushD        $array-location           
+        LoadI                                  
+        PushI        28                        
+        Add                                    
+        PushI        0                         
+        StoreI                                 
+        PushD        $array-location           
+        LoadI                                  
+        PushI        32                        
+        Add                                    
+        PushI        0                         
+        StoreI                                 
+        PushD        $array-location           
+        LoadI                                  
+        StoreI                                 
+        PushD        $array-location           
         LoadI                                  
         Duplicate                              
-        PushI        20                        
+        JumpFalse    $$negative-array-index    
+        PushI        12                        
         Add                                    
-        LoadC                                  
-        PStack                                 
         LoadI                                  
-        StoreI                                 
+        PushD        $print-format-integer     
+        Printf                                 
         Halt                                   
         Label        -mem-manager-make-tags    
         DLabel       $mmgr-tags-size           
