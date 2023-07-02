@@ -4,6 +4,7 @@ import java.util.List;
 
 import parseTree.ParseNode;
 import parseTree.ParseNodeVisitor;
+import semanticAnalyzer.types.Array;
 import semanticAnalyzer.types.Type;
 import tokens.Token;
 
@@ -20,6 +21,14 @@ public class ArrayNode extends ParseNode{
 
     public void setDynamic(boolean dynamic) {
         isDynamic = dynamic;
+    }
+
+    public void setSubtype(Type subtype) {
+        super.setType(new Array(subtype));
+    }
+
+    public Type getSubtype() {
+        return ((Array)super.getType()).getSubtype();
     }
 
     public boolean isDynamic() {

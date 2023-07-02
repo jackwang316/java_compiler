@@ -1,6 +1,3 @@
 main {
-	var testa := "abc";
-	var b := "cde";
-	
-	print testa;
+	var test2 := [3,6];
 }

@@ -10,6 +10,7 @@ import lexicalAnalyzer.Punctuator;
 import logging.TanLogger;
 import parseTree.ParseNode;
 import parseTree.ParseNodeVisitor;
+import parseTree.nodeTypes.ArrayNode;
 import parseTree.nodeTypes.AssignmentStatementNode;
 import parseTree.nodeTypes.BlockStatementNode;
 import parseTree.nodeTypes.BooleanConstantNode;
@@ -29,6 +30,7 @@ import parseTree.nodeTypes.TypeNode;
 import parseTree.nodeTypes.StringConstantNode;
 import semanticAnalyzer.signatures.FunctionSignature;
 import semanticAnalyzer.signatures.FunctionSignatures;
+import semanticAnalyzer.types.Array;
 import semanticAnalyzer.types.PrimitiveType;
 import semanticAnalyzer.types.Type;
 import symbolTable.Binding;
@@ -171,6 +173,28 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 		return token.getLextant();
 	}
 
+	@Override
+	public void visitLeave(ArrayNode node){
+		if(node.isDynamic()){
+		 	if(!node.child(0).getType().equivalent(PrimitiveType.INTEGER)) {
+				typeCheckError(node, node.child(0).getType());
+				node.setType(PrimitiveType.ERROR);
+				return;
+			}
+			Type type = node.getType();
+			while (type instanceof Array) {
+				type = ((Array)type).getSubtype();
+			}
+		}
+			
+		List<Type> childTypes = new ArrayList<>();
+		for(ParseNode child: node.getChildren()){
+			childTypes.add(child.getType());
+		}
+		node.setSubtype(childTypes.get(0));
+
+	}
+
 
 	///////////////////////////////////////////////////////////////////////////
 	// simple leaf nodes
@@ -234,6 +258,13 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 	// error logging/printing
 	private void semanticError(String message) {
 		logError("Semantic error " + message);
+	}
+
+	private void typeCheckError(ParseNode node, Type operandTypes){
+		Token token = node.getToken();
+		
+		logError("operator " + token.getLexeme() + " not defined for type " 
+				 + operandTypes  + " at " + token.getLocation());
 	}
 	
 	private void typeCheckError(ParseNode node, List<Type> operandTypes) {

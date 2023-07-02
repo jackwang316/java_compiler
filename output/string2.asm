@@ -1,26 +1,3 @@
-        Label        -mem-manager-initialize   
-        DLabel       $heap-start-ptr           
-        DataZ        4                         
-        DLabel       $heap-after-ptr           
-        DataZ        4                         
-        DLabel       $heap-first-free          
-        DataZ        4                         
-        DLabel       $mmgr-newblock-block      
-        DataZ        4                         
-        DLabel       $mmgr-newblock-size       
-        DataZ        4                         
-        PushD        $heap-memory              
-        Duplicate                              
-        PushD        $heap-start-ptr           
-        Exchange                               
-        StoreI                                 
-        PushD        $heap-after-ptr           
-        Exchange                               
-        StoreI                                 
-        PushI        0                         
-        PushD        $heap-first-free          
-        Exchange                               
-        StoreI                                 
         Jump         $$main                    
         DLabel       $eat-location-zero        
         DataZ        8                         
@@ -182,61 +159,31 @@
         DataI        0                         
         DLabel       $usable-memory-start      
         DLabel       $global-memory-block      
-        DataZ        0                         
+        DataZ        4                         
         Label        $$main                    
         PushD        $global-memory-block      
         PushI        0                         
-        Add                                    %% test2
-        PushI        24                        
-        Call         -mem-manager-allocate     
-        PushD        $array-location-1         
-        Exchange                               
+        Add                                    %% a
+        DLabel       -String-1-StringLabel     
+        DataI        3                         
+        DataI        9                         
+        DataI        3                         
+        DataC        97                        %% "abc"
+        DataC        98                        
+        DataC        99                        
+        DataC        0                         
+        PushD        -String-1-StringLabel     
         StoreI                                 
-        PushD        $array-location-1         
-        LoadI                                  
+        PushD        $global-memory-block      
         PushI        0                         
-        Add                                    
-        PushI        5                         
-        StoreI                                 
-        PushD        $array-location-1         
-        LoadI                                  
-        PushI        4                         
-        Add                                    
-        PushI        0                         
-        StoreI                                 
-        PushD        $array-location-1         
-        LoadI                                  
-        PushI        8                         
-        Add                                    
-        PushI        4                         
-        StoreI                                 
-        PushD        $array-location-1         
-        LoadI                                  
+        Add                                    %% a
+        LoadC                                  
         PushI        12                        
         Add                                    
-        PushI        2                         
-        StoreI                                 
-        PushD        $array-location-1         
-        LoadI                                  
-        PushI        16                        
-        Add                                    
-        PushI        3                         
-        StoreI                                 
-        PushD        $array-location-1         
-        LoadI                                  
-        PushI        20                        
-        Add                                    
-        PushI        6                         
-        StoreI                                 
-        PushD        $array-location-1         
-        LoadI                                  
-        Duplicate                              
-        PushI        20                        
-        Add                                    
-        LoadC                                  
-        PStack                                 
-        LoadI                                  
-        StoreI                                 
+        PushD        $print-format-string      
+        Printf                                 
+        PushD        $print-format-newline     
+        Printf                                 
         Halt                                   
         Label        -mem-manager-make-tags    
         DLabel       $mmgr-tags-size           

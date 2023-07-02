@@ -95,6 +95,10 @@ public class ASMCodeFragment {
 		ASMCodeChunk chunk = new ASMCodeChunk();
 		chunks.add(chunk);
 	}
+
+	public void addChunk(ASMCodeChunk chunk) {
+		chunks.add(chunk);
+	}
 	
 	public String toString() {
 		StringBuffer buffer = new StringBuffer();

@@ -122,6 +122,41 @@
         Label        $$f-divide-by-zero        
         PushD        $errors-float-divide-by-zero 
         Jump         $$general-runtime-error   
+        DLabel       $errors-negative-array-index 
+        DataC        110                       %% "negative array index"
+        DataC        101                       
+        DataC        103                       
+        DataC        97                        
+        DataC        116                       
+        DataC        105                       
+        DataC        118                       
+        DataC        101                       
+        DataC        32                        
+        DataC        97                        
+        DataC        114                       
+        DataC        114                       
+        DataC        97                        
+        DataC        121                       
+        DataC        32                        
+        DataC        105                       
+        DataC        110                       
+        DataC        100                       
+        DataC        101                       
+        DataC        120                       
+        DataC        0                         
+        Label        $$negative-array-index    
+        PushD        $errors-negative-array-index 
+        Jump         $$general-runtime-error   
+        DLabel       $array-location-1         
+        DataI        0                         
+        DLabel       $array-location-2         
+        DataI        0                         
+        DLabel       $array-location-3         
+        DataI        0                         
+        DLabel       $array-location-4         
+        DataI        0                         
+        DLabel       $array-location-5         
+        DataI        0                         
         DLabel       $usable-memory-start      
         DLabel       $global-memory-block      
         DataZ        8                         

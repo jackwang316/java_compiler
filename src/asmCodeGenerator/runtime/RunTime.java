@@ -17,17 +17,24 @@ public class RunTime {
 	public static final String GLOBAL_MEMORY_BLOCK    = "$global-memory-block";
 	public static final String USABLE_MEMORY_START    = "$usable-memory-start";
 	public static final String MAIN_PROGRAM_LABEL     = "$$main";
+
+	public static final String ARR_LOC_1					= "$array-location-1";
+	public static final String ARR_LOC_2					= "$array-location-2";
+	public static final String ARR_LOC_3					= "$array-location-3";
+	public static final String ARR_LOC_4					= "$array-location-4";
+	public static final String ARR_LOC_5					= "$array-location-5";
 	
 	public static final String GENERAL_RUNTIME_ERROR = "$$general-runtime-error";
 	public static final String INTEGER_DIVIDE_BY_ZERO_RUNTIME_ERROR = "$$i-divide-by-zero";
-    public static final String FLOATING_DIVIDE_BY_ZERO_RUNTIME_ERROR = "$$f-divide-by-zero";;
-	
+    public static final String FLOATING_DIVIDE_BY_ZERO_RUNTIME_ERROR = "$$f-divide-by-zero";
+	public static final String NEGATIVE_INDEX_RUNTIME_ERROR 	= "$$negative-array-index";
 
 	private ASMCodeFragment environmentASM() {
 		ASMCodeFragment result = new ASMCodeFragment(GENERATES_VOID);
 		result.append(jumpToMain());
 		result.append(stringsForPrintf());
 		result.append(runtimeErrors());
+		result.append(arrayLocations());
 		result.add(DLabel, USABLE_MEMORY_START);
 		return result;
 	}
@@ -66,6 +73,23 @@ public class RunTime {
 		return frag;
 	}
 	
+
+	private ASMCodeFragment arrayLocations() {
+		ASMCodeFragment frag = new ASMCodeFragment(GENERATES_VOID);
+		
+		frag.add(DLabel, ARR_LOC_1);
+		frag.add(DataI, 0);
+		frag.add(DLabel, ARR_LOC_2);
+		frag.add(DataI, 0);
+		frag.add(DLabel, ARR_LOC_3);
+		frag.add(DataI, 0);
+		frag.add(DLabel, ARR_LOC_4);
+		frag.add(DataI, 0);
+		frag.add(DLabel, ARR_LOC_5);
+		frag.add(DataI, 0);
+		return frag;
+		
+	}
 	
 	private ASMCodeFragment runtimeErrors() {
 		ASMCodeFragment frag = new ASMCodeFragment(GENERATES_VOID);
@@ -73,6 +97,7 @@ public class RunTime {
 		generalRuntimeError(frag);
 		integerDivideByZeroError(frag);
 		floatingDivideByZeroError(frag);
+		negativeIndexError(frag);
 		
 		return frag;
 	}
@@ -111,7 +136,18 @@ public class RunTime {
 		frag.add(Jump, GENERAL_RUNTIME_ERROR);
 	}
 	
+	private void negativeIndexError(ASMCodeFragment frag) {
+		String negativeIndexMessage = "$errors-negative-array-index";
+		
+		frag.add(DLabel, negativeIndexMessage);
+		frag.add(DataS, "negative array index");
+		
+		frag.add(Label, NEGATIVE_INDEX_RUNTIME_ERROR);
+		frag.add(PushD, negativeIndexMessage);
+		frag.add(Jump, GENERAL_RUNTIME_ERROR);
+	}
 	
+
 	public static ASMCodeFragment getEnvironment() {
 		RunTime rt = new RunTime();
 		return rt.environmentASM();
