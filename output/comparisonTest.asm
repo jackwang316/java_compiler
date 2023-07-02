@@ -1,3 +1,26 @@
+        Label        -mem-manager-initialize   
+        DLabel       $heap-start-ptr           
+        DataZ        4                         
+        DLabel       $heap-after-ptr           
+        DataZ        4                         
+        DLabel       $heap-first-free          
+        DataZ        4                         
+        DLabel       $mmgr-newblock-block      
+        DataZ        4                         
+        DLabel       $mmgr-newblock-size       
+        DataZ        4                         
+        PushD        $heap-memory              
+        Duplicate                              
+        PushD        $heap-start-ptr           
+        Exchange                               
+        StoreI                                 
+        PushD        $heap-after-ptr           
+        Exchange                               
+        StoreI                                 
+        PushI        0                         
+        PushD        $heap-first-free          
+        Exchange                               
+        StoreI                                 
         Jump         $$main                    
         DLabel       $eat-location-zero        
         DataZ        8                         
@@ -122,8 +145,8 @@
         Label        $$f-divide-by-zero        
         PushD        $errors-float-divide-by-zero 
         Jump         $$general-runtime-error   
-        DLabel       $errors-negative-array    
-        DataC        110                       %% "negative array size"
+        DLabel       $errors-negative-array-index 
+        DataC        110                       %% "negative array index"
         DataC        101                       
         DataC        103                       
         DataC        97                        
@@ -138,14 +161,19 @@
         DataC        97                        
         DataC        121                       
         DataC        32                        
-        DataC        115                       
         DataC        105                       
-        DataC        122                       
+        DataC        110                       
+        DataC        100                       
         DataC        101                       
+        DataC        120                       
         DataC        0                         
-        Label        $$negative-array-runtime-error 
-        PushD        $errors-negative-array    
+        Label        $$negative-array-index    
+        PushD        $errors-negative-array-index 
         Jump         $$general-runtime-error   
+        DLabel       $array-location           
+        DataI        0                         
+        DLabel       $string-location          
+        DataI        0                         
         DLabel       $usable-memory-start      
         DLabel       $global-memory-block      
         DataZ        9                         
@@ -153,45 +181,179 @@
         PushD        $global-memory-block      
         PushI        0                         
         Add                                    %% a
-        DLabel       -String-1-StringLabel     
-        DataI        3                         
-        DataI        9                         
-        DataI        4                         
-        DataC        49                        %% "1234"
-        DataC        50                        
-        DataC        51                        
-        DataC        52                        
-        DataC        0                         
-        PushD        -String-1-StringLabel     
-        PStack                                 
+        PushI        17                        
+        Call         -mem-manager-allocate     
+        PushD        $string-location          
+        Exchange                               
+        StoreI                                 
+        PushD        $string-location          
+        LoadI                                  
+        PushI        0                         
+        Add                                    
+        PushI        3                         
+        StoreI                                 
+        PushD        $string-location          
+        LoadI                                  
+        PushI        4                         
+        Add                                    
+        PushI        5                         
+        StoreI                                 
+        PushD        $string-location          
+        LoadI                                  
+        PushI        8                         
+        Add                                    
+        PushI        4                         
+        StoreI                                 
+        PushD        $string-location          
+        LoadI                                  
+        PushI        12                        
+        Add                                    
+        PushI        49                        
+        StoreC                                 
+        PushD        $string-location          
+        LoadI                                  
+        PushI        13                        
+        Add                                    
+        PushI        50                        
+        StoreC                                 
+        PushD        $string-location          
+        LoadI                                  
+        PushI        14                        
+        Add                                    
+        PushI        51                        
+        StoreC                                 
+        PushD        $string-location          
+        LoadI                                  
+        PushI        15                        
+        Add                                    
+        PushI        52                        
+        StoreC                                 
+        PushD        $string-location          
+        LoadI                                  
+        PushI        16                        
+        Add                                    
+        PushI        0                         
+        StoreC                                 
+        PushD        $string-location          
+        LoadI                                  
+        Duplicate                              
+        PushI        12                        
+        Add                                    
+        LoadI                                  
         StoreI                                 
         PushD        $global-memory-block      
         PushI        4                         
         Add                                    %% b
-        DLabel       -String-2-StringLabel     
-        DataI        3                         
-        DataI        9                         
-        DataI        3                         
-        DataC        97                        %% "abc"
-        DataC        98                        
-        DataC        99                        
-        DataC        0                         
-        PushD        -String-2-StringLabel     
-        PStack                                 
+        PushI        16                        
+        Call         -mem-manager-allocate     
+        PushD        $string-location          
+        Exchange                               
+        StoreI                                 
+        PushD        $string-location          
+        LoadI                                  
+        PushI        0                         
+        Add                                    
+        PushI        3                         
+        StoreI                                 
+        PushD        $string-location          
+        LoadI                                  
+        PushI        4                         
+        Add                                    
+        PushI        5                         
+        StoreI                                 
+        PushD        $string-location          
+        LoadI                                  
+        PushI        8                         
+        Add                                    
+        PushI        3                         
+        StoreI                                 
+        PushD        $string-location          
+        LoadI                                  
+        PushI        12                        
+        Add                                    
+        PushI        97                        
+        StoreC                                 
+        PushD        $string-location          
+        LoadI                                  
+        PushI        13                        
+        Add                                    
+        PushI        98                        
+        StoreC                                 
+        PushD        $string-location          
+        LoadI                                  
+        PushI        14                        
+        Add                                    
+        PushI        99                        
+        StoreC                                 
+        PushD        $string-location          
+        LoadI                                  
+        PushI        15                        
+        Add                                    
+        PushI        0                         
+        StoreC                                 
+        PushD        $string-location          
+        LoadI                                  
+        Duplicate                              
+        PushI        12                        
+        Add                                    
+        LoadI                                  
         StoreI                                 
         PushD        $global-memory-block      
         PushI        4                         
         Add                                    %% b
-        DLabel       -String-3-StringLabel     
-        DataI        3                         
-        DataI        9                         
-        DataI        3                         
-        DataC        99                        %% "cde"
-        DataC        100                       
-        DataC        101                       
-        DataC        0                         
-        PushD        -String-3-StringLabel     
-        PStack                                 
+        PushI        16                        
+        Call         -mem-manager-allocate     
+        PushD        $string-location          
+        Exchange                               
+        StoreI                                 
+        PushD        $string-location          
+        LoadI                                  
+        PushI        0                         
+        Add                                    
+        PushI        3                         
+        StoreI                                 
+        PushD        $string-location          
+        LoadI                                  
+        PushI        4                         
+        Add                                    
+        PushI        5                         
+        StoreI                                 
+        PushD        $string-location          
+        LoadI                                  
+        PushI        8                         
+        Add                                    
+        PushI        3                         
+        StoreI                                 
+        PushD        $string-location          
+        LoadI                                  
+        PushI        12                        
+        Add                                    
+        PushI        99                        
+        StoreC                                 
+        PushD        $string-location          
+        LoadI                                  
+        PushI        13                        
+        Add                                    
+        PushI        100                       
+        StoreC                                 
+        PushD        $string-location          
+        LoadI                                  
+        PushI        14                        
+        Add                                    
+        PushI        101                       
+        StoreC                                 
+        PushD        $string-location          
+        LoadI                                  
+        PushI        15                        
+        Add                                    
+        PushI        0                         
+        StoreC                                 
+        PushD        $string-location          
+        LoadI                                  
+        Duplicate                              
+        PushI        12                        
+        Add                                    
+        LoadI                                  
         StoreI                                 
         PushD        $global-memory-block      
         PushI        8                         
@@ -202,17 +364,65 @@
         Add                                    %% a
         LoadC                                  
         Label        -compare-5-arg2           
-        DLabel       -String-4-StringLabel     
-        DataI        3                         
-        DataI        9                         
-        DataI        4                         
-        DataC        49                        %% "1234"
-        DataC        50                        
-        DataC        51                        
-        DataC        52                        
-        DataC        0                         
-        PushD        -String-4-StringLabel     
-        PStack                                 
+        PushI        17                        
+        Call         -mem-manager-allocate     
+        PushD        $string-location          
+        Exchange                               
+        StoreI                                 
+        PushD        $string-location          
+        LoadI                                  
+        PushI        0                         
+        Add                                    
+        PushI        3                         
+        StoreI                                 
+        PushD        $string-location          
+        LoadI                                  
+        PushI        4                         
+        Add                                    
+        PushI        5                         
+        StoreI                                 
+        PushD        $string-location          
+        LoadI                                  
+        PushI        8                         
+        Add                                    
+        PushI        4                         
+        StoreI                                 
+        PushD        $string-location          
+        LoadI                                  
+        PushI        12                        
+        Add                                    
+        PushI        49                        
+        StoreC                                 
+        PushD        $string-location          
+        LoadI                                  
+        PushI        13                        
+        Add                                    
+        PushI        50                        
+        StoreC                                 
+        PushD        $string-location          
+        LoadI                                  
+        PushI        14                        
+        Add                                    
+        PushI        51                        
+        StoreC                                 
+        PushD        $string-location          
+        LoadI                                  
+        PushI        15                        
+        Add                                    
+        PushI        52                        
+        StoreC                                 
+        PushD        $string-location          
+        LoadI                                  
+        PushI        16                        
+        Add                                    
+        PushI        0                         
+        StoreC                                 
+        PushD        $string-location          
+        LoadI                                  
+        Duplicate                              
+        PushI        12                        
+        Add                                    
+        LoadI                                  
         Label        -compare-5-sub            
         Subtract                               
         JumpFalse    -compare-5-true           
@@ -243,6 +453,8 @@
         PushI        0                         
         Add                                    %% a
         LoadC                                  
+        PushD        $string-location          
+        LoadI                                  
         PushI        12                        
         Add                                    
         PushD        $print-format-string      

@@ -19,6 +19,7 @@ public class RunTime {
 	public static final String MAIN_PROGRAM_LABEL     = "$$main";
 
 	public static final String ARR_LOC					= "$array-location";
+	public static final String STR_LOC					= "$string-location";
 	
 	public static final String GENERAL_RUNTIME_ERROR = "$$general-runtime-error";
 	public static final String INTEGER_DIVIDE_BY_ZERO_RUNTIME_ERROR = "$$i-divide-by-zero";
@@ -30,7 +31,7 @@ public class RunTime {
 		result.append(jumpToMain());
 		result.append(stringsForPrintf());
 		result.append(runtimeErrors());
-		result.append(arrayLocations());
+		result.append(memLocations());
 		result.add(DLabel, USABLE_MEMORY_START);
 		return result;
 	}
@@ -70,10 +71,12 @@ public class RunTime {
 	}
 	
 
-	private ASMCodeFragment arrayLocations() {
+	private ASMCodeFragment memLocations() {
 		ASMCodeFragment frag = new ASMCodeFragment(GENERATES_VOID);
 		
 		frag.add(DLabel, ARR_LOC);
+		frag.add(DataI, 0);
+		frag.add(DLabel, STR_LOC);
 		frag.add(DataI, 0);
 		return frag;
 		

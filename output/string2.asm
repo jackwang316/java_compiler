@@ -1,3 +1,26 @@
+        Label        -mem-manager-initialize   
+        DLabel       $heap-start-ptr           
+        DataZ        4                         
+        DLabel       $heap-after-ptr           
+        DataZ        4                         
+        DLabel       $heap-first-free          
+        DataZ        4                         
+        DLabel       $mmgr-newblock-block      
+        DataZ        4                         
+        DLabel       $mmgr-newblock-size       
+        DataZ        4                         
+        PushD        $heap-memory              
+        Duplicate                              
+        PushD        $heap-start-ptr           
+        Exchange                               
+        StoreI                                 
+        PushD        $heap-after-ptr           
+        Exchange                               
+        StoreI                                 
+        PushI        0                         
+        PushD        $heap-first-free          
+        Exchange                               
+        StoreI                                 
         Jump         $$main                    
         DLabel       $eat-location-zero        
         DataZ        8                         
@@ -147,37 +170,182 @@
         Label        $$negative-array-index    
         PushD        $errors-negative-array-index 
         Jump         $$general-runtime-error   
-        DLabel       $array-location-1         
+        DLabel       $array-location           
         DataI        0                         
-        DLabel       $array-location-2         
-        DataI        0                         
-        DLabel       $array-location-3         
-        DataI        0                         
-        DLabel       $array-location-4         
-        DataI        0                         
-        DLabel       $array-location-5         
+        DLabel       $string-location          
         DataI        0                         
         DLabel       $usable-memory-start      
         DLabel       $global-memory-block      
-        DataZ        4                         
+        DataZ        13                        
         Label        $$main                    
         PushD        $global-memory-block      
         PushI        0                         
         Add                                    %% a
-        DLabel       -String-1-StringLabel     
-        DataI        3                         
-        DataI        9                         
-        DataI        3                         
-        DataC        97                        %% "abc"
-        DataC        98                        
-        DataC        99                        
-        DataC        0                         
-        PushD        -String-1-StringLabel     
+        PushI        16                        
+        Call         -mem-manager-allocate     
+        PushD        $string-location          
+        Exchange                               
         StoreI                                 
+        PushD        $string-location          
+        LoadI                                  
+        PushI        0                         
+        Add                                    
+        PushI        3                         
+        StoreI                                 
+        PushD        $string-location          
+        LoadI                                  
+        PushI        4                         
+        Add                                    
+        PushI        5                         
+        StoreI                                 
+        PushD        $string-location          
+        LoadI                                  
+        PushI        8                         
+        Add                                    
+        PushI        3                         
+        StoreI                                 
+        PushD        $string-location          
+        LoadI                                  
+        PushI        12                        
+        Add                                    
+        PushI        97                        
+        StoreC                                 
+        PushD        $string-location          
+        LoadI                                  
+        PushI        13                        
+        Add                                    
+        PushI        98                        
+        StoreC                                 
+        PushD        $string-location          
+        LoadI                                  
+        PushI        14                        
+        Add                                    
+        PushI        99                        
+        StoreC                                 
+        PushD        $string-location          
+        LoadI                                  
+        PushI        15                        
+        Add                                    
+        PushI        0                         
+        StoreC                                 
+        PushD        $string-location          
+        LoadI                                  
+        Duplicate                              
+        PushI        12                        
+        Add                                    
+        LoadI                                  
+        StoreI                                 
+        PushD        $global-memory-block      
+        PushI        4                         
+        Add                                    %% b
+        PushI        5                         
+        Duplicate                              
+        JumpNeg      $$negative-array-index    
+        PushI        36                        
+        Call         -mem-manager-allocate     
+        PushD        $array-location           
+        Exchange                               
+        StoreI                                 
+        PushD        $array-location           
+        LoadI                                  
+        PushI        0                         
+        Add                                    
+        PushI        5                         
+        StoreI                                 
+        PushD        $array-location           
+        LoadI                                  
+        PushI        4                         
+        Add                                    
+        PushI        0                         
+        StoreI                                 
+        PushD        $array-location           
+        LoadI                                  
+        PushI        8                         
+        Add                                    
+        PushI        4                         
+        StoreI                                 
+        PushD        $array-location           
+        LoadI                                  
+        PushI        12                        
+        Add                                    
+        PushI        5                         
+        StoreI                                 
+        PushD        $array-location           
+        LoadI                                  
+        PushI        16                        
+        Add                                    
+        PushI        0                         
+        StoreI                                 
+        PushD        $array-location           
+        LoadI                                  
+        PushI        20                        
+        Add                                    
+        PushI        0                         
+        StoreI                                 
+        PushD        $array-location           
+        LoadI                                  
+        PushI        24                        
+        Add                                    
+        PushI        0                         
+        StoreI                                 
+        PushD        $array-location           
+        LoadI                                  
+        PushI        28                        
+        Add                                    
+        PushI        0                         
+        StoreI                                 
+        PushD        $array-location           
+        LoadI                                  
+        PushI        32                        
+        Add                                    
+        PushI        0                         
+        StoreI                                 
+        PushD        $array-location           
+        LoadI                                  
+        StoreI                                 
+        PushD        $global-memory-block      
+        PushI        8                         
+        Add                                    %% c
+        PushI        1234                      
+        StoreI                                 
+        PushD        $global-memory-block      
+        PushI        12                        
+        Add                                    %% d
+        PushI        99                        
+        StoreC                                 
+        PushD        $global-memory-block      
+        PushI        8                         
+        Add                                    %% c
+        LoadI                                  
+        PushD        $print-format-integer     
+        Printf                                 
+        PushD        $print-format-newline     
+        Printf                                 
+        PushD        $global-memory-block      
+        PushI        12                        
+        Add                                    %% d
+        LoadC                                  
+        PushD        $print-format-character   
+        Printf                                 
+        PushD        $print-format-newline     
+        Printf                                 
+        PushD        $array-location           
+        LoadI                                  
+        Duplicate                              
+        JumpFalse    $$negative-array-index    
+        PushI        12                        
+        Add                                    
+        LoadI                                  
+        PushD        $print-format-integer     
+        Printf                                 
+        PushD        $print-format-newline     
+        Printf                                 
         PushD        $global-memory-block      
         PushI        0                         
         Add                                    %% a
         LoadC                                  
+        PushD        $string-location          
+        LoadI                                  
         PushI        12                        
         Add                                    
         PushD        $print-format-string      

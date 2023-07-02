@@ -52,6 +52,9 @@ public class ASMCodeGenerator {
 	public static final int ADDRESS_LENGTH = 4;
 	public static final int HEADER_LENGTH = 16;
 	public static final int REFERENCES_STATUS = 0x100;
+	private static final int STRING_ID = 3;
+	private static final int STRING_HEADER_LENGTH = 12;
+	private static final int STRING_STATUS = 5;
 
 	public static ASMCodeFragment generate(ParseNode syntaxTree) {
 		ASMCodeGenerator codeGenerator = new ASMCodeGenerator(syntaxTree);
@@ -99,6 +102,7 @@ public class ASMCodeGenerator {
 
 
 	protected class CodeVisitor extends ParseNodeVisitor.Default {
+		
 		private Map<ParseNode, ASMCodeFragment> codeMap;
 		ASMCodeFragment code;
 		
@@ -376,7 +380,6 @@ public class ASMCodeGenerator {
 			} else {
 				newAddressCode(node);
 				Type type = node.getType();
-				System.out.println(node.getType());
 				int status = getStatus(type);
 				int length = node.nChildren();
 				int typeSize = isArrayOrString(type) ? PrimitiveType.INTEGER.getSize() : type.getSize();
@@ -395,19 +398,11 @@ public class ASMCodeGenerator {
 				List<ParseNode> children = node.getChildren();
 
 				for(int i = 0; i< length; i++) {
-					appendToPtr(code, tempLoc, HEADER_LENGTH + i * typeSize, removeValueCode(children.get(i)), opcodeForStore(type));
+					ASMCodeFragment frag = removeValueCode(children.get(i));
+					System.out.println(frag);
+					appendToPtr(code, tempLoc, HEADER_LENGTH + i * typeSize, frag, opcodeForStore(type));
 				}
 				code.add(Duplicate);
-				// code.add(PushD, tempLoc);
-				// code.add(Exchange);
-				// code.add(StoreI);
-				// code.add(ASMOpcode.PushD, RunTime.ARR_LOC);
-				// code.add(ASMOpcode.LoadI);
-				// code.add(Duplicate);
-				// code.add(PushI, 12);
-				// code.add(Add);
-				// code.add(LoadI);
-				// code.add(PStack);
 			} 
 		}
 
@@ -438,7 +433,6 @@ public class ASMCodeGenerator {
 			code.add(PushI, offset);
 			code.add(Add);
 			code.append(val);
-			System.out.println(val);
 			code.add(asmOpcode);
 		}
 
@@ -623,13 +617,35 @@ public class ASMCodeGenerator {
 		}
 		public void visit(StringConstantNode node) {
 			newValueCode(node);
-			String stringLabelName = new Labeller("String").newLabel("StringLabel");
-			code.add(DLabel, stringLabelName);
-			code.add(DataI, 3);
-			code.add(DataI, 9);
-			code.add(DataI, node.getValue().length());
-			code.add(DataS, node.getValue());
-			code.add(PushD, stringLabelName);
+			String value = node.getValue();
+			int totalLength = (value.length() + 1) * PrimitiveType.CHARACTER.getSize() + STRING_HEADER_LENGTH;
+			String loc = RunTime.STR_LOC;
+			code.add(PushI, totalLength);
+			code.add(Call, MemoryManager.MEM_MANAGER_ALLOCATE);
+			code.add(PushD, loc);
+			code.add(Exchange);
+			code.add(StoreI);
+			appendToPtr(code, loc, 0, STRING_ID);
+			appendToPtr(code, loc, ADDRESS_LENGTH, STRING_STATUS);
+			appendToPtr(code, loc, 2 * ADDRESS_LENGTH, value.length());
+			
+			char[] strArr = value.toCharArray();
+
+			for(int i = 0; i < strArr.length; i++) {
+				ASMCodeFragment frag = new ASMCodeFragment(GENERATES_VALUE);
+				frag.add(PushI, strArr[i]);
+				appendToPtr(code, loc, STRING_HEADER_LENGTH + (i * PrimitiveType.CHARACTER.getSize()), frag, StoreC);
+			}
+
+			ASMCodeFragment frag = new ASMCodeFragment(GENERATES_VALUE);
+			frag.add(PushI, 0);
+			appendToPtr(code, loc, STRING_HEADER_LENGTH + (strArr.length * PrimitiveType.CHARACTER.getSize()), frag, StoreC);
+
+			Macros.loadIFrom(code, loc);
+			code.add(Duplicate);
+			code.add(PushI, 12);
+			code.add(Add);
+			code.add(LoadI);
 		}
 	}
 

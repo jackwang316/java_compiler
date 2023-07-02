@@ -1,4 +1,10 @@
 main {
 	const a := "abc";
+	const b := new [int] (5);
+	const c := 1234;
+	const d := 'c';
+	print c \n;
+	print d \n;
+	print length b\n;
 	print a \n;
 }
