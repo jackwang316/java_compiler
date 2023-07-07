@@ -174,6 +174,12 @@
         DataI        0                         
         DLabel       $string-location          
         DataI        0                         
+        DLabel       $print-temp-1             
+        DataI        0                         
+        DLabel       $print-temp-2             
+        DataI        0                         
+        DLabel       $print-temp-3             
+        DataI        0                         
         DLabel       $usable-memory-start      
         DLabel       $global-memory-block      
         DataZ        8                         

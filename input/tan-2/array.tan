@@ -1,5 +1,5 @@
 main {
-	var test := [1,2];
-	var test2 := new [int] (5);
-	print length test;
+	var test := [1 + 1, 2];
+	print test \n;
+	print length test \n;
 }

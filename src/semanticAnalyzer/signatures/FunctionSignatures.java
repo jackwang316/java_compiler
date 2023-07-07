@@ -9,6 +9,7 @@ import asmCodeGenerator.codeStorage.ASMOpcode;
 import asmCodeGenerator.operators.IntegerDivideCodeGenerator;
 import asmCodeGenerator.operators.LengthCodeGenerator;
 import asmCodeGenerator.operators.FloatingDivideCodeGenerator;
+import asmCodeGenerator.operators.IndexCodeGenerator;
 import asmCodeGenerator.operators.CharToBoolCodeGenerator;
 import asmCodeGenerator.operators.CharToIntGenerator;
 import asmCodeGenerator.operators.IntToBoolCodeGenerator;
@@ -36,6 +37,9 @@ public class FunctionSignatures extends ArrayList<FunctionSignature> {
 		signaturesForKey.put(key, this);
 	}
 	
+	public FunctionSignatures(Punctuator indexing, Object toggleIdentifer) {
+	}
+
 	public Object getKey() {
 		return key;
 	}
@@ -132,13 +136,12 @@ public class FunctionSignatures extends ArrayList<FunctionSignature> {
 	
 		TypeVariable T = new TypeVariable("T");
 		new FunctionSignatures(Keyword.LENGTH,
-			new FunctionSignature(new LengthCodeGenerator(), new Array(T), INTEGER),
-			new FunctionSignature(new LengthCodeGenerator(), INTEGER, INTEGER)
+			new FunctionSignature(new LengthCodeGenerator(), new Array(), INTEGER)
 		);
-//		new FunctionSignatures(Punctuator.ADD,
-//		    new FunctionSignature(ASMOpcode.Add, INTEGER, INTEGER, INTEGER),
-//		    new FunctionSignature(ASMOpcode.FAdd, FLOAT, FLOAT, FLOAT)
-//		);
+
+		new FunctionSignatures(Punctuator.INDEXING,
+		 	new FunctionSignature(new IndexCodeGenerator(), new Array(T), PrimitiveType.INTEGER, T).toggleIdentifer()
+		);
 		
 		new FunctionSignatures(Punctuator.CAST,
 			new FunctionSignature(ASMOpcode.Nop, 

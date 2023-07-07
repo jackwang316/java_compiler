@@ -20,8 +20,9 @@ public class RunTime {
 
 	public static final String ARR_LOC					= "$array-location";
 	public static final String STR_LOC					= "$string-location";
-	
+
 	public static final String GENERAL_RUNTIME_ERROR = "$$general-runtime-error";
+	public static final String OUT_OF_BOUNDS_RUNTIME_ERROR = "$$out-of-bounds-runtime-error";
 	public static final String INTEGER_DIVIDE_BY_ZERO_RUNTIME_ERROR = "$$i-divide-by-zero";
     public static final String FLOATING_DIVIDE_BY_ZERO_RUNTIME_ERROR = "$$f-divide-by-zero";
 	public static final String NEGATIVE_INDEX_RUNTIME_ERROR 	= "$$negative-array-index";
@@ -89,6 +90,7 @@ public class RunTime {
 		integerDivideByZeroError(frag);
 		floatingDivideByZeroError(frag);
 		negativeIndexError(frag);
+		outOfBoundsError(frag);
 		
 		return frag;
 	}
@@ -124,6 +126,17 @@ public class RunTime {
 		
 		frag.add(Label, FLOATING_DIVIDE_BY_ZERO_RUNTIME_ERROR);
 		frag.add(PushD, floatDivideByZeroMessage);
+		frag.add(Jump, GENERAL_RUNTIME_ERROR);
+	}
+
+	private void outOfBoundsError(ASMCodeFragment frag) {
+		String outOfBoundsMessage = "$errors-array-index-out-of-bounds";
+		
+		frag.add(DLabel, outOfBoundsMessage);
+		frag.add(DataS, "array index out of bounds");
+		
+		frag.add(Label, OUT_OF_BOUNDS_RUNTIME_ERROR);
+		frag.add(PushD, outOfBoundsMessage);
 		frag.add(Jump, GENERAL_RUNTIME_ERROR);
 	}
 	
