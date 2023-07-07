@@ -390,7 +390,7 @@ public class ASMCodeGenerator {
 		public void visitLeave(ArrayNode node) {
 			if (node.isDynamic()) {
 				newValueCode(node);
-				Type type = node.getType();
+				Type type = node.getSubtype();
 				int status = getStatus(type);	
 				int length = parseInt(node);
 				int typeSize = isArrayOrString(type) ? PrimitiveType.INTEGER.getSize() : type.getSize();
@@ -417,7 +417,7 @@ public class ASMCodeGenerator {
 
 			} else {
 				newAddressCode(node);
-				Type type = node.getType();
+				Type type = node.getSubtype();
 				int status = getStatus(type);
 				int length = node.nChildren();
 				int typeSize = isArrayOrString(type) ? PrimitiveType.INTEGER.getSize() : type.getSize();
@@ -437,7 +437,6 @@ public class ASMCodeGenerator {
 
 				for(int i = 0; i< length; i++) {
 					ASMCodeFragment frag = removeValueCode(children.get(i));
-					System.out.println(frag);
 					appendToPtr(code, tempLoc, HEADER_LENGTH + i * typeSize, frag, opcodeForStore(type));
 				}
 				code.add(Duplicate);

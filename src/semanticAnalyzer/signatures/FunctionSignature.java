@@ -11,6 +11,7 @@ import lexicalAnalyzer.Punctuator;
 public class FunctionSignature {
 	private static final boolean ALL_TYPES_ACCEPT_ERROR_TYPES = true;
 	private Type resultType;
+	private boolean isIdentifer;
 	private Type[] paramTypes;
 	Object whichVariant;
 	
@@ -46,6 +47,11 @@ public class FunctionSignature {
 	}
 	public boolean isNull() {
 		return false;
+	}
+
+	public FunctionSignature toggleIdentifer() {
+		this.isIdentifer = true;
+		return this;
 	}
 	
 	

@@ -1,6 +1,6 @@
 main {
 	const a := "abc";
-	const b := new [int] (5);
+	const b := new [int] (4);
 	const c := 1234;
 	const d := 'c';
 	print c \n;

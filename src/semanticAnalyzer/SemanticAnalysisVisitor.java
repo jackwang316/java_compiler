@@ -2,8 +2,6 @@ package semanticAnalyzer;
 
 import java.util.Arrays; 	
 import java.util.List;
-
-import asmCodeGenerator.operators.LengthCodeGenerator;
 import lexicalAnalyzer.Keyword;
 import lexicalAnalyzer.Lextant;
 import java.util.ArrayList;
@@ -20,7 +18,6 @@ import parseTree.nodeTypes.DeclarationNode;
 import parseTree.nodeTypes.ErrorNode;
 import parseTree.nodeTypes.FloatingConstantNode;
 import parseTree.nodeTypes.IdentifierNode;
-import parseTree.nodeTypes.IfStatementNode;
 import parseTree.nodeTypes.IntegerConstantNode;
 import parseTree.nodeTypes.NewlineNode;
 import parseTree.nodeTypes.OperatorNode;
@@ -29,14 +26,12 @@ import parseTree.nodeTypes.ProgramNode;
 import parseTree.nodeTypes.SpaceNode;
 import parseTree.nodeTypes.TabSpaceNode;
 import parseTree.nodeTypes.TypeNode;
-import parseTree.nodeTypes.WhileStatementNode;
 import parseTree.nodeTypes.StringConstantNode;
 import semanticAnalyzer.signatures.FunctionSignature;
 import semanticAnalyzer.signatures.FunctionSignatures;
 import semanticAnalyzer.types.Array;
 import semanticAnalyzer.types.PrimitiveType;
 import semanticAnalyzer.types.Type;
-import semanticAnalyzer.types.TypeVariable;
 import symbolTable.Binding;
 import symbolTable.Binding.Constancy;
 import symbolTable.Scope;
@@ -85,14 +80,6 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 	// statements and declarations
 	@Override
 	public void visitLeave(PrintStatementNode node) {
-	}
-	@Override
-	public void visitLeave(IfStatementNode node){
-		assertCorrectType(node, PrimitiveType.BOOLEAN, node.child(0).getType());
-	}
-	@Override 
-	public void visitLeave(WhileStatementNode node){
-		assertCorrectType(node, PrimitiveType.BOOLEAN, node.child(0).getType());
 	}
 	@Override
 	public void visitLeave(DeclarationNode node) {
@@ -169,10 +156,11 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 		}
 
 		Lextant operator = operatorFor(node);
-
-		FunctionSignature signature = FunctionSignatures.signature(operator, childTypes);
+		FunctionSignature signature = operator.getLexeme().equals(Keyword.LENGTH.getLexeme()) 
+				? FunctionSignatures.signaturesOf(operator).get(0) 
+				: FunctionSignatures.signature(operator, childTypes);
 		
-		if(signature.accepts(childTypes)) {
+		if(signature.accepts(childTypes) || childTypes.get(0) instanceof Array) {
 			node.setType(signature.resultType());
 			node.setSignature(signature);
 		}
@@ -207,8 +195,11 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 			Type selectedType = PrimitiveType.ERROR;
 			if(types.size()==1) {
 				selectedType = types.get(0);
-				node.setType(selectedType);
+				node.setType(new Array(selectedType));
 			}
+		}
+		else{
+			node.setType(new Array(node.child(0).getType()));
 		}
 	}
 
@@ -293,11 +284,5 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 	private void logError(String message) {
 		TanLogger log = TanLogger.getLogger("compiler.semanticAnalyzer");
 		log.severe(message);
-	}
-	private void assertCorrectType(ParseNode node, Type expectedType, Type actualType) {
-		if(!expectedType.equals(actualType)) {
-			semanticError("expected " + expectedType + ", got " + actualType);
-			node.setType(PrimitiveType.ERROR);
-		}
 	}
 }
