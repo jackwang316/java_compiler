@@ -64,6 +64,9 @@ public class FunctionSignature {
 		}		
 		return true;
 	}
+	public boolean accepts(List<Type> types, Type returnType) {
+		return resultType() == returnType && accepts(types);
+	}
 	private boolean assignableTo(Type variableType, Type valueType) {
 		if(valueType == PrimitiveType.ERROR && ALL_TYPES_ACCEPT_ERROR_TYPES) {
 			return true;
@@ -109,5 +112,6 @@ public class FunctionSignature {
 			return neverMatchedSignature;
 		}
 	}
+	
 
 }

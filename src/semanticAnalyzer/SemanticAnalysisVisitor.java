@@ -35,6 +35,7 @@ import semanticAnalyzer.signatures.FunctionSignature;
 import semanticAnalyzer.signatures.FunctionSignatures;
 import semanticAnalyzer.types.Array;
 import semanticAnalyzer.types.PrimitiveType;
+import static semanticAnalyzer.types.PrimitiveType.*;
 import semanticAnalyzer.types.Type;
 import semanticAnalyzer.types.TypeVariable;
 import symbolTable.Binding;
@@ -90,7 +91,7 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 	public void visitLeave(IfStatementNode node){
 		assertCorrectType(node, PrimitiveType.BOOLEAN, node.child(0).getType());
 	}
-	@Override 
+	@Override
 	public void visitLeave(WhileStatementNode node){
 		assertCorrectType(node, PrimitiveType.BOOLEAN, node.child(0).getType());
 	}
@@ -151,11 +152,183 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 			node.setType(signature.resultType());
 			node.setSignature(signature);
 	}
+
+	private Type[][] promotionTableTypes = new Type[][]{
+		new Type[] {CHARACTER, INTEGER},
+		new Type[] {CHARACTER, FLOATING},
+		new Type[] {INTEGER, FLOATING}
+	};
+	
+	private Type[] promotionTableResultTypes = new Type[] {
+		INTEGER,
+		FLOATING,
+		FLOATING
+	};
+
+	private int promotionLevel(Type type) {
+		for(int i = 0; i < promotionTableTypes.length; i++) {
+			if(type.equals(promotionTableTypes[i][0]) || type.equals(promotionTableTypes[i][1])) {
+				return i;
+			}
+		}
+		return -1;
+	}
+
+	private Type promotionResultType(Type type1, Type type2) {
+		int level1 = promotionLevel(type1);
+		int level2 = promotionLevel(type2);
+		if(level1 == -1 || level2 == -1) {
+			return PrimitiveType.ERROR;
+		}
+		return promotionTableResultTypes[Math.max(level1, level2)];
+	}
+
+	private FunctionSignature binaryPromotionSignature(OperatorNode node, FunctionSignatures group, ArrayList<Type> childTypes) {
+		assert childTypes.size() == 2;
+
+		Type type1 = childTypes.get(0);
+		Type type2 = childTypes.get(1);
+		Type resultType = promotionResultType(type1, type2);
+
+		FunctionSignature originalSignature = group.acceptingSignature(childTypes);
+		if(originalSignature != FunctionSignature.nullInstance() && !originalSignature.resultType().equals(PrimitiveType.ERROR)) {
+			return originalSignature;
+		}
+
+		int[] startPositions = new int[childTypes.size()];
+    	for (int i = 0; i < startPositions.length; i++) {
+        	startPositions[i] = promotionLevel(childTypes.get(i));
+    	}
+
+    	int[] currPos = startPositions.clone();
+
+		// LHS
+		if(currPos[0]!=-1) {
+			for (int i = currPos[0]; i < promotionTableTypes.length; i++) {
+				FunctionSignature signature = group.acceptingSignature(Arrays.asList(promotionTableTypes[i][1], type2));
+				if(signature != FunctionSignature.nullInstance() && !signature.resultType().equals(PrimitiveType.ERROR)) {
+					implicitConversion(type1, promotionTableTypes[i][1], childTypes);
+					return signature;
+				}
+			}
+		}
+		// RHS
+		if(currPos[1]!=-1) {
+			for (int i = currPos[1]; i < promotionTableTypes.length; i++) {
+				FunctionSignature signature = group.acceptingSignature(Arrays.asList(type1, promotionTableTypes[i][1]));
+				if(signature != FunctionSignature.nullInstance() && !signature.resultType().equals(PrimitiveType.ERROR)) {
+					implicitConversion(type2, promotionTableTypes[i][1], childTypes);
+					return signature;
+				}
+			}
+		}
+		// LHS & RHS
+		if(currPos[0]!=-1 && currPos[1]!=-1) {
+			ArrayList<FunctionSignature> howManyWork = new ArrayList<FunctionSignature>();
+			// RHS: outer loop, LHS: inner loop
+			for (int i = currPos[1]; i < promotionTableTypes.length; i++) {
+				for (int j = currPos[0]; j < promotionTableTypes.length; j++) {
+					FunctionSignature signature = group.acceptingSignature(Arrays.asList(promotionTableTypes[i][1], promotionTableTypes[j][1]));
+					if(signature != FunctionSignature.nullInstance() && !signature.resultType().equals(PrimitiveType.ERROR)) {
+						howManyWork.add(signature);
+					}
+				}
+			}
+			if(howManyWork.size() > 1) {
+				// int[][] parameterPositions = new int[howManyWork.size()][];
+				int[][] precendence = new int[howManyWork.size()][];
+				for (int i = 0; i < precendence.length; i++) {
+					Type[] parameterTypes = howManyWork.get(i).getParamTypes();
+					precendence[i] = new int[]{promotionLevel(parameterTypes[0]), promotionLevel(parameterTypes[1])};
+				}
+				int x = 0, y = 0;
+				for (int i = 1; i < precendence.length; i++) {
+					if(precendence[i][0] > precendence[x][0]) {
+						x = i;
+					}
+					if(precendence[i][1] > precendence[y][1]) {
+						y = i;
+					}
+
+				}
+				if(x != y){
+					if(precendence[x][1] == precendence[y][1]){
+						y = x;
+					}
+					else if(precendence[x][0] == precendence[y][0]){
+						x = y;
+					}
+				}
+				if (x==y){
+					FunctionSignature signature = howManyWork.get(x);
+					Type[] parameterTypes = signature.getParamTypes();
+					for (int i = 0; i < parameterTypes.length; i++) {
+						implicitConversion(childTypes.get(i), parameterTypes[i], childTypes);
+					}
+					return signature;
+				}
+				multiplePossiblePromotionError(node, node.getToken().getLexeme(), childTypes.get(0), childTypes.get(1));
+			}
+		}
+		return originalSignature;
+	}
+
+	// private void implicitConversion(OperatorNode node, Type type, ArrayList<Type> childTypes) {
+		// Type originalType = childTypes.get(index);
+		// if(originalType == resultType) {
+		// 	return;
+		// }
+		// implicitCast(node, index, resultType, originalType);
+
+		// childTypes.set(index, resultType);
+		
+	// }
+
+	private void implicitConversion(Type originalType, Type promoType, ArrayList<Type> childTypes) {
+		if(originalType == promoType) {
+			return;
+		}
+		implicitConversion(originalType, promoType);
+		childTypes.set(childTypes.size()-1, promoType);
+	}
+	private void implicitConversion(Type originalType, Type promoType) {
+		if(originalType == promoType) {
+			return;
+		}
+		if(originalType == PrimitiveType.CHARACTER && promoType == PrimitiveType.INTEGER) {
+			implicitConversion(originalType, INTEGER);
+		}
+		else if(originalType == PrimitiveType.CHARACTER && promoType == PrimitiveType.FLOATING) {
+			implicitConversion(originalType, FLOATING);
+		}
+		else if(originalType == PrimitiveType.INTEGER && promoType == PrimitiveType.FLOATING) {
+			implicitConversion(originalType, FLOATING);
+		}
+		else {
+			semanticError("implicit conversion error");
+		}
+
+		TypeNode typeNode = TypeNode.withChildren(((ParseNode)originalType), promoType);
+		typeNode.setType(promoType);
+		typeNode.setSignature(FunctionSignatures.signature(Punctuator.CAST, Arrays.asList(originalType, promoType)));
+		visitLeave(typeNode);
+	}
+
 	///////////////////////////////////////////////////////////////////////////
 	// expressions
 	@Override
 	public void visitLeave(OperatorNode node) {
-		List<Type> childTypes;  
+		// ArrayList<Type> childTypes = new ArrayList<Type>();
+		List<Type> childTypes;
+		Lextant operator = operatorFor(node);
+		FunctionSignatures signatures = FunctionSignatures.signaturesOf(operator);
+		FunctionSignature signature;
+
+		ArrayList<Type> childTypesArrayList = new ArrayList<Type>();
+		for (ParseNode child : node.getChildren()) {
+			childTypesArrayList.add(child.getType());
+		}
+
 		if(node.nChildren() == 1) {
 			ParseNode child = node.child(0);
 			childTypes = Arrays.asList(child.getType());
@@ -165,13 +338,12 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 			ParseNode left  = node.child(0);
 			ParseNode right = node.child(1);
 			
-			childTypes = Arrays.asList(left.getType(), right.getType());		
+			childTypes = Arrays.asList(left.getType(), right.getType());
+			signature = binaryPromotionSignature(node, signatures, childTypesArrayList);
 		}
-
-		Lextant operator = operatorFor(node);
-
-		FunctionSignature signature = FunctionSignatures.signature(operator, childTypes);
 		
+		signature = FunctionSignatures.signature(operator, childTypes);
+
 		if(signature.accepts(childTypes)) {
 			node.setType(signature.resultType());
 			node.setSignature(signature);
@@ -288,7 +460,11 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 		Token token = node.getToken();
 		
 		logError("operator " + token.getLexeme() + " not defined for types " 
-				 + operandTypes  + " at " + token.getLocation());	
+				 + operandTypes  + " at " + token.getLocation());
+	}
+	private void multiplePossiblePromotionError(ParseNode node, String operator, Type left, Type right) {
+		logError("Multiple possible promotions for operator " + operator + " with operands "+ left + " and " +
+	right + " at " + node.getToken().getLocation());
 	}
 	private void logError(String message) {
 		TanLogger log = TanLogger.getLogger("compiler.semanticAnalyzer");

@@ -16,7 +16,6 @@ import asmCodeGenerator.operators.IntToCharCodeGenerator;
 import lexicalAnalyzer.Keyword;
 import lexicalAnalyzer.Punctuator;
 import semanticAnalyzer.types.Array;
-import semanticAnalyzer.types.PrimitiveType;
 import semanticAnalyzer.types.Type;
 import semanticAnalyzer.types.TypeVariable;
 
@@ -46,6 +45,15 @@ public class FunctionSignatures extends ArrayList<FunctionSignature> {
 	public FunctionSignature acceptingSignature(List<Type> types) {
 		for(FunctionSignature functionSignature: this) {
 			if(functionSignature.accepts(types)) {
+				return functionSignature;
+			}
+		}
+		return FunctionSignature.nullInstance();
+	}
+
+	public FunctionSignature acceptingSignature(List<Type> types, Type returnType) {
+		for(FunctionSignature functionSignature: this) {
+			if(functionSignature.accepts(types, returnType)) {
 				return functionSignature;
 			}
 		}
@@ -135,10 +143,6 @@ public class FunctionSignatures extends ArrayList<FunctionSignature> {
 			new FunctionSignature(new LengthCodeGenerator(), new Array(T), INTEGER),
 			new FunctionSignature(new LengthCodeGenerator(), INTEGER, INTEGER)
 		);
-//		new FunctionSignatures(Punctuator.ADD,
-//		    new FunctionSignature(ASMOpcode.Add, INTEGER, INTEGER, INTEGER),
-//		    new FunctionSignature(ASMOpcode.FAdd, FLOAT, FLOAT, FLOAT)
-//		);
 		
 		new FunctionSignatures(Punctuator.CAST,
 			new FunctionSignature(ASMOpcode.Nop, 
