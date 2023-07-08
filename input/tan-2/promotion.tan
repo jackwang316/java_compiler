@@ -1,0 +1,13 @@
+main {
+	var test1 := 20.32;
+	test1 := 1345;
+	print test1\n;
+	
+	var test2 := 20;
+	test2 := 'a';
+	print test2\n;
+
+	var test3 := 20.32;
+	test3 := 'a';
+	print test3\n;
+}

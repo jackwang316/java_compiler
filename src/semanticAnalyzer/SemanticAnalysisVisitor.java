@@ -35,6 +35,7 @@ import semanticAnalyzer.signatures.FunctionSignature;
 import semanticAnalyzer.signatures.FunctionSignatures;
 import semanticAnalyzer.types.Array;
 import semanticAnalyzer.types.PrimitiveType;
+import static semanticAnalyzer.types.PrimitiveType.*;
 import semanticAnalyzer.types.Type;
 import symbolTable.Binding;
 import symbolTable.Binding.Constancy;
@@ -45,6 +46,7 @@ import tokens.Token;
 class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 	@Override
 	public void visitLeave(ParseNode node) {
+		System.out.println("visitLeave(ParseNode node)");
 		throw new RuntimeException("Node class unimplemented in SemanticAnalysisVisitor: " + node.getClass());
 	}
 	
@@ -86,6 +88,14 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 	public void visitLeave(PrintStatementNode node) {
 	}
 	@Override
+	public void visitLeave(IfStatementNode node){
+		assertCorrectType(node, PrimitiveType.BOOLEAN, node.child(0).getType());
+	}
+	@Override
+	public void visitLeave(WhileStatementNode node){
+		assertCorrectType(node, PrimitiveType.BOOLEAN, node.child(0).getType());
+	}
+	@Override
 	public void visitLeave(DeclarationNode node) {
 		if(node.child(0) instanceof ErrorNode) {
 			node.setType(PrimitiveType.ERROR);
@@ -107,6 +117,7 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 	
 	@Override
 	public void visitLeave(AssignmentStatementNode node) {
+		System.out.println("visitLeave(AssignmentStatementNode node)");
 		if(node.child(0) instanceof ErrorNode) {
 			node.setType(PrimitiveType.ERROR);
 			return;
@@ -132,6 +143,14 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 		if(!expressionType.equals(identifierType)) {
 			semanticError("types don't match in AssignmentStatement");
 			return;
+		
+		
+		if((identifierType == CHARACTER || identifierType == INTEGER || identifierType == FLOATING) && (expressionType == CHARACTER || expressionType == INTEGER)) {
+			System.out.println("implicit conversion");
+			implicitConversion(node, 1, identifierType, expressionType);
+		}
+		else {
+			assertCorrectType(node, identifierType, expressionType);
 		}
 		
 		if(identifier instanceof IdentifierNode) {
@@ -141,6 +160,7 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 		}
 
 		node.setType(expressionType);
+	}
 	}
 
 	@Override
@@ -156,21 +176,193 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 			node.setType(signature.resultType());
 			node.setSignature(signature);
 	}
+
+	private Type[][] promotionTableTypes = {
+		{CHARACTER, INTEGER},
+		{CHARACTER, FLOATING},
+		{INTEGER, FLOATING}
+	};
+
+	private FunctionSignature binaryPromotionSignature(OperatorNode node, FunctionSignatures signatures, ArrayList<Type> childTypes) {
+		System.out.println("binaryPromotionSignature");
+		Type type1 = childTypes.get(0);
+		Type type2 = childTypes.get(1);
+	
+		FunctionSignature originalSignature = signatures.acceptingSignature(childTypes);
+		if (originalSignature != FunctionSignature.nullInstance() && !originalSignature.resultType().equals(PrimitiveType.ERROR)) {
+			return originalSignature;
+		}
+	
+		ArrayList<FunctionSignature> matchingSignatures = new ArrayList<>();
+	
+		// Check all possible promotion paths
+		for (Type[] promotionTypes : promotionTableTypes) {
+			Type lhsType = promotionTypes[0];
+			Type rhsType = promotionTypes[1];
+	
+			// Promotion: char -> int
+			if (type1 == CHARACTER  && type2 == INTEGER) {
+				System.out.println("char -> int");
+				FunctionSignature signature = signatures.acceptingSignature(Arrays.asList(lhsType, rhsType));
+				if (signature != FunctionSignature.nullInstance() && !signature.resultType().equals(PrimitiveType.ERROR)) {
+					matchingSignatures.add(signature);
+				}
+			}
+	
+			// Promotion: char -> float
+			if (type1 == CHARACTER  && type2 == FLOATING) {
+				System.out.println("char -> float");
+				FunctionSignature signature = signatures.acceptingSignature(Arrays.asList(lhsType, rhsType));
+				if (signature != FunctionSignature.nullInstance() && !signature.resultType().equals(PrimitiveType.ERROR)) {
+					matchingSignatures.add(signature);
+				}
+			}
+	
+			// Promotion: int -> float
+			if (type1 == INTEGER && type2 == FLOATING) {
+				System.out.println("int -> float");
+				FunctionSignature signature = signatures.acceptingSignature(Arrays.asList(lhsType, rhsType));
+				if (signature != FunctionSignature.nullInstance() && !signature.resultType().equals(PrimitiveType.ERROR)) {
+					matchingSignatures.add(signature);
+				}
+			}
+		}
+	
+		if (matchingSignatures.size() == 1) {
+			FunctionSignature signature = matchingSignatures.get(0);
+			Type[] parameterTypes = signature.getParamTypes();
+			for (int i = 0; i < parameterTypes.length; i++) {
+				implicitConversion(node, i, parameterTypes[i], childTypes);
+			}
+			return signature;
+		} else if (matchingSignatures.size() > 1) {
+			// Handle multiple possible promotions error
+			multiplePossiblePromotionError(node, node.getToken().getLexeme(), childTypes.get(0), childTypes.get(1));
+		}
+	
+		return originalSignature;
+	}
+	
+	private void implicitConversion(ParseNode node, int index, Type promoType, ArrayList<Type> childTypes) {
+		Type originalType = childTypes.get(index);
+		if (originalType != promoType) {
+			ParseNode expression = node.child(index);
+			TypeNode typeNode = TypeNode.withChildren(expression, promoType);
+			node.replaceNthChild(index, typeNode);
+			visitLeave(typeNode);
+			childTypes.set(index, promoType);
+		}
+	}
+
+	// private void implicitConversion(ParseNode node, int index, Type promoType, ArrayList<Type> childTypes) {
+	// 	Type originalType = childTypes.get(index);
+	// 	if(originalType == promoType) {
+	// 		return;
+	// 	}
+	// 	implicitConversion(node, index, originalType, promoType);
+	// 	childTypes.set(index, promoType);
+	// }
+
+	// private void implicitConversion(ParseNode node, int index, Type promoType, Type originalType) {
+	// 	if (originalType == promoType) {
+	// 		return;
+	// 	}
+	
+	// 	// Handle char to int conversion
+	// 	System.out.println("originalType: " + originalType + " promoType: " + promoType);
+	// 	if (originalType == CHARACTER && promoType == INTEGER) {
+	// 		ParseNode expression = node.child(index);
+	// 		TypeNode typeNode = TypeNode.withChildren(expression, promoType);
+	// 		// System.out.println("typeNode: " + typeNode);
+	// 		node.replaceNthChild(index, typeNode);
+	// 		visitLeave(typeNode);
+	// 	}
+	
+	// 	// Handle char to float conversion
+	// 	if (originalType == CHARACTER && promoType == FLOATING) {
+	// 		ParseNode expression = node.child(index);
+	// 		// TypeNode typeNode = TypeNode.withChildren(expression, promoType);
+	// 		// System.out.println("typeNode: " + typeNode);
+	// 		// node.replaceNthChild(index, typeNode);
+	// 		// visitLeave(typeNode);
+			
+	// 		// Convert CHAR to INT
+	// 		TypeNode intTypeNode = TypeNode.withChildren(expression, INTEGER);
+	// 		node.replaceNthChild(index, intTypeNode);
+	// 		visitLeave(intTypeNode);
+		
+	// 		// Convert INT to FLOATING
+	// 		ParseNode intExpression = intTypeNode.child(0);
+	// 		TypeNode floatTypeNode = TypeNode.withChildren(intExpression, FLOATING);
+	// 		intTypeNode.replaceChild(intExpression, floatTypeNode);
+	// 		visitLeave(floatTypeNode);
+	// 	}
+	
+	// 	// Handle int to float conversion
+	// 	if (originalType == INTEGER && promoType == FLOATING) {
+	// 		ParseNode expression = node.child(index);
+	// 		TypeNode typeNode = TypeNode.withChildren(expression, promoType);
+	// 		// System.out.println("typeNode: " + typeNode);
+	// 		node.replaceNthChild(index, typeNode);
+	// 		visitLeave(typeNode);
+	// 	}
+	// }
+	private void implicitConversion(ParseNode node, int index, Type promoType, Type originalType){
+		if(originalType == promoType){
+			return;
+		}
+		if(originalType == CHARACTER && promoType != INTEGER) {
+			implicitConversion(node, index, INTEGER, originalType);
+		}
+
+		if(originalType == CHARACTER && promoType == FLOATING) {
+			implicitConversion(node, index, INTEGER, originalType);
+			implicitConversion(node, index, FLOATING, INTEGER);
+		}
+
+		// if(originalType == INTEGER && promoType == FLOATING) {
+		// 	implicitConversion(node, index, FLOATING, originalType);
+		// }
+
+		ParseNode expressionNode = node.child(index);
+		TypeNode typeNode = TypeNode.withChildren(expressionNode, promoType);
+		System.out.println("typeNode: " + typeNode);
+		
+		// node.replaceNthChild(index, typeNode);
+		visitLeave(typeNode);
+	}
+
 	///////////////////////////////////////////////////////////////////////////
 	// expressions
 	@Override
 	public void visitLeave(OperatorNode node) {
-		List<Type> childTypes;  
+		List<Type> childTypes;
+		Lextant operator = operatorFor(node);
+		FunctionSignatures signatures = FunctionSignatures.signaturesOf(operator);
+		FunctionSignature signature;
+
+		// unary
 		if(node.nChildren() == 1) {
+			System.out.println("unary");
 			ParseNode child = node.child(0);
 			childTypes = Arrays.asList(child.getType());
+			signature = signatures.acceptingSignature(childTypes);
 		}
-		else {
-			assert node.nChildren() == 2;
+
+		// binary
+		else{
+			System.out.println("binary");
 			ParseNode left  = node.child(0);
 			ParseNode right = node.child(1);
 			
-			childTypes = Arrays.asList(left.getType(), right.getType());		
+			childTypes = Arrays.asList(left.getType(), right.getType());
+
+			ArrayList<Type> childTypesArrayList = new ArrayList<Type>();
+			for (ParseNode child : node.getChildren()) {
+				childTypesArrayList.add(child.getType());
+			}
+			
+			signature = binaryPromotionSignature(node, signatures, childTypesArrayList);
 		}
 
 		Lextant operator = operatorFor(node);
@@ -179,6 +371,12 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 				: FunctionSignatures.signature(operator, childTypes);
 		
 		if(signature.accepts(childTypes) || childTypes.get(0) instanceof Array) {
+		System.out.println("Child types: " + childTypes);
+    	System.out.println("Signature: " + signature);
+		
+		// signature = FunctionSignatures.signature(operator, childTypes);
+
+		if(signature.accepts(childTypes)) {
 			node.setType(signature.resultType());
 			node.setSignature(signature);
 		}
@@ -186,6 +384,7 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 			typeCheckError(node, childTypes);
 			node.setType(PrimitiveType.ERROR);
 		}
+	}
 	}
 
 	
@@ -314,7 +513,11 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 		Token token = node.getToken();
 		
 		logError("operator " + token.getLexeme() + " not defined for types " 
-				 + operandTypes  + " at " + token.getLocation());	
+				 + operandTypes  + " at " + token.getLocation());
+	}
+	private void multiplePossiblePromotionError(ParseNode node, String operator, Type left, Type right) {
+		logError("Multiple possible promotions for operator " + operator + " with operands "+ left + " and " +
+	right + " at " + node.getToken().getLocation());
 	}
 	private void logError(String message) {
 		TanLogger log = TanLogger.getLogger("compiler.semanticAnalyzer");
