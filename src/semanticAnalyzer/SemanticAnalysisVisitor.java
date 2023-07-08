@@ -47,6 +47,7 @@ import tokens.Token;
 class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 	@Override
 	public void visitLeave(ParseNode node) {
+		System.out.println("visitLeave(ParseNode node)");
 		throw new RuntimeException("Node class unimplemented in SemanticAnalysisVisitor: " + node.getClass());
 	}
 	
@@ -117,6 +118,7 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 	
 	@Override
 	public void visitLeave(AssignmentStatementNode node) {
+		System.out.println("visitLeave(AssignmentStatementNode node)");
 		if(node.child(0) instanceof ErrorNode) {
 			node.setType(PrimitiveType.ERROR);
 			return;
@@ -128,9 +130,13 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 		Type expressionType = expression.getType();
 		Type identifierType = identifier.getType();
 		
-		if(!expressionType.equals(identifierType)) {
-			semanticError("types don't match in AssignmentStatement");
-			return;
+		
+		if((identifierType == CHARACTER || identifierType == INTEGER || identifierType == FLOATING) && (expressionType == CHARACTER || expressionType == INTEGER)) {
+			System.out.println("implicit conversion");
+			implicitConversion(node, 1, identifierType, expressionType);
+		}
+		else {
+			assertCorrectType(node, identifierType, expressionType);
 		}
 		
 		if(identifier.getBinding().isConstant()) {
@@ -153,164 +159,158 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 			node.setSignature(signature);
 	}
 
-	private Type[][] promotionTableTypes = new Type[][]{
-		new Type[] {CHARACTER, INTEGER},
-		new Type[] {CHARACTER, FLOATING},
-		new Type[] {INTEGER, FLOATING}
-	};
-	
-	private Type[] promotionTableResultTypes = new Type[] {
-		INTEGER,
-		FLOATING,
-		FLOATING
+	private Type[][] promotionTableTypes = {
+		{CHARACTER, INTEGER},
+		{CHARACTER, FLOATING},
+		{INTEGER, FLOATING}
 	};
 
-	private int promotionLevel(Type type) {
-		for(int i = 0; i < promotionTableTypes.length; i++) {
-			if(type.equals(promotionTableTypes[i][0]) || type.equals(promotionTableTypes[i][1])) {
-				return i;
-			}
-		}
-		return -1;
-	}
-
-	private Type promotionResultType(Type type1, Type type2) {
-		int level1 = promotionLevel(type1);
-		int level2 = promotionLevel(type2);
-		if(level1 == -1 || level2 == -1) {
-			return PrimitiveType.ERROR;
-		}
-		return promotionTableResultTypes[Math.max(level1, level2)];
-	}
-
-	private FunctionSignature binaryPromotionSignature(OperatorNode node, FunctionSignatures group, ArrayList<Type> childTypes) {
-		assert childTypes.size() == 2;
-
+	private FunctionSignature binaryPromotionSignature(OperatorNode node, FunctionSignatures signatures, ArrayList<Type> childTypes) {
+		System.out.println("binaryPromotionSignature");
 		Type type1 = childTypes.get(0);
 		Type type2 = childTypes.get(1);
-		Type resultType = promotionResultType(type1, type2);
-
-		FunctionSignature originalSignature = group.acceptingSignature(childTypes);
-		if(originalSignature != FunctionSignature.nullInstance() && !originalSignature.resultType().equals(PrimitiveType.ERROR)) {
+	
+		FunctionSignature originalSignature = signatures.acceptingSignature(childTypes);
+		if (originalSignature != FunctionSignature.nullInstance() && !originalSignature.resultType().equals(PrimitiveType.ERROR)) {
 			return originalSignature;
 		}
-
-		int[] startPositions = new int[childTypes.size()];
-    	for (int i = 0; i < startPositions.length; i++) {
-        	startPositions[i] = promotionLevel(childTypes.get(i));
-    	}
-
-    	int[] currPos = startPositions.clone();
-
-		// LHS
-		if(currPos[0]!=-1) {
-			for (int i = currPos[0]; i < promotionTableTypes.length; i++) {
-				FunctionSignature signature = group.acceptingSignature(Arrays.asList(promotionTableTypes[i][1], type2));
-				if(signature != FunctionSignature.nullInstance() && !signature.resultType().equals(PrimitiveType.ERROR)) {
-					implicitConversion(type1, promotionTableTypes[i][1], childTypes);
-					return signature;
+	
+		ArrayList<FunctionSignature> matchingSignatures = new ArrayList<>();
+	
+		// Check all possible promotion paths
+		for (Type[] promotionTypes : promotionTableTypes) {
+			Type lhsType = promotionTypes[0];
+			Type rhsType = promotionTypes[1];
+	
+			// Promotion: char -> int
+			if (type1 == CHARACTER  && type2 == INTEGER) {
+				System.out.println("char -> int");
+				FunctionSignature signature = signatures.acceptingSignature(Arrays.asList(lhsType, rhsType));
+				if (signature != FunctionSignature.nullInstance() && !signature.resultType().equals(PrimitiveType.ERROR)) {
+					matchingSignatures.add(signature);
+				}
+			}
+	
+			// Promotion: char -> float
+			if (type1 == CHARACTER  && type2 == FLOATING) {
+				System.out.println("char -> float");
+				FunctionSignature signature = signatures.acceptingSignature(Arrays.asList(lhsType, rhsType));
+				if (signature != FunctionSignature.nullInstance() && !signature.resultType().equals(PrimitiveType.ERROR)) {
+					matchingSignatures.add(signature);
+				}
+			}
+	
+			// Promotion: int -> float
+			if (type1 == INTEGER && type2 == FLOATING) {
+				System.out.println("int -> float");
+				FunctionSignature signature = signatures.acceptingSignature(Arrays.asList(lhsType, rhsType));
+				if (signature != FunctionSignature.nullInstance() && !signature.resultType().equals(PrimitiveType.ERROR)) {
+					matchingSignatures.add(signature);
 				}
 			}
 		}
-		// RHS
-		if(currPos[1]!=-1) {
-			for (int i = currPos[1]; i < promotionTableTypes.length; i++) {
-				FunctionSignature signature = group.acceptingSignature(Arrays.asList(type1, promotionTableTypes[i][1]));
-				if(signature != FunctionSignature.nullInstance() && !signature.resultType().equals(PrimitiveType.ERROR)) {
-					implicitConversion(type2, promotionTableTypes[i][1], childTypes);
-					return signature;
-				}
+	
+		if (matchingSignatures.size() == 1) {
+			FunctionSignature signature = matchingSignatures.get(0);
+			Type[] parameterTypes = signature.getParamTypes();
+			for (int i = 0; i < parameterTypes.length; i++) {
+				implicitConversion(node, i, parameterTypes[i], childTypes);
 			}
+			return signature;
+		} else if (matchingSignatures.size() > 1) {
+			// Handle multiple possible promotions error
+			multiplePossiblePromotionError(node, node.getToken().getLexeme(), childTypes.get(0), childTypes.get(1));
 		}
-		// LHS & RHS
-		if(currPos[0]!=-1 && currPos[1]!=-1) {
-			ArrayList<FunctionSignature> howManyWork = new ArrayList<FunctionSignature>();
-			// RHS: outer loop, LHS: inner loop
-			for (int i = currPos[1]; i < promotionTableTypes.length; i++) {
-				for (int j = currPos[0]; j < promotionTableTypes.length; j++) {
-					FunctionSignature signature = group.acceptingSignature(Arrays.asList(promotionTableTypes[i][1], promotionTableTypes[j][1]));
-					if(signature != FunctionSignature.nullInstance() && !signature.resultType().equals(PrimitiveType.ERROR)) {
-						howManyWork.add(signature);
-					}
-				}
-			}
-			if(howManyWork.size() > 1) {
-				// int[][] parameterPositions = new int[howManyWork.size()][];
-				int[][] precendence = new int[howManyWork.size()][];
-				for (int i = 0; i < precendence.length; i++) {
-					Type[] parameterTypes = howManyWork.get(i).getParamTypes();
-					precendence[i] = new int[]{promotionLevel(parameterTypes[0]), promotionLevel(parameterTypes[1])};
-				}
-				int x = 0, y = 0;
-				for (int i = 1; i < precendence.length; i++) {
-					if(precendence[i][0] > precendence[x][0]) {
-						x = i;
-					}
-					if(precendence[i][1] > precendence[y][1]) {
-						y = i;
-					}
-
-				}
-				if(x != y){
-					if(precendence[x][1] == precendence[y][1]){
-						y = x;
-					}
-					else if(precendence[x][0] == precendence[y][0]){
-						x = y;
-					}
-				}
-				if (x==y){
-					FunctionSignature signature = howManyWork.get(x);
-					Type[] parameterTypes = signature.getParamTypes();
-					for (int i = 0; i < parameterTypes.length; i++) {
-						implicitConversion(childTypes.get(i), parameterTypes[i], childTypes);
-					}
-					return signature;
-				}
-				multiplePossiblePromotionError(node, node.getToken().getLexeme(), childTypes.get(0), childTypes.get(1));
-			}
-		}
+	
 		return originalSignature;
 	}
+	
+	private void implicitConversion(ParseNode node, int index, Type promoType, ArrayList<Type> childTypes) {
+		Type originalType = childTypes.get(index);
+		if (originalType != promoType) {
+			ParseNode expression = node.child(index);
+			TypeNode typeNode = TypeNode.withChildren(expression, promoType);
+			node.replaceNthChild(index, typeNode);
+			visitLeave(typeNode);
+			childTypes.set(index, promoType);
+		}
+	}
 
-	// private void implicitConversion(OperatorNode node, Type type, ArrayList<Type> childTypes) {
-		// Type originalType = childTypes.get(index);
-		// if(originalType == resultType) {
-		// 	return;
-		// }
-		// implicitCast(node, index, resultType, originalType);
-
-		// childTypes.set(index, resultType);
-		
+	// private void implicitConversion(ParseNode node, int index, Type promoType, ArrayList<Type> childTypes) {
+	// 	Type originalType = childTypes.get(index);
+	// 	if(originalType == promoType) {
+	// 		return;
+	// 	}
+	// 	implicitConversion(node, index, originalType, promoType);
+	// 	childTypes.set(index, promoType);
 	// }
 
-	private void implicitConversion(Type originalType, Type promoType, ArrayList<Type> childTypes) {
-		if(originalType == promoType) {
+	// private void implicitConversion(ParseNode node, int index, Type promoType, Type originalType) {
+	// 	if (originalType == promoType) {
+	// 		return;
+	// 	}
+	
+	// 	// Handle char to int conversion
+	// 	System.out.println("originalType: " + originalType + " promoType: " + promoType);
+	// 	if (originalType == CHARACTER && promoType == INTEGER) {
+	// 		ParseNode expression = node.child(index);
+	// 		TypeNode typeNode = TypeNode.withChildren(expression, promoType);
+	// 		// System.out.println("typeNode: " + typeNode);
+	// 		node.replaceNthChild(index, typeNode);
+	// 		visitLeave(typeNode);
+	// 	}
+	
+	// 	// Handle char to float conversion
+	// 	if (originalType == CHARACTER && promoType == FLOATING) {
+	// 		ParseNode expression = node.child(index);
+	// 		// TypeNode typeNode = TypeNode.withChildren(expression, promoType);
+	// 		// System.out.println("typeNode: " + typeNode);
+	// 		// node.replaceNthChild(index, typeNode);
+	// 		// visitLeave(typeNode);
+			
+	// 		// Convert CHAR to INT
+	// 		TypeNode intTypeNode = TypeNode.withChildren(expression, INTEGER);
+	// 		node.replaceNthChild(index, intTypeNode);
+	// 		visitLeave(intTypeNode);
+		
+	// 		// Convert INT to FLOATING
+	// 		ParseNode intExpression = intTypeNode.child(0);
+	// 		TypeNode floatTypeNode = TypeNode.withChildren(intExpression, FLOATING);
+	// 		intTypeNode.replaceChild(intExpression, floatTypeNode);
+	// 		visitLeave(floatTypeNode);
+	// 	}
+	
+	// 	// Handle int to float conversion
+	// 	if (originalType == INTEGER && promoType == FLOATING) {
+	// 		ParseNode expression = node.child(index);
+	// 		TypeNode typeNode = TypeNode.withChildren(expression, promoType);
+	// 		// System.out.println("typeNode: " + typeNode);
+	// 		node.replaceNthChild(index, typeNode);
+	// 		visitLeave(typeNode);
+	// 	}
+	// }
+	private void implicitConversion(ParseNode node, int index, Type promoType, Type originalType){
+		if(originalType == promoType){
 			return;
 		}
-		implicitConversion(originalType, promoType);
-		childTypes.set(childTypes.size()-1, promoType);
-	}
-	private void implicitConversion(Type originalType, Type promoType) {
-		if(originalType == promoType) {
-			return;
-		}
-		if(originalType == PrimitiveType.CHARACTER && promoType == PrimitiveType.INTEGER) {
-			implicitConversion(originalType, INTEGER);
-		}
-		else if(originalType == PrimitiveType.CHARACTER && promoType == PrimitiveType.FLOATING) {
-			implicitConversion(originalType, FLOATING);
-		}
-		else if(originalType == PrimitiveType.INTEGER && promoType == PrimitiveType.FLOATING) {
-			implicitConversion(originalType, FLOATING);
-		}
-		else {
-			semanticError("implicit conversion error");
+		if(originalType == CHARACTER && promoType != INTEGER) {
+			implicitConversion(node, index, INTEGER, originalType);
 		}
 
-		TypeNode typeNode = TypeNode.withChildren(((ParseNode)originalType), promoType);
-		typeNode.setType(promoType);
-		typeNode.setSignature(FunctionSignatures.signature(Punctuator.CAST, Arrays.asList(originalType, promoType)));
+		if(originalType == CHARACTER && promoType == FLOATING) {
+			implicitConversion(node, index, INTEGER, originalType);
+			implicitConversion(node, index, FLOATING, INTEGER);
+		}
+
+		// if(originalType == INTEGER && promoType == FLOATING) {
+		// 	implicitConversion(node, index, FLOATING, originalType);
+		// }
+
+		ParseNode expressionNode = node.child(index);
+		TypeNode typeNode = TypeNode.withChildren(expressionNode, promoType);
+		System.out.println("typeNode: " + typeNode);
+		
+		// node.replaceNthChild(index, typeNode);
 		visitLeave(typeNode);
 	}
 
@@ -318,31 +318,38 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 	// expressions
 	@Override
 	public void visitLeave(OperatorNode node) {
-		// ArrayList<Type> childTypes = new ArrayList<Type>();
 		List<Type> childTypes;
 		Lextant operator = operatorFor(node);
 		FunctionSignatures signatures = FunctionSignatures.signaturesOf(operator);
 		FunctionSignature signature;
 
-		ArrayList<Type> childTypesArrayList = new ArrayList<Type>();
-		for (ParseNode child : node.getChildren()) {
-			childTypesArrayList.add(child.getType());
-		}
-
+		// unary
 		if(node.nChildren() == 1) {
+			System.out.println("unary");
 			ParseNode child = node.child(0);
 			childTypes = Arrays.asList(child.getType());
+			signature = signatures.acceptingSignature(childTypes);
 		}
-		else {
-			assert node.nChildren() == 2;
+
+		// binary
+		else{
+			System.out.println("binary");
 			ParseNode left  = node.child(0);
 			ParseNode right = node.child(1);
 			
 			childTypes = Arrays.asList(left.getType(), right.getType());
+
+			ArrayList<Type> childTypesArrayList = new ArrayList<Type>();
+			for (ParseNode child : node.getChildren()) {
+				childTypesArrayList.add(child.getType());
+			}
+			
 			signature = binaryPromotionSignature(node, signatures, childTypesArrayList);
 		}
+		System.out.println("Child types: " + childTypes);
+    	System.out.println("Signature: " + signature);
 		
-		signature = FunctionSignatures.signature(operator, childTypes);
+		// signature = FunctionSignatures.signature(operator, childTypes);
 
 		if(signature.accepts(childTypes)) {
 			node.setType(signature.resultType());
