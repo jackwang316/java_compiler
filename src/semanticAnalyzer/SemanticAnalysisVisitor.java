@@ -1,7 +1,10 @@
 package semanticAnalyzer;
 
-import java.util.Arrays; 	
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+
 import lexicalAnalyzer.Keyword;
 import lexicalAnalyzer.Lextant;
 import java.util.ArrayList;
@@ -203,29 +206,30 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 			ArrayList<Type> types = new ArrayList<Type>();
 			for(ParseNode child: node.getChildren()) {
 				Type childType = child.getType();
-				boolean found=false;
-				for(Type type: types) {
-					if(type.equivalent(childType)) {
-						found=true;
-						break;
-					}
-				}
-				if(!found) {
+				if(!types.contains(childType)) {
 					types.add(childType);
 				}
 			}
 
 			Type selectedType = PrimitiveType.ERROR;
-			if(types.size()==1) {
+			if(types.size() == 1) {
 				selectedType = types.get(0);
 				node.setType(new Array(selectedType));
+				return;
+			}
+
+			for(Type t: types){
+				if(t instanceof Array || t == PrimitiveType.STRING){
+					promotionError(node, PrimitiveType.STRING);
+					node.setType(PrimitiveType.ERROR);
+					return;
+				}
 			}
 		}
 		else{
 			node.setType(new Array(node.child(0).getType()));
 		}
 	}
-
 
 	///////////////////////////////////////////////////////////////////////////
 	// simple leaf nodes
@@ -290,6 +294,13 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 	// error logging/printing
 	private void semanticError(String message) {
 		logError("Semantic error " + message);
+	}
+
+	private void promotionError(ParseNode node, Type operandTypes) {
+		Token token = node.getToken();
+		
+		logError("operator for casting " + token.getLexeme() + " not defined for type " 
+				 + operandTypes  + " at " + token.getLocation());
 	}
 
 	private void typeCheckError(ParseNode node, Type operandTypes){
