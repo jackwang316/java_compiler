@@ -9,6 +9,7 @@ import java.util.ArrayList;
 
 import asmCodeGenerator.codeStorage.ASMCodeChunk;
 import asmCodeGenerator.codeStorage.ASMCodeFragment;
+import asmCodeGenerator.codeStorage.ASMCodeFragment.CodeType;
 import asmCodeGenerator.codeStorage.ASMOpcode;
 import asmCodeGenerator.operators.SimpleCodeGenerator;
 import asmCodeGenerator.runtime.MemoryManager;
@@ -25,6 +26,7 @@ import parseTree.nodeTypes.DeclarationNode;
 import parseTree.nodeTypes.FloatingConstantNode;
 import parseTree.nodeTypes.IdentifierNode;
 import parseTree.nodeTypes.IfStatementNode;
+import parseTree.nodeTypes.IndexNode;
 import parseTree.nodeTypes.IntegerConstantNode;
 import parseTree.nodeTypes.NewlineNode;
 import parseTree.nodeTypes.OperatorNode;
@@ -174,7 +176,10 @@ public class ASMCodeGenerator {
 				code.add(LoadC);
 			}
 			else if(node.getType() == PrimitiveType.STRING) {
-				code.add(LoadC);
+				code.add(LoadI);
+			}
+			else if(node.getType() instanceof Array) {
+				code.add(LoadI);
 			}
 			else if(node.getType() == PrimitiveType.FLOATING) {
 				code.add(LoadF);
@@ -287,8 +292,27 @@ public class ASMCodeGenerator {
 		
 		public void visitLeave(AssignmentStatementNode node) {
 			newVoidCode(node);
-			ASMCodeFragment lvalue = removeAddressCode(node.child(0));	
 			ASMCodeFragment rvalue = removeValueCode(node.child(1));
+			if(node.child(0) instanceof IndexNode){
+				IndexNode indexNode = (IndexNode) node.child(0);
+				int index = Integer.parseInt(indexNode.child(1).getToken().getLexeme());
+				Type subType = ((Array) indexNode.child(0).getType()).getSubtype();
+				int subTypeSize = subType.getSize();
+				Macros.loadIFrom(code, RunTime.ARR_LOC);
+				code.add(Duplicate);
+				code.add(PushI, 12);
+				code.add(Add);
+				code.add(LoadI);
+				code.add(PushI, index + 1);
+				code.add(Subtract);
+				code.add(JumpNeg, RunTime.OUT_OF_BOUNDS_RUNTIME_ERROR);
+				Macros.loadIFrom(code, RunTime.ARR_LOC);
+				code.add(Duplicate);
+				appendToPtr(code, RunTime.ARR_LOC, HEADER_LENGTH + (index * subTypeSize), rvalue, opcodeForStore(subType));
+			}
+
+			ASMCodeFragment lvalue = removeAddressCode(node.child(0));	
+			
 			
 			code.append(lvalue);
 			code.append(rvalue);
@@ -296,6 +320,7 @@ public class ASMCodeGenerator {
 			Type type = node.getType();
 			code.add(opcodeForStore(type));
 		}
+
 		private ASMOpcode opcodeForStore(Type type) {
 			if(type == PrimitiveType.INTEGER) {
 				return StoreI;
@@ -363,6 +388,24 @@ public class ASMCodeGenerator {
 //			}
 			
 		}
+
+		public void visitLeave(IndexNode node){
+			newAddressCode(node);
+			int index = Integer.parseInt(node.child(1).getToken().getLexeme());
+			Macros.loadIFrom(code, RunTime.ARR_LOC);
+			code.add(Duplicate);
+			code.add(PushI, 12);
+			code.add(Add);
+			code.add(LoadI);
+			code.add(PushI, index);
+			code.add(Subtract);
+			code.add(JumpNeg, RunTime.OUT_OF_BOUNDS_RUNTIME_ERROR);
+			code.add(Duplicate);
+			code.add(PushI, HEADER_LENGTH);
+			code.add(Add);
+			code.add(LoadI);
+		}
+
 		private List<ASMCodeFragment> childValueCode(OperatorNode node){
 			List<ASMCodeFragment> result = new ArrayList<>();
 			for (ParseNode child: node.getChildren()) {
