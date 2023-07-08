@@ -60,7 +60,23 @@ public class PrintStatementGenerator {
 			return;
 		}
 
+		
 		Type subtype = ((Array) node.getType()).getSubtype();
+
+		if(node.nChildren() == 2){
+			int index = Integer.parseInt(node.child(1).getToken().getLexeme());
+			int subTypeSize = subtype.getSize();
+			Macros.loadIFrom(code, RunTime.ARR_LOC);
+			code.add(PushI, ARR_ELEM_START + index * subTypeSize);
+			code.add(Add);
+			code.add(getAddressCode(subtype));
+			if(subtype == PrimitiveType.BOOLEAN) {
+				convertToBool();
+			}
+			code.add(PushD, printFormat(subtype));
+			code.add(Printf);
+			return;
+		}
 
 
 		Labeller labeller = new Labeller("array-printing");

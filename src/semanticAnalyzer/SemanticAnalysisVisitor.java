@@ -18,6 +18,7 @@ import parseTree.nodeTypes.DeclarationNode;
 import parseTree.nodeTypes.ErrorNode;
 import parseTree.nodeTypes.FloatingConstantNode;
 import parseTree.nodeTypes.IdentifierNode;
+import parseTree.nodeTypes.IndexNode;
 import parseTree.nodeTypes.IntegerConstantNode;
 import parseTree.nodeTypes.NewlineNode;
 import parseTree.nodeTypes.OperatorNode;
@@ -107,24 +108,38 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 			node.setType(PrimitiveType.ERROR);
 			return;
 		}
-		
-		IdentifierNode identifier = (IdentifierNode) node.child(0);
+
+		ParseNode identifier = node.child(0);
 		ParseNode expression = node.child(1);
+
+		node.setType(identifier.getType());
 		
 		Type expressionType = expression.getType();
 		Type identifierType = identifier.getType();
-		
+
+		if(expressionType instanceof Array && identifierType instanceof Array) {
+			node.setType(expressionType);
+			return;
+		}
+
+		if(identifierType instanceof Array) {
+			identifierType = ((Array) identifierType).getSubtype();
+		}
+
 		if(!expressionType.equals(identifierType)) {
 			semanticError("types don't match in AssignmentStatement");
 			return;
 		}
 		
-		if(identifier.getBinding().isConstant()) {
-			semanticError("reassignment to const identifer");
+		if(identifier instanceof IdentifierNode) {
+			if(((IdentifierNode) identifier).getBinding().isConstant()) {
+				semanticError("reassignment to const identifer");
+			}
 		}
+
 		node.setType(expressionType);
 	}
-	
+
 	@Override
 	public void visitLeave(TypeNode node) {
 			ArrayList<Type> types = new ArrayList<>();
@@ -169,6 +184,14 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 			node.setType(PrimitiveType.ERROR);
 		}
 	}
+
+	
+	@Override
+	public void visitLeave(IndexNode node) {
+		node.setType(node.child(0).getType());
+		super.visitLeave(node);
+	}
+
 	private Lextant operatorFor(OperatorNode node) {
 		LextantToken token = (LextantToken) node.getToken();
 		return token.getLextant();
@@ -239,6 +262,7 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 	@Override
 	public void visit(TabSpaceNode node) {
 	}
+
 	///////////////////////////////////////////////////////////////////////////
 	// IdentifierNodes, with helper methods
 	@Override

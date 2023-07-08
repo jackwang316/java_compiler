@@ -211,7 +211,7 @@
         PushD        $global-memory-block      
         PushI        0                         
         Add                                    %% test
-        PushI        24                        
+        PushI        18                        
         Call         -mem-manager-allocate     
         PushD        $array-location           
         Exchange                               
@@ -232,7 +232,7 @@
         LoadI                                  
         PushI        8                         
         Add                                    
-        PushI        4                         
+        PushI        1                         
         StoreI                                 
         PushD        $array-location           
         LoadI                                  
@@ -244,20 +244,81 @@
         LoadI                                  
         PushI        16                        
         Add                                    
-        Label        -Operator-1-args          
-        PushI        1                         
-        PushI        1                         
-        Add                                    
-        StoreI                                 
+        PushI        0                         
+        StoreC                                 
         PushD        $array-location           
         LoadI                                  
-        PushI        20                        
+        PushI        17                        
         Add                                    
-        PushI        2                         
-        StoreI                                 
+        PushI        0                         
+        StoreC                                 
         Duplicate                              
         LoadI                                  
         StoreI                                 
+        PushD        $array-location           
+        LoadI                                  
+        Duplicate                              
+        PushI        12                        
+        Add                                    
+        LoadI                                  
+        PushI        2                         
+        Subtract                               
+        JumpNeg      $$out-of-bounds-runtime-error 
+        PushD        $array-location           
+        LoadI                                  
+        Duplicate                              
+        PushD        $array-location           
+        LoadI                                  
+        PushI        17                        
+        Add                                    
+        PushI        1                         
+        StoreC                                 
+        StoreC                                 
+        PushD        $array-location           
+        LoadI                                  
+        Duplicate                              
+        PushI        12                        
+        Add                                    
+        LoadI                                  
+        PushI        1                         
+        Subtract                               
+        JumpNeg      $$out-of-bounds-runtime-error 
+        Duplicate                              
+        PushI        16                        
+        Add                                    
+        LoadI                                  
+        PushI        1                         
+        StoreC                                 
+        StoreC                                 
+        PushD        $array-location           
+        LoadI                                  
+        Duplicate                              
+        PushI        12                        
+        Add                                    
+        LoadI                                  
+        PushI        1                         
+        Subtract                               
+        JumpNeg      $$out-of-bounds-runtime-error 
+        Duplicate                              
+        PushI        16                        
+        Add                                    
+        LoadI                                  
+        LoadI                                  
+        PushD        $array-location           
+        LoadI                                  
+        PushI        17                        
+        Add                                    
+        LoadC                                  
+        JumpTrue     -print-boolean-1-true     
+        PushD        $boolean-false-string     
+        Jump         -print-boolean-1-join     
+        Label        -print-boolean-1-true     
+        PushD        $boolean-true-string      
+        Label        -print-boolean-1-join     
+        PushD        $print-format-boolean     
+        Printf                                 
+        PushD        $print-format-newline     
+        Printf                                 
         PushD        $global-memory-block      
         PushI        0                         
         Add                                    %% test
@@ -300,8 +361,14 @@
         PushD        -array-printing-2-elem-start-addr 
         LoadI                                  
         Add                                    
-        LoadI                                  
-        PushD        $print-format-integer     
+        LoadC                                  
+        JumpTrue     -print-boolean-3-true     
+        PushD        $boolean-false-string     
+        Jump         -print-boolean-3-join     
+        Label        -print-boolean-3-true     
+        PushD        $boolean-true-string      
+        Label        -print-boolean-3-join     
+        PushD        $print-format-boolean     
         Printf                                 
         PushD        -array-printing-2-elem-start-addr 
         LoadI                                  
@@ -331,17 +398,6 @@
         Label        -array-printing-2-end     
         PushI        93                        
         PushD        $print-format-character   
-        Printf                                 
-        PushD        $print-format-newline     
-        Printf                                 
-        PushD        $array-location           
-        LoadI                                  
-        Duplicate                              
-        JumpFalse    $$negative-array-index    
-        PushI        12                        
-        Add                                    
-        LoadI                                  
-        PushD        $print-format-integer     
         Printf                                 
         PushD        $print-format-newline     
         Printf                                 
