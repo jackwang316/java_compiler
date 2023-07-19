@@ -2,4 +2,5 @@
 *.class
 *.txt
 /bin/
+/output/
 *.asm
