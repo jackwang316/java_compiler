@@ -16,6 +16,7 @@ import parseTree.nodeTypes.ErrorNode;
 import parseTree.nodeTypes.FloatingConstantNode;
 import parseTree.nodeTypes.IdentifierNode;
 import parseTree.nodeTypes.IfStatementNode;
+import parseTree.nodeTypes.IndexNode;
 import parseTree.nodeTypes.IntegerConstantNode;
 import parseTree.nodeTypes.NewlineNode;
 import parseTree.nodeTypes.OperatorNode;
@@ -200,7 +201,7 @@ public class Parser {
 	}	
 	
 	private boolean startsMutation(Token token) {
-		return startsIdentifier(token);
+		return startsExpression(token);
 	}
 	
 	// This adds the printExpressions it parses to the children of the given parent
@@ -233,7 +234,7 @@ public class Parser {
 		if(!startsMutation(nowReading)) {
 			return syntaxErrorNode("reassignment");
 		}
-		ParseNode identifier = parseIdentifier();
+		ParseNode identifier = parseExpression();
 		expect(Punctuator.ASSIGN);
 		ParseNode expression = parseExpression();
 		expect(Punctuator.TERMINATOR);
@@ -283,7 +284,7 @@ public class Parser {
 		Token declarationToken = nowReading;
 		readToken();
 		
-		ParseNode identifier = parseIdentifier();
+		ParseNode identifier = parseExpression();
 		expect(Punctuator.ASSIGN);
 		ParseNode initializer = parseExpression();
 		expect(Punctuator.TERMINATOR);
@@ -445,14 +446,27 @@ public class Parser {
 		}
 		Token current = nowReading;
 		ArrayList<ParseNode> list = new ArrayList<ParseNode>();
+		int i = 0;
 		do {
 			readToken();
 
+				
+
 			if(nowReading.isLextant(Punctuator.CLOSE_BRACKET)) {
+				if(i == 0){
+					return syntaxErrorNode("array creation");
+				}
 				break;
 			}
+			ParseNode expression = parseExpression();
+			if(nowReading.isLextant(Punctuator.INDEXING)){
+				expect(Punctuator.INDEXING);
+				ParseNode index = parseExpression();
+				expect(Punctuator.CLOSE_BRACKET);
+				return IndexNode.withChildren(expression, index);
 
-			list.add(parseExpression());
+			}
+			list.add(expression);
 		} while (nowReading.isLextant(Punctuator.COMMA));
 		expect(Punctuator.CLOSE_BRACKET);
 		return ArrayNode.staticMake(current, list);

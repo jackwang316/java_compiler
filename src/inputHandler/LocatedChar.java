@@ -63,7 +63,7 @@ public class LocatedChar implements Locator {
 		return character.equals('#');
 	}
 	public boolean isCommentEnd() {
-		return character.equals('#') || character.equals('\n');
+		return character.equals('#') || character.equals('\n') || character.equals(';');
 	}
 	public boolean isWhitespace() {
 		return Character.isWhitespace(character);

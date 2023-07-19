@@ -22,6 +22,10 @@ public abstract class ScannerImp implements Scanner {
 		return !(nextToken instanceof NullToken);
 	}
 
+	public boolean hasNext(String lexeme) {
+		return nextToken.getLexeme().equals(lexeme);
+	}
+
 	@Override
 	public Token next() {
 		Token result = nextToken;

@@ -38,15 +38,6 @@ public class AssignmentStatementNode extends ParseNode {
 		node.appendChild(expression);
 		return node;
 	}
-
-	public static AssignmentStatementNode withChildren(ParseNode identifier, ParseNode index, ParseNode expression) {
-		AssignmentStatementNode node = new AssignmentStatementNode(identifier.getToken());
-		node.appendChild(identifier);
-		node.appendChild(index);
-		node.appendChild(expression);
-		return node;
-	}
-	
 	
 	///////////////////////////////////////////////////////////
 	// boilerplate for visitors
