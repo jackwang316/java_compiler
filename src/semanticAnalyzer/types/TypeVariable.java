@@ -3,6 +3,8 @@ package semanticAnalyzer.types;
 import java.util.List;
 import java.util.Set;
 
+import tokens.Token;
+
 public class TypeVariable implements Type{
     String name;
     Type constraint;

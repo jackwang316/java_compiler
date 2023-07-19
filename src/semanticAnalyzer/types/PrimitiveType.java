@@ -47,6 +47,9 @@ public enum PrimitiveType implements Type {
 		else if(type.equals(Keyword.BOOL.getLexeme())) {
 			return PrimitiveType.BOOLEAN;
 		}
+		else if(type.equals(Keyword.VOID.getLexeme())) {
+			return PrimitiveType.NO_TYPE;
+		}
 		else {
 			return PrimitiveType.ERROR;
 		}

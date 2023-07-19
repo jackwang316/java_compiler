@@ -1,0 +1,7 @@
+subr int fin( void a, int b ){
+	return 5; 
+}
+
+main {
+	print "hello" \n;
+}

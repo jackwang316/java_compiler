@@ -22,6 +22,9 @@ public enum Keyword implements Lextant {
 	IF("if"),
 	ELSE("else"),
 	WHILE("while"),
+	SUBR("subr"),
+	RETURN("return"),
+	VOID("void"),
 	NULL_KEYWORD("");
 	
 	private String lexeme;
@@ -57,6 +60,12 @@ public enum Keyword implements Lextant {
 		return forLexeme(lexeme) != NULL_KEYWORD;
 	}
 	
+	public static Lextant[] getReturnTypes() {
+		Lextant[] literals = { BOOL, CHAR, STRING, INT, FLOAT, VOID };
+		return literals;
+	}
+
+
 	/*   the following hashtable lookup can replace the serial-search implementation of forLexeme() above. It is faster but less clear. 
 	private static LexemeMap<Keyword> lexemeToKeyword = new LexemeMap<Keyword>(values(), NULL_KEYWORD);
 	public static Keyword forLexeme(String lexeme) {

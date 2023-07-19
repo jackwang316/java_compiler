@@ -170,15 +170,39 @@
         Label        $$negative-array-index    
         PushD        $errors-negative-array-index 
         Jump         $$general-runtime-error   
+        DLabel       $errors-array-index-out-of-bounds 
+        DataC        97                        %% "array index out of bounds"
+        DataC        114                       
+        DataC        114                       
+        DataC        97                        
+        DataC        121                       
+        DataC        32                        
+        DataC        105                       
+        DataC        110                       
+        DataC        100                       
+        DataC        101                       
+        DataC        120                       
+        DataC        32                        
+        DataC        111                       
+        DataC        117                       
+        DataC        116                       
+        DataC        32                        
+        DataC        111                       
+        DataC        102                       
+        DataC        32                        
+        DataC        98                        
+        DataC        111                       
+        DataC        117                       
+        DataC        110                       
+        DataC        100                       
+        DataC        115                       
+        DataC        0                         
+        Label        $$out-of-bounds-runtime-error 
+        PushD        $errors-array-index-out-of-bounds 
+        Jump         $$general-runtime-error   
         DLabel       $array-location           
         DataI        0                         
         DLabel       $string-location          
-        DataI        0                         
-        DLabel       $print-temp-1             
-        DataI        0                         
-        DLabel       $print-temp-2             
-        DataI        0                         
-        DLabel       $print-temp-3             
         DataI        0                         
         DLabel       $usable-memory-start      
         DLabel       $global-memory-block      

@@ -22,6 +22,7 @@ import parseTree.nodeTypes.NewlineNode;
 import parseTree.nodeTypes.OperatorNode;
 import parseTree.nodeTypes.PrintStatementNode;
 import parseTree.nodeTypes.ProgramNode;
+import parseTree.nodeTypes.ReturnNode;
 import parseTree.nodeTypes.SpaceNode;
 import parseTree.nodeTypes.TabSpaceNode;
 import parseTree.nodeTypes.TypeNode;
@@ -29,6 +30,10 @@ import parseTree.nodeTypes.WhileStatementNode;
 import semanticAnalyzer.types.PrimitiveType;
 import semanticAnalyzer.types.Type;
 import parseTree.nodeTypes.StringConstantNode;
+import parseTree.nodeTypes.SubrBlockNode;
+import parseTree.nodeTypes.SubrDefinitionNode;
+import parseTree.nodeTypes.SubrParameterListNode;
+import parseTree.nodeTypes.SubrParameterNode;
 import tokens.*;
 import lexicalAnalyzer.Keyword;
 import lexicalAnalyzer.Lextant;
@@ -64,6 +69,11 @@ public class Parser {
 			return syntaxErrorNode("program");
 		}
 		ParseNode program = new ProgramNode(nowReading);
+
+		while (startsSubrDefinition(nowReading)) {
+			ParseNode globalDefinition = parseSubrDefinition();
+			program.appendChild(globalDefinition);
+		}
 		
 		expect(Keyword.MAIN);
 		ParseNode mainBlock = parseBlockStatements();
@@ -76,10 +86,71 @@ public class Parser {
 		return program;
 	}
 	private boolean startsProgram(Token token) {
-		return token.isLextant(Keyword.MAIN);
+		return token.isLextant(Keyword.MAIN) || token.isLextant(Keyword.SUBR);
 	}
 	
+
+	private boolean startsSubrDefinition(Token token) {
+		return token.isLextant(Keyword.SUBR);
+	}
+
+	private ParseNode parseSubrDefinition() {
+		if(!startsSubrDefinition(nowReading)) {
+			return syntaxErrorNode("subr definition");
+		}
+		expect (Keyword.SUBR);
+		Token definition = previouslyRead;
+		Type returnType = parseType();
+		readToken();
+		ParseNode identifier = parseIdentifier();
+
+		ParseNode definitionBlock = parseSubrBlock();
+		return SubrDefinitionNode.withChildren(definition, identifier, definitionBlock);
+	}
 	
+	private ParseNode parseSubrBlock() {
+		if(!startsSubrBlock(nowReading)) {
+			return syntaxErrorNode("subr block");
+		}
+
+		Token blockToken = nowReading;
+		SubrParameterListNode parameterList = new SubrParameterListNode(previouslyRead);
+		expect(Punctuator.OPEN_PARENTHESIS);
+		while(!nowReading.isLextant(Punctuator.CLOSE_PARENTHESIS)) {
+			if(nowReading.isLextant(Punctuator.COMMA)){
+				readToken();
+			}
+
+			if(startsParameterType(nowReading)){
+				Type type = parseType();
+				if(type.toString().equals("void")){
+					return syntaxErrorNode("subr block");
+				}
+				readToken();
+				ParseNode identifier = parseIdentifier();
+				SubrParameterNode parameter = SubrParameterNode.withChildren(identifier.getToken(), type, identifier);
+				parameterList.appendChild(parameter);
+
+			}
+		}
+		expect(Punctuator.CLOSE_PARENTHESIS);
+		ParseNode definitionBlock = parseBlockStatements();
+		return SubrBlockNode.withChildren(blockToken, parameterList, definitionBlock);
+	}
+
+	private boolean startsParameterType(Token token) {
+		return token.isLextant(Keyword.getReturnTypes());
+	}
+	private Type parseType() {
+		if(nowReading.isLextant(Keyword.getReturnTypes())){
+			Type type = PrimitiveType.parseType(nowReading.getLexeme());
+			return type;
+		}
+		return PrimitiveType.ERROR;
+	}
+	private boolean startsSubrBlock(Token token) {
+		return token.isLextant(Punctuator.OPEN_PARENTHESIS);
+	}
 	///////////////////////////////////////////////////////////
 	// mainBlock and subBlock
 	private ParseNode parseBlockStatements() {
@@ -154,8 +225,14 @@ public class Parser {
 		if(startsDeclaration(nowReading)) {
 			return parseDeclaration();
 		}
+		if(startsSubrDefinition(nowReading)){
+			return parseSubrDefinition();
+		}
 		if(startsMutation(nowReading)) {
 			return parseMutation();
+		}
+		if(startsReturnStatement(nowReading)) {
+			return parseReturnStatement();
 		}
 		if(startsPrintStatement(nowReading)) {
 			return parsePrintStatement();
@@ -172,15 +249,32 @@ public class Parser {
 		return syntaxErrorNode("statement");
 	}
 	
+	private ParseNode parseReturnStatement() {
+		if(!startsReturnStatement(nowReading)) {
+			return syntaxErrorNode("return statement");
+		}
+
+		Token returnToken = nowReading;
+		readToken();
+
+		ParseNode expression = parseExpression();
+		expect(Punctuator.TERMINATOR);
+		return ReturnNode.withChild(returnToken, expression);
+	}
+
+	private boolean startsReturnStatement(Token token) {
+		return token.isLextant(Keyword.RETURN);
+	}
+
 	private boolean startsStatement(Token token) {
 		return startsPrintStatement(token) ||
 			   startsMutation(token) ||
 			   startsDeclaration(token) ||
 			   startsBlockStatements(token) ||
+			   startsReturnStatement(token) ||
 			   startsIfStatement(token) ||
 			   startsWhileStatement(token);
 	}
-	
 
 	// printStmt -> PRINT printExpressionList TERMINATOR
 	private ParseNode parsePrintStatement() {
