@@ -17,6 +17,7 @@ import asmCodeGenerator.operators.IntToCharCodeGenerator;
 import lexicalAnalyzer.Keyword;
 import lexicalAnalyzer.Punctuator;
 import semanticAnalyzer.types.Array;
+import semanticAnalyzer.types.PrimitiveType;
 import semanticAnalyzer.types.Type;
 import semanticAnalyzer.types.TypeVariable;
 
@@ -54,7 +55,7 @@ public class FunctionSignatures extends ArrayList<FunctionSignature> {
 		}
 		return FunctionSignature.nullInstance();
 	}
-
+	
 	public FunctionSignature acceptingSignature(List<Type> types, Type returnType) {
 		for(FunctionSignature functionSignature: this) {
 			if(functionSignature.accepts(types, returnType)) {
@@ -148,7 +149,7 @@ public class FunctionSignatures extends ArrayList<FunctionSignature> {
 		);
 
 		new FunctionSignatures(Punctuator.INDEXING,
-		 	new FunctionSignature(new IndexCodeGenerator(), new Array(T), PrimitiveType.INTEGER, T).toggleIdentifer()
+		 	new FunctionSignature(new IndexCodeGenerator(), new Array(T), INTEGER, T).toggleIdentifer()
 		);
 		
 		new FunctionSignatures(Punctuator.CAST,

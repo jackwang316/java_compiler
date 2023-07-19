@@ -143,9 +143,10 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 			identifierType = ((Array) identifierType).getSubtype();
 		}
 
-		if(!expressionType.equals(identifierType)) {
-			semanticError("types don't match in AssignmentStatement");
-			return;
+		// if(!expressionType.equals(identifierType)) {
+		// 	semanticError("types don't match in AssignmentStatement");
+		// 	return;
+		// }
 		
 		
 		if((identifierType == CHARACTER || identifierType == INTEGER || identifierType == FLOATING) && (expressionType == CHARACTER || expressionType == INTEGER)) {
@@ -163,6 +164,7 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 		}
 
 		node.setType(expressionType);
+		
 	}
 
 	@Override
@@ -241,7 +243,7 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 			// Handle multiple possible promotions error
 			multiplePossiblePromotionError(node, node.getToken().getLexeme(), childTypes.get(0), childTypes.get(1));
 		}
-	
+
 		return originalSignature;
 	}
 	
@@ -367,14 +369,14 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 			signature = binaryPromotionSignature(node, signatures, childTypesArrayList);
 		}
 
-		Lextant operator = operatorFor(node);
-		FunctionSignature signature = operator.getLexeme().equals(Keyword.LENGTH.getLexeme()) 
+		signature = operator.getLexeme().equals(Keyword.LENGTH.getLexeme()) 
 				? FunctionSignatures.signaturesOf(operator).get(0) 
 				: FunctionSignatures.signature(operator, childTypes);
 		
 		if(signature.accepts(childTypes) || childTypes.get(0) instanceof Array) {
-		System.out.println("Child types: " + childTypes);
-    	System.out.println("Signature: " + signature);
+			System.out.println("Child types: " + childTypes);
+    		System.out.println("Signature: " + signature);
+		}
 		
 		// signature = FunctionSignatures.signature(operator, childTypes);
 
@@ -386,6 +388,7 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 			typeCheckError(node, childTypes);
 			node.setType(PrimitiveType.ERROR);
 		}
+	
 	}
 
 	
