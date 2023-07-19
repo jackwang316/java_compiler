@@ -169,10 +169,11 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 		}
 
 		Lextant operator = operatorFor(node);
-
-		FunctionSignature signature = FunctionSignatures.signature(operator, childTypes);
+		FunctionSignature signature = operator.getLexeme().equals(Keyword.LENGTH.getLexeme()) 
+				? FunctionSignatures.signaturesOf(operator).get(0) 
+				: FunctionSignatures.signature(operator, childTypes);
 		
-		if(signature.accepts(childTypes)) {
+		if(signature.accepts(childTypes) || childTypes.get(0) instanceof Array) {
 			node.setType(signature.resultType());
 			node.setSignature(signature);
 		}
@@ -207,8 +208,11 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 			Type selectedType = PrimitiveType.ERROR;
 			if(types.size()==1) {
 				selectedType = types.get(0);
-				node.setType(selectedType);
+				node.setType(new Array(selectedType));
 			}
+		}
+		else{
+			node.setType(new Array(node.child(0).getType()));
 		}
 	}
 

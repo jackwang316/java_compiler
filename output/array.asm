@@ -170,11 +170,43 @@
         Label        $$negative-array-index    
         PushD        $errors-negative-array-index 
         Jump         $$general-runtime-error   
+        DLabel       $errors-array-index-out-of-bounds 
+        DataC        97                        %% "array index out of bounds"
+        DataC        114                       
+        DataC        114                       
+        DataC        97                        
+        DataC        121                       
+        DataC        32                        
+        DataC        105                       
+        DataC        110                       
+        DataC        100                       
+        DataC        101                       
+        DataC        120                       
+        DataC        32                        
+        DataC        111                       
+        DataC        117                       
+        DataC        116                       
+        DataC        32                        
+        DataC        111                       
+        DataC        102                       
+        DataC        32                        
+        DataC        98                        
+        DataC        111                       
+        DataC        117                       
+        DataC        110                       
+        DataC        100                       
+        DataC        115                       
+        DataC        0                         
+        Label        $$out-of-bounds-runtime-error 
+        PushD        $errors-array-index-out-of-bounds 
+        Jump         $$general-runtime-error   
         DLabel       $array-location           
+        DataI        0                         
+        DLabel       $string-location          
         DataI        0                         
         DLabel       $usable-memory-start      
         DLabel       $global-memory-block      
-        DataZ        8                         
+        DataZ        0                         
         Label        $$main                    
         PushD        $global-memory-block      
         PushI        0                         
@@ -212,7 +244,10 @@
         LoadI                                  
         PushI        16                        
         Add                                    
+        Label        -Operator-1-args          
         PushI        1                         
+        PushI        1                         
+        Add                                    
         StoreI                                 
         PushD        $array-location           
         LoadI                                  
@@ -224,73 +259,81 @@
         LoadI                                  
         StoreI                                 
         PushD        $global-memory-block      
-        PushI        4                         
-        Add                                    %% test2
-        PushI        5                         
-        Duplicate                              
-        JumpNeg      $$negative-array-index    
-        PushI        36                        
-        Call         -mem-manager-allocate     
+        PushI        0                         
+        Add                                    %% test
+        LoadI                                  
+        DLabel       -array-printing-2-length-addr 
+        DataI        0                         
+        DLabel       -array-printing-2-elem-start-addr 
+        DataI        0                         
+        DLabel       -array-printing-2-type-addr 
+        DataI        0                         
+        Label        -array-printing-2-start   
         PushD        $array-location           
+        LoadI                                  
+        PushI        12                        
+        Add                                    
+        LoadI                                  
+        PushD        -array-printing-2-length-addr 
         Exchange                               
-        StoreI                                 
-        PushD        $array-location           
-        LoadI                                  
-        PushI        0                         
-        Add                                    
-        PushI        5                         
-        StoreI                                 
-        PushD        $array-location           
-        LoadI                                  
-        PushI        4                         
-        Add                                    
-        PushI        0                         
         StoreI                                 
         PushD        $array-location           
         LoadI                                  
         PushI        8                         
         Add                                    
-        PushI        4                         
+        LoadC                                  
+        PushD        -array-printing-2-type-addr 
+        Exchange                               
         StoreI                                 
-        PushD        $array-location           
-        LoadI                                  
-        PushI        12                        
-        Add                                    
-        PushI        5                         
-        StoreI                                 
-        PushD        $array-location           
-        LoadI                                  
+        PushD        -array-printing-2-elem-start-addr 
         PushI        16                        
-        Add                                    
-        PushI        0                         
         StoreI                                 
+        PushI        91                        
+        PushD        $print-format-character   
+        Printf                                 
+        Label        -array-printing-2-loop    
+        PushD        -array-printing-2-length-addr 
+        LoadI                                  
+        JumpFalse    -array-printing-2-end     
         PushD        $array-location           
         LoadI                                  
-        PushI        20                        
-        Add                                    
-        PushI        0                         
-        StoreI                                 
-        PushD        $array-location           
+        PushD        -array-printing-2-elem-start-addr 
         LoadI                                  
-        PushI        24                        
         Add                                    
-        PushI        0                         
-        StoreI                                 
-        PushD        $array-location           
         LoadI                                  
-        PushI        28                        
+        PushD        $print-format-integer     
+        Printf                                 
+        PushD        -array-printing-2-elem-start-addr 
+        LoadI                                  
+        PushD        -array-printing-2-type-addr 
+        LoadI                                  
         Add                                    
-        PushI        0                         
+        PushD        -array-printing-2-elem-start-addr 
+        Exchange                               
         StoreI                                 
-        PushD        $array-location           
+        PushD        -array-printing-2-length-addr 
         LoadI                                  
+        PushI        1                         
+        Subtract                               
+        PushD        -array-printing-2-length-addr 
+        Exchange                               
+        StoreI                                 
+        PushD        -array-printing-2-length-addr 
+        LoadI                                  
+        JumpFalse    -array-printing-2-end     
+        PushI        44                        
+        PushD        $print-format-character   
+        Printf                                 
         PushI        32                        
-        Add                                    
-        PushI        0                         
-        StoreI                                 
-        PushD        $array-location           
-        LoadI                                  
-        StoreI                                 
+        PushD        $print-format-character   
+        Printf                                 
+        Jump         -array-printing-2-loop    
+        Label        -array-printing-2-end     
+        PushI        93                        
+        PushD        $print-format-character   
+        Printf                                 
+        PushD        $print-format-newline     
+        Printf                                 
         PushD        $array-location           
         LoadI                                  
         Duplicate                              
@@ -299,6 +342,8 @@
         Add                                    
         LoadI                                  
         PushD        $print-format-integer     
+        Printf                                 
+        PushD        $print-format-newline     
         Printf                                 
         Halt                                   
         Label        -mem-manager-make-tags    

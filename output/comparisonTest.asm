@@ -174,6 +174,12 @@
         DataI        0                         
         DLabel       $string-location          
         DataI        0                         
+        DLabel       $print-temp-1             
+        DataI        0                         
+        DLabel       $print-temp-2             
+        DataI        0                         
+        DLabel       $print-temp-3             
+        DataI        0                         
         DLabel       $usable-memory-start      
         DLabel       $global-memory-block      
         DataZ        9                         
@@ -358,12 +364,12 @@
         PushD        $global-memory-block      
         PushI        8                         
         Add                                    %% compare
-        Label        -compare-5-arg1           
+        Label        -compare-1-arg1           
         PushD        $global-memory-block      
         PushI        0                         
         Add                                    %% a
         LoadC                                  
-        Label        -compare-5-arg2           
+        Label        -compare-1-arg2           
         PushI        17                        
         Call         -mem-manager-allocate     
         PushD        $string-location          
@@ -423,28 +429,28 @@
         PushI        12                        
         Add                                    
         LoadI                                  
-        Label        -compare-5-sub            
+        Label        -compare-1-sub            
         Subtract                               
-        JumpFalse    -compare-5-true           
-        Jump         -compare-5-false          
-        Label        -compare-5-true           
+        JumpFalse    -compare-1-true           
+        Jump         -compare-1-false          
+        Label        -compare-1-true           
         PushI        1                         
-        Jump         -compare-5-join           
-        Label        -compare-5-false          
+        Jump         -compare-1-join           
+        Label        -compare-1-false          
         PushI        0                         
-        Jump         -compare-5-join           
-        Label        -compare-5-join           
+        Jump         -compare-1-join           
+        Label        -compare-1-join           
         StoreC                                 
         PushD        $global-memory-block      
         PushI        8                         
         Add                                    %% compare
         LoadC                                  
-        JumpTrue     -print-boolean-6-true     
+        JumpTrue     -print-boolean-2-true     
         PushD        $boolean-false-string     
-        Jump         -print-boolean-6-join     
-        Label        -print-boolean-6-true     
+        Jump         -print-boolean-2-join     
+        Label        -print-boolean-2-true     
         PushD        $boolean-true-string      
-        Label        -print-boolean-6-join     
+        Label        -print-boolean-2-join     
         PushD        $print-format-boolean     
         Printf                                 
         PushD        $print-format-newline     
