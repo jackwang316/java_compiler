@@ -1,28 +1,29 @@
 package asmCodeGenerator;
 
-import static asmCodeGenerator.codeStorage.ASMOpcode.Jump;
-import static asmCodeGenerator.codeStorage.ASMOpcode.JumpTrue;
-import static asmCodeGenerator.codeStorage.ASMOpcode.Label;
-import static asmCodeGenerator.codeStorage.ASMOpcode.PushI;
-import static asmCodeGenerator.codeStorage.ASMOpcode.Printf;
-import static asmCodeGenerator.codeStorage.ASMOpcode.Add;
-import static asmCodeGenerator.codeStorage.ASMOpcode.PushD;
-import static asmCodeGenerator.codeStorage.ASMOpcode.LoadI;
+import static asmCodeGenerator.codeStorage.ASMOpcode.*;
+
+import javax.crypto.Mac;
+
 import parseTree.ParseNode;
 import parseTree.nodeTypes.NewlineNode;
 import parseTree.nodeTypes.PrintStatementNode;
 import parseTree.nodeTypes.SpaceNode;
 import parseTree.nodeTypes.TabSpaceNode;
+import semanticAnalyzer.types.Array;
 import semanticAnalyzer.types.PrimitiveType;
 import semanticAnalyzer.types.Type;
 import asmCodeGenerator.ASMCodeGenerator.CodeVisitor;
 import asmCodeGenerator.codeStorage.ASMCodeFragment;
+import asmCodeGenerator.codeStorage.ASMOpcode;
+import asmCodeGenerator.operators.CharToBoolCodeGenerator;
 import asmCodeGenerator.runtime.RunTime;
 
 public class PrintStatementGenerator {
 	ASMCodeFragment code;
 	ASMCodeGenerator.CodeVisitor visitor;
-	
+	public static int ARR_SUBTYPE_POS_START = 8;
+	public static int ARR_LENGTH_POS_START = 12;
+	public static int ARR_ELEM_START = 16;
 	
 	public PrintStatementGenerator(ASMCodeFragment code, CodeVisitor visitor) {
 		super();
@@ -43,15 +44,132 @@ public class PrintStatementGenerator {
 	}
 
 	private void appendPrintCode(ParseNode node) {
-		String format = printFormat(node.getType());
-
 		code.append(visitor.removeValueCode(node));
 		makeStringPrintable(node);
 		convertToStringIfBoolean(node);
-		code.add(PushD, format);
-		code.add(Printf);
+		makeArrayPrintable(node);
+		if(node.getType() instanceof Array == false){
+			String format = printFormat(node.getType());
+			code.add(PushD, format);
+			code.add(Printf);
+		}
 	}
 	
+	private void makeArrayPrintable(ParseNode node) {
+		if(node.getType() instanceof Array == false){
+			return;
+		}
+
+		Type subtype = ((Array) node.getType()).getSubtype();
+
+
+		Labeller labeller = new Labeller("array-printing");
+		String startLabel = labeller.newLabel("start");
+		String loopLabel  = labeller.newLabel("loop");
+		String endLabel  = labeller.newLabel("end");
+		
+		String lengthAddr = labeller.newLabel("length-addr");
+		String elemAddr = labeller.newLabel("elem-start-addr");
+		String typeAddr = labeller.newLabel("type-addr");
+
+		initLocation(lengthAddr);
+		initLocation(elemAddr);
+		initLocation(typeAddr);
+
+		code.add(Label, startLabel);
+		
+		Macros.loadIFrom(code, RunTime.ARR_LOC);
+		Macros.readIOffset(code, ARR_LENGTH_POS_START);
+		Macros.storeITo(code, lengthAddr);
+		
+		Macros.loadIFrom(code, RunTime.ARR_LOC);
+		Macros.readCOffset(code, ARR_SUBTYPE_POS_START);
+		Macros.storeITo(code, typeAddr);
+
+		code.add(PushD, elemAddr);	
+		code.add(PushI, ARR_ELEM_START);
+		code.add(StoreI);
+		
+		code.add(PushI, '[');
+		code.add(PushD, RunTime.CHARACTER_PRINT_FORMAT);
+		code.add(Printf);
+
+		code.add(Label, loopLabel);
+		Macros.loadIFrom(code, lengthAddr);
+		code.add(JumpFalse, endLabel);
+
+		Macros.loadIFrom(code, RunTime.ARR_LOC);
+		Macros.loadIFrom(code, elemAddr);
+		code.add(Add);
+			
+		code.add(getAddressCode(subtype));
+
+		if(subtype == PrimitiveType.BOOLEAN) {
+			convertToBool();
+		}
+
+		code.add(PushD, printFormat(subtype));
+		code.add(Printf);
+		
+		Macros.loadIFrom(code, elemAddr);
+		Macros.loadIFrom(code, typeAddr);
+		code.add(Add);
+
+		Macros.storeITo(code, elemAddr);
+
+		Macros.loadIFrom(code, lengthAddr);
+		code.add(PushI, 1);
+		code.add(Subtract);
+		Macros.storeITo(code, lengthAddr);
+			
+		Macros.loadIFrom(code, lengthAddr);
+		code.add(JumpFalse, endLabel);
+			
+		code.add(PushI, ',');
+		code.add(PushD, RunTime.CHARACTER_PRINT_FORMAT);
+		code.add(Printf);
+		code.add(PushI, ' ');
+		code.add(PushD, RunTime.CHARACTER_PRINT_FORMAT);
+		code.add(Printf);
+			
+		code.add(Jump, loopLabel);
+	
+		code.add(Label, endLabel);
+		
+		code.add(PushI, ']');
+		code.add(PushD, RunTime.CHARACTER_PRINT_FORMAT);
+		code.add(Printf);
+	}
+
+	private void initLocation(String location) {
+		code.add(DLabel, location);
+		code.add(DataI, 0);
+	}
+
+	public ASMOpcode getAddressCode(Type subtype) {
+			if(subtype == PrimitiveType.INTEGER) {
+				return LoadI;
+			}	
+			else if(subtype == PrimitiveType.BOOLEAN) {
+				return LoadC;
+			}	
+			else if(subtype == PrimitiveType.CHARACTER) {
+				return LoadC;
+			}
+			else if(subtype == PrimitiveType.STRING) {
+				return LoadC;
+			}
+			else if(subtype == PrimitiveType.FLOATING) {
+				return LoadF;
+			}	
+			else if(subtype instanceof Array) {
+				return LoadI;
+			}
+			else{
+				return null;
+			}
+		}
+
 	private void makeStringPrintable(ParseNode node) {
 		if(node.getType() != PrimitiveType.STRING) {
 			return;
@@ -66,6 +184,10 @@ public class PrintStatementGenerator {
 			return;
 		}
 		
+		convertToBool();
+	}
+
+	private void convertToBool() {
 		Labeller labeller = new Labeller("print-boolean");
 		String trueLabel = labeller.newLabel("true");
 		String endLabel = labeller.newLabel("join");

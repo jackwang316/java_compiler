@@ -174,9 +174,15 @@
         DataI        0                         
         DLabel       $string-location          
         DataI        0                         
+        DLabel       $print-temp-1             
+        DataI        0                         
+        DLabel       $print-temp-2             
+        DataI        0                         
+        DLabel       $print-temp-3             
+        DataI        0                         
         DLabel       $usable-memory-start      
         DLabel       $global-memory-block      
-        DataZ        13                        
+        DataZ        9                         
         Label        $$main                    
         PushD        $global-memory-block      
         PushI        0                         
@@ -238,10 +244,10 @@
         PushD        $global-memory-block      
         PushI        4                         
         Add                                    %% b
-        PushI        5                         
+        PushI        4                         
         Duplicate                              
         JumpNeg      $$negative-array-index    
-        PushI        36                        
+        PushI        32                        
         Call         -mem-manager-allocate     
         PushD        $array-location           
         Exchange                               
@@ -268,7 +274,7 @@
         LoadI                                  
         PushI        12                        
         Add                                    
-        PushI        5                         
+        PushI        4                         
         StoreI                                 
         PushD        $array-location           
         LoadI                                  
@@ -296,25 +302,19 @@
         StoreI                                 
         PushD        $array-location           
         LoadI                                  
-        PushI        32                        
-        Add                                    
-        PushI        0                         
-        StoreI                                 
-        PushD        $array-location           
-        LoadI                                  
         StoreI                                 
         PushD        $global-memory-block      
-        PushI        8                         
+        PushI        4                         
         Add                                    %% c
         PushI        1234                      
         StoreI                                 
         PushD        $global-memory-block      
-        PushI        12                        
+        PushI        8                         
         Add                                    %% d
         PushI        99                        
         StoreC                                 
         PushD        $global-memory-block      
-        PushI        8                         
+        PushI        4                         
         Add                                    %% c
         LoadI                                  
         PushD        $print-format-integer     
@@ -322,7 +322,7 @@
         PushD        $print-format-newline     
         Printf                                 
         PushD        $global-memory-block      
-        PushI        12                        
+        PushI        8                         
         Add                                    %% d
         LoadC                                  
         PushD        $print-format-character   
