@@ -1,0 +1,21 @@
+main{
+	var test_int:= 123;
+	test_int := 345;
+	print test_int\n;
+	
+	var test_float := 123.123;
+	test_float:= 321.321;
+	print test_float\n;
+	
+	var test_char := 'a';
+	test_char:= 'z';
+	print test_char\n;
+	
+	var test_bool := false;
+	test_bool:= true;
+	print test_bool\n;
+	
+	var test_string := "1234";
+	test_string:= "2345";
+	print test_string\n;
+}

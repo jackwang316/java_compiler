@@ -17,7 +17,7 @@ public class ParseNode implements Locator {
 	
 	List<ParseNode>	children;
 	ParseNode parent;
-
+	
 	protected Token token;
 	Type type;					// used for expressions
 	private Scope scope;		// the scope created by this node, if any.
@@ -130,6 +130,12 @@ public class ParseNode implements Locator {
 				break;
 			}
 		}	
+	}
+	public void replaceNthChild(int index, ParseNode newChild) {
+		// children.remove(index);
+		// children.add(index, newChild);
+		// newChild.setParent(this);
+		children.set(index, newChild);
 	}
 	public int nChildren() {
 		return children.size();

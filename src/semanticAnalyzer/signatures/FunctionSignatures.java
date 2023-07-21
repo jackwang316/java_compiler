@@ -56,6 +56,15 @@ public class FunctionSignatures extends ArrayList<FunctionSignature> {
 		return FunctionSignature.nullInstance();
 	}
 	
+	public FunctionSignature acceptingSignature(List<Type> types, Type returnType) {
+		for(FunctionSignature functionSignature: this) {
+			if(functionSignature.accepts(types, returnType)) {
+				return functionSignature;
+			}
+		}
+		return FunctionSignature.nullInstance();
+	}
+	
 	public boolean accepts(List<Type> types) {
 		return !acceptingSignature(types).isNull();
 	}
@@ -140,7 +149,7 @@ public class FunctionSignatures extends ArrayList<FunctionSignature> {
 		);
 
 		new FunctionSignatures(Punctuator.INDEXING,
-		 	new FunctionSignature(new IndexCodeGenerator(), new Array(T), PrimitiveType.INTEGER, T).toggleIdentifer()
+		 	new FunctionSignature(new IndexCodeGenerator(), new Array(T), INTEGER, T).toggleIdentifer()
 		);
 		
 		new FunctionSignatures(Punctuator.CAST,
