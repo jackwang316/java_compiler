@@ -24,6 +24,7 @@ import parseTree.nodeTypes.IdentifierNode;
 import parseTree.nodeTypes.IndexNode;
 import parseTree.nodeTypes.IfStatementNode;
 import parseTree.nodeTypes.IntegerConstantNode;
+import parseTree.nodeTypes.LoopJumpNode;
 import parseTree.nodeTypes.NewlineNode;
 import parseTree.nodeTypes.OperatorNode;
 import parseTree.nodeTypes.PrintStatementNode;
@@ -469,6 +470,20 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 	@Override
 	public void visit(TabSpaceNode node) {
 	}
+	@Override 
+	public void visit(LoopJumpNode node) {
+		boolean found = false;
+		for (ParseNode current : node.pathToRoot()) {
+			if (current instanceof WhileStatementNode) {
+				node.setLabel((WhileStatementNode)current);
+				found = true;
+				break;
+			}
+		}
+		if (!found) {
+			loopParentError(node);
+		}
+	}
 
 	///////////////////////////////////////////////////////////////////////////
 	// IdentifierNodes, with helper methods
@@ -532,5 +547,10 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 			semanticError("expected " + expectedType + ", got " + actualType);
 			node.setType(PrimitiveType.ERROR);
 		}
+	}
+	private void loopParentError(ParseNode node) {
+		// semanticError("loop jump outside of loop");
+		semanticError("loop jump outside of loop");
+		logError("No loop parent for " + node.getToken().getLexeme() + " at " + node.getToken().getLocation());
 	}
 }

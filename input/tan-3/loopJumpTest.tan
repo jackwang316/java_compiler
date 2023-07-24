@@ -1,0 +1,14 @@
+main {
+	var i := 1;
+	while (i < 3){
+		print (i)\n;
+		print("before continue")\n;
+		i := i + 1;
+		continue;
+		print("after continue")\n;
+		break;
+		print("do not print")\n;
+		
+	}
+	print ("end")\n;
+}

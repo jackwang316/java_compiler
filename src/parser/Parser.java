@@ -18,6 +18,7 @@ import parseTree.nodeTypes.IdentifierNode;
 import parseTree.nodeTypes.IfStatementNode;
 import parseTree.nodeTypes.IndexNode;
 import parseTree.nodeTypes.IntegerConstantNode;
+import parseTree.nodeTypes.LoopJumpNode;
 import parseTree.nodeTypes.NewlineNode;
 import parseTree.nodeTypes.OperatorNode;
 import parseTree.nodeTypes.PrintStatementNode;
@@ -142,6 +143,20 @@ public class Parser {
 	private boolean startsWhileStatement(Token token) {
 		return token.isLextant(Keyword.WHILE);
 	}
+	private ParseNode parseLoopJumpStatement() {
+		if(!startsLoopJumpStatement(nowReading)) {
+			return syntaxErrorNode("LoopJumpStatement");
+		}
+		Token loopJumpToken = nowReading;
+		readToken();
+		expect(Punctuator.TERMINATOR);
+		ParseNode loopJumpNode = new LoopJumpNode(loopJumpToken);
+		return loopJumpNode;
+	}
+
+	private boolean startsLoopJumpStatement(Token token) {
+		return token.isLextant(Keyword.BREAK, Keyword.CONTINUE);
+	}
 	
 	///////////////////////////////////////////////////////////
 	// statements
@@ -169,6 +184,9 @@ public class Parser {
 		if(startsWhileStatement(nowReading)) {
 			return parseWhileStatement();
 		}
+		if(startsLoopJumpStatement(nowReading)) {
+			return parseLoopJumpStatement();
+		}
 		return syntaxErrorNode("statement");
 	}
 	
@@ -178,7 +196,8 @@ public class Parser {
 			   startsDeclaration(token) ||
 			   startsBlockStatements(token) ||
 			   startsIfStatement(token) ||
-			   startsWhileStatement(token);
+			   startsWhileStatement(token)||
+			   startsLoopJumpStatement(token);
 	}
 	
 

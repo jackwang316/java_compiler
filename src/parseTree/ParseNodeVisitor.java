@@ -12,6 +12,7 @@ import parseTree.nodeTypes.IdentifierNode;
 import parseTree.nodeTypes.IfStatementNode;
 import parseTree.nodeTypes.IndexNode;
 import parseTree.nodeTypes.IntegerConstantNode;
+import parseTree.nodeTypes.LoopJumpNode;
 import parseTree.nodeTypes.NewlineNode;
 import parseTree.nodeTypes.OperatorNode;
 import parseTree.nodeTypes.PrintStatementNode;
@@ -71,6 +72,7 @@ public interface ParseNodeVisitor {
 	void visit(NewlineNode node);
 	void visit(SpaceNode node);
 	void visit(TabSpaceNode node);
+	void visit (LoopJumpNode node);
 	void visit(FloatingConstantNode node);
 	void visit(CharacterConstantNode node);
 	void visit(StringConstantNode node);
@@ -193,6 +195,9 @@ public interface ParseNodeVisitor {
 			defaultVisitForLeaf(node);
 		}
 		public void visit(TabSpaceNode node) {
+			defaultVisitForLeaf(node);
+		}
+		public void visit(LoopJumpNode node) {
 			defaultVisitForLeaf(node);
 		}
 
