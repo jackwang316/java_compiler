@@ -24,6 +24,7 @@ import parseTree.nodeTypes.BooleanConstantNode;
 import parseTree.nodeTypes.CharacterConstantNode;
 import parseTree.nodeTypes.DeclarationNode;
 import parseTree.nodeTypes.FloatingConstantNode;
+import parseTree.nodeTypes.ForStatementNode;
 import parseTree.nodeTypes.IdentifierNode;
 import parseTree.nodeTypes.IfStatementNode;
 import parseTree.nodeTypes.IndexNode;
@@ -254,6 +255,22 @@ public class ASMCodeGenerator {
 			code.append(expressionCode);
 			code.add(JumpFalse, node.getEndLabel());
 			code.append(whileBodyCode);
+			code.add(Jump, node.getStartLabel());
+			code.add(Label, node.getEndLabel());
+		}
+		public void visitLeave(ForStatementNode node){
+			newVoidCode(node);
+			System.out.println("for statement");
+			ASMCodeFragment initCode = removeVoidCode(node.child(0));
+			ASMCodeFragment expressionCode = removeValueCode(node.child(1));
+			ASMCodeFragment incrementCode = removeVoidCode(node.child(2));
+			ASMCodeFragment forBodyCode = removeVoidCode(node.child(3));
+			code.append(initCode);
+			code.add(Label, node.getStartLabel());
+			code.append(expressionCode);
+			code.add(JumpFalse, node.getEndLabel());
+			code.append(forBodyCode);
+			code.append(incrementCode);
 			code.add(Jump, node.getStartLabel());
 			code.add(Label, node.getEndLabel());
 		}

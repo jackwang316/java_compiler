@@ -24,7 +24,16 @@ public class LoopJumpNode extends ParseNode{
         } else if (token.isLextant(Keyword.CONTINUE)) {
             label = node.getStartLabel();
         } else {
-            throw new IllegalArgumentException("Invalid loop jump node");
+            throw new IllegalArgumentException("Invalid while loop jump node");
+        }
+    }
+    public void setLabel(ForStatementNode node) {
+        if (token.isLextant(Keyword.BREAK)) {
+            label = node.getEndLabel();
+        } else if (token.isLextant(Keyword.CONTINUE)) {
+            label = node.getStartLabel();
+        } else {
+            throw new IllegalArgumentException("Invalid for loop jump node");
         }
     }
 

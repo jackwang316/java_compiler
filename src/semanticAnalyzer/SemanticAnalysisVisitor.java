@@ -4,6 +4,8 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import asmCodeGenerator.Labeller;
 import asmCodeGenerator.operators.LengthCodeGenerator;
 import lexicalAnalyzer.Keyword;
 import lexicalAnalyzer.Lextant;
@@ -20,6 +22,7 @@ import parseTree.nodeTypes.CharacterConstantNode;
 import parseTree.nodeTypes.DeclarationNode;
 import parseTree.nodeTypes.ErrorNode;
 import parseTree.nodeTypes.FloatingConstantNode;
+import parseTree.nodeTypes.ForStatementNode;
 import parseTree.nodeTypes.IdentifierNode;
 import parseTree.nodeTypes.IndexNode;
 import parseTree.nodeTypes.IfStatementNode;
@@ -44,6 +47,7 @@ import semanticAnalyzer.types.TypeVariable;
 import symbolTable.Binding;
 import symbolTable.Binding.Constancy;
 import symbolTable.Scope;
+import tokens.IdentifierToken;
 import tokens.LextantToken;
 import tokens.Token;
 
@@ -65,6 +69,54 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 	}
 	public void visitEnter(BlockStatementNode node) {
 		enterSubscope(node);
+		if (node.getParent() instanceof ForStatementNode) {
+			ForStatementNode forNode = (ForStatementNode) node.getParent();
+
+			IdentifierNode index = (IdentifierNode) forNode.child(0);
+			IntegerConstantNode start = (IntegerConstantNode) forNode.child(1);
+			IntegerConstantNode end = (IntegerConstantNode) forNode.child(2);
+
+			Type type;
+
+			if (start.getType() == PrimitiveType.INTEGER && end.getType() == PrimitiveType.INTEGER) {
+				index.setType(PrimitiveType.INTEGER);
+				type = PrimitiveType.INTEGER;
+			} else {
+				type = PrimitiveType.ERROR;
+				semanticError("For loop index must be an integer. Not a " + index.getType());
+			}
+
+			// System.out.println("before binding");
+			Binding binding = node.getScope().createBinding(index, type, Constancy.IS_CONSTANT);
+			// System.out.println("after binding");
+			index.setBinding(binding);
+
+			// Labeller labeller = new Labeller("for");
+			// String startLabel = labeller.newLabel("start");
+			// String endLabel = labeller.newLabel("end");
+			Labeller labeller = new Labeller("loop_index");
+			String indexLabel = labeller.newLabel("index");
+			String startLabel = labeller.newLabel("start");
+			String endLabel = labeller.newLabel("end");
+
+			LoopJumpNode indexJump = new LoopJumpNode(IdentifierToken.make(node.getToken().getLocation(), indexLabel));
+			LoopJumpNode startJump = new LoopJumpNode(IdentifierToken.make(node.getToken().getLocation(), startLabel));
+			LoopJumpNode endJump = new LoopJumpNode(IdentifierToken.make(node.getToken().getLocation(), endLabel));
+
+			forNode.appendChild(indexJump);
+			forNode.appendChild(startJump);
+			forNode.appendChild(endJump);
+			
+			// IdentifierNode terminator = new IdentifierNode(IdentifierToken.make(node.getToken().getLocation(), labeller.newLabel("hidden_loop_terminator")));
+			// Binding yetBinding = node.getLocalScope().createBinding(terminator, PrimitiveType.INTEGER, Constancy.IS_CONSTANT);
+			// terminator.setBinding(yetBinding);
+			// forNode.appendChild(terminator);
+
+			// LoopJumpNode startJump = new LoopJumpNode(IdentifierToken.make(node.getToken().getLocation(), labeller.newLabel("start")));
+			// LoopJumpNode endJump = new LoopJumpNode(IdentifierToken.make(node.getToken().getLocation(), labeller.newLabel("end")));
+			// forNode.appendChild(startJump);
+			// forNode.appendChild(endJump);
+		}
 	}
 	public void visitLeave(BlockStatementNode node) {
 		leaveScope(node);
@@ -98,6 +150,11 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 	@Override
 	public void visitLeave(WhileStatementNode node){
 		assertCorrectType(node, PrimitiveType.BOOLEAN, node.child(0).getType());
+	}
+	@Override 
+	public void visitLeave(ForStatementNode node){
+		assertCorrectType(node, PrimitiveType.INTEGER, node.child(1).getType());
+		assertCorrectType(node, PrimitiveType.INTEGER, node.child(2).getType());
 	}
 	@Override
 	public void visitLeave(DeclarationNode node) {
@@ -374,10 +431,10 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 				? FunctionSignatures.signaturesOf(operator).get(0) 
 				: FunctionSignatures.signature(operator, childTypes);
 		
-		if(signature.accepts(childTypes) || childTypes.get(0) instanceof Array) {
-			System.out.println("Child types: " + childTypes);
-    		System.out.println("Signature: " + signature);
-		}
+		// if(signature.accepts(childTypes) || childTypes.get(0) instanceof Array) {
+		// 	System.out.println("Child types: " + childTypes);
+    	// 	System.out.println("Signature: " + signature);
+		// }
 		
 		// signature = FunctionSignatures.signature(operator, childTypes);
 
@@ -389,7 +446,7 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 			typeCheckError(node, childTypes);
 			node.setType(PrimitiveType.ERROR);
 		}
-	
+		System.out.println("next node: " + node.getParent());
 	}
 
 	
@@ -479,6 +536,11 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 				found = true;
 				break;
 			}
+			else if (current instanceof ForStatementNode) {
+				node.setLabel((ForStatementNode)current);
+				found = true;
+				break;
+			}
 		}
 		if (!found) {
 			loopParentError(node);
@@ -500,7 +562,7 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 	
 	private boolean isBeingDeclared(IdentifierNode node) {
 		ParseNode parent = node.getParent();
-		return (parent instanceof DeclarationNode) && (node == parent.child(0));
+		return (parent instanceof DeclarationNode || parent instanceof ForStatementNode) && (node == parent.child(0));
 	}
 	private void addBinding(IdentifierNode identifierNode, Type type, Constancy constancy) {
 		Scope scope = identifierNode.getLocalScope();

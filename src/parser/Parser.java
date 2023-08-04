@@ -14,6 +14,7 @@ import parseTree.nodeTypes.CharacterConstantNode;
 import parseTree.nodeTypes.DeclarationNode;
 import parseTree.nodeTypes.ErrorNode;
 import parseTree.nodeTypes.FloatingConstantNode;
+import parseTree.nodeTypes.ForStatementNode;
 import parseTree.nodeTypes.IdentifierNode;
 import parseTree.nodeTypes.IfStatementNode;
 import parseTree.nodeTypes.IndexNode;
@@ -143,6 +144,31 @@ public class Parser {
 	private boolean startsWhileStatement(Token token) {
 		return token.isLextant(Keyword.WHILE);
 	}
+	// example: for(i from 2 to 5) {...}
+	private ParseNode parseForStatement() {
+		if(!startsForStatement(nowReading)) {
+			return syntaxErrorNode("ForStatement");
+		}
+		System.out.println("ForStatement");
+		Token forToken = nowReading;
+		readToken();
+		expect(Punctuator.OPEN_PARENTHESIS);
+
+		ParseNode identifier = parseIdentifier();
+		expect(Keyword.FROM);
+		ParseNode startIndex = parseExpression();
+		expect(Keyword.TO);
+		ParseNode endIndex = parseExpression();
+		
+		expect(Punctuator.CLOSE_PARENTHESIS);
+
+		ParseNode blockStatement = parseBlockStatements();
+		ParseNode forStatNode = ForStatementNode.withChildren(forToken, identifier, startIndex, endIndex, blockStatement);
+		return forStatNode;
+	}
+	private boolean startsForStatement(Token token) {
+		return token.isLextant(Keyword.FOR);
+	}
 	private ParseNode parseLoopJumpStatement() {
 		if(!startsLoopJumpStatement(nowReading)) {
 			return syntaxErrorNode("LoopJumpStatement");
@@ -184,6 +210,9 @@ public class Parser {
 		if(startsWhileStatement(nowReading)) {
 			return parseWhileStatement();
 		}
+		if(startsForStatement(nowReading)) {
+			return parseForStatement();
+		}
 		if(startsLoopJumpStatement(nowReading)) {
 			return parseLoopJumpStatement();
 		}
@@ -197,6 +226,7 @@ public class Parser {
 			   startsBlockStatements(token) ||
 			   startsIfStatement(token) ||
 			   startsWhileStatement(token)||
+			   startsForStatement(token)||
 			   startsLoopJumpStatement(token);
 	}
 	
