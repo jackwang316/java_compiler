@@ -257,22 +257,69 @@ public class ASMCodeGenerator {
 			code.append(whileBodyCode);
 			code.add(Jump, node.getStartLabel());
 			code.add(Label, node.getEndLabel());
+			System.out.println(code);
 		}
-		public void visitLeave(ForStatementNode node){
+		/*
+		 * main {
+			for (i from 2 to 5) {
+				print i*i;
+			}
+		}
+		// i will increment by 1 from 2 to 5
+		 */
+		public void visitLeave(ForStatementNode node) {
+			System.out.println("----------------------------------------This should only be called once----------------------------------------");
 			newVoidCode(node);
-			System.out.println("for statement");
-			ASMCodeFragment initCode = removeVoidCode(node.child(0));
-			ASMCodeFragment expressionCode = removeValueCode(node.child(1));
-			ASMCodeFragment incrementCode = removeVoidCode(node.child(2));
+			System.out.println("ForStatementNode: " + node);
+
+			ASMCodeFragment index = removeValueCode(node.child(0));
+			System.out.println("index: " + index);
+
+			ASMCodeFragment startIndex = removeValueCode(node.child(1));
+			System.out.println("startIndex: " + startIndex);
+
+			ASMCodeFragment endIndex = removeValueCode(node.child(2));
+			System.out.println("endIndex: " + endIndex);
+
 			ASMCodeFragment forBodyCode = removeVoidCode(node.child(3));
-			code.append(initCode);
+			System.out.println("forBodyCode: " + forBodyCode);
+
+			// Make index = startIndex before loop
+			code.append(index);
+			code.append(startIndex);
+			// code.append(index);
+			code.add(StoreI);
+
+			// Start label of the loop
 			code.add(Label, node.getStartLabel());
-			code.append(expressionCode);
-			code.add(JumpFalse, node.getEndLabel());
+		
+			// Load the index value
+			code.append(index);
+		
+			// Load the endIndex value
+			code.append(endIndex);
+		
+			// Compare index with endIndex and jump to end if index is greater
+			code.add(Subtract);
+			code.add(JumpPos, node.getEndLabel());
+		
+			// Append code for the loop body
 			code.append(forBodyCode);
-			code.append(incrementCode);
+		
+			// Increment index
+			code.append(index);
+			code.add(PushI, 1);
+			code.add(Add);
+			code.add(StoreI);
+		
+			// Jump to start of the loop
 			code.add(Jump, node.getStartLabel());
+		
+			// End label of the loop
 			code.add(Label, node.getEndLabel());
+		
+			System.out.println(code);
+
 		}
 		public void visit(NewlineNode node) {
 			newVoidCode(node);

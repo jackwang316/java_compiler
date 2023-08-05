@@ -149,7 +149,7 @@ public class Parser {
 		if(!startsForStatement(nowReading)) {
 			return syntaxErrorNode("ForStatement");
 		}
-		System.out.println("ForStatement");
+		// System.out.println("ForStatement");
 		Token forToken = nowReading;
 		readToken();
 		expect(Punctuator.OPEN_PARENTHESIS);

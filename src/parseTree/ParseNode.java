@@ -167,6 +167,8 @@ public class ParseNode implements Locator {
 	protected void visitChildren(ParseNodeVisitor visitor) {
 		for(ParseNode child : children) {
 			child.accept(visitor);
+			// System.out.println("child: " + child);
 		}
+		// System.out.println("end of children");
 	}
 }

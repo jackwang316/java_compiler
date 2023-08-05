@@ -34,7 +34,14 @@ public class ForStatementNode extends ParseNode{
 
     public void accept(ParseNodeVisitor visitor) {
         visitor.visitEnter(this);
-        visitChildren(visitor);
+        // System.out.println("entering for statement node");
+        // visitChildren(visitor);
+        int n = nChildren();
+		for(int i = 0;i < n; i++) {
+			child(i).accept(visitor);
+            // System.out.println("child: " + child(i));
+		}
+        // System.out.println("leaving for statement node");
         visitor.visitLeave(this);
     }
     public String getStartLabel() {

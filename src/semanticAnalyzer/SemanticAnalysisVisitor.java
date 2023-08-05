@@ -54,7 +54,7 @@ import tokens.Token;
 class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 	@Override
 	public void visitLeave(ParseNode node) {
-		System.out.println("visitLeave(ParseNode node)");
+		// System.out.println("visitLeave(ParseNode node)");
 		throw new RuntimeException("Node class unimplemented in SemanticAnalysisVisitor: " + node.getClass());
 	}
 	
@@ -75,7 +75,7 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 			IdentifierNode index = (IdentifierNode) forNode.child(0);
 			IntegerConstantNode start = (IntegerConstantNode) forNode.child(1);
 			IntegerConstantNode end = (IntegerConstantNode) forNode.child(2);
-
+			
 			Type type;
 
 			if (start.getType() == PrimitiveType.INTEGER && end.getType() == PrimitiveType.INTEGER) {
@@ -86,15 +86,10 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 				semanticError("For loop index must be an integer. Not a " + index.getType());
 			}
 
-			// System.out.println("before binding");
 			Binding binding = node.getScope().createBinding(index, type, Constancy.IS_CONSTANT);
-			// System.out.println("after binding");
 			index.setBinding(binding);
 
-			// Labeller labeller = new Labeller("for");
-			// String startLabel = labeller.newLabel("start");
-			// String endLabel = labeller.newLabel("end");
-			Labeller labeller = new Labeller("loop_index");
+			Labeller labeller = new Labeller("for");
 			String indexLabel = labeller.newLabel("index");
 			String startLabel = labeller.newLabel("start");
 			String endLabel = labeller.newLabel("end");
@@ -106,6 +101,33 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 			forNode.appendChild(indexJump);
 			forNode.appendChild(startJump);
 			forNode.appendChild(endJump);
+
+			// String indexLabel = labeller.newLabel("index");
+			// String startLabel = labeller.newLabel("start");
+			// String endLabel = labeller.newLabel("end");
+
+			// IdentifierNode terminator = new IdentifierNode(IdentifierToken.make(node.getToken().getLocation(), labeller.newLabel("hidden_loop_terminator")));
+			// Binding yetbinding = node.getLocalScope().createBinding(terminator, PrimitiveType.INTEGER, Constancy.IS_CONSTANT);
+			// terminator.setBinding(yetbinding);
+			// forNode.appendChild(terminator);
+
+			// IdentifierNode indexNode = new IdentifierNode(IdentifierToken.make(node.getToken().getLocation(), labeller.newLabel("index")));
+			// Binding indexBinding = node.getLocalScope().createBinding(indexNode, PrimitiveType.INTEGER, Constancy.IS_CONSTANT);
+			// indexNode.setBinding(indexBinding);
+			// forNode.appendChild(indexNode);
+
+			// Labeller labeller = new Labeller("loop_index");
+			// String indexLabel = labeller.newLabel("index");
+			// String startLabel = labeller.newLabel("start");
+			// String endLabel = labeller.newLabel("end");
+
+			// LoopJumpNode indexJump = new LoopJumpNode(IdentifierToken.make(node.getToken().getLocation(), indexLabel));
+			// LoopJumpNode startJump = new LoopJumpNode(IdentifierToken.make(node.getToken().getLocation(), startLabel));
+			// LoopJumpNode endJump = new LoopJumpNode(IdentifierToken.make(node.getToken().getLocation(), endLabel));
+
+			// forNode.appendChild(indexJump);
+			// forNode.appendChild(startJump);
+			// forNode.appendChild(endJump);
 			
 			// IdentifierNode terminator = new IdentifierNode(IdentifierToken.make(node.getToken().getLocation(), labeller.newLabel("hidden_loop_terminator")));
 			// Binding yetBinding = node.getLocalScope().createBinding(terminator, PrimitiveType.INTEGER, Constancy.IS_CONSTANT);
@@ -119,6 +141,7 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 		}
 	}
 	public void visitLeave(BlockStatementNode node) {
+		// System.out.println("visitLeave(BlockStatementNode node)");
 		leaveScope(node);
 	}
 	
@@ -178,7 +201,7 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 	
 	@Override
 	public void visitLeave(AssignmentStatementNode node) {
-		System.out.println("visitLeave(AssignmentStatementNode node)");
+		// System.out.println("visitLeave(AssignmentStatementNode node)");
 		if(node.child(0) instanceof ErrorNode) {
 			node.setType(PrimitiveType.ERROR);
 			return;
@@ -246,7 +269,7 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 	};
 
 	private FunctionSignature binaryPromotionSignature(OperatorNode node, FunctionSignatures signatures, ArrayList<Type> childTypes) {
-		System.out.println("binaryPromotionSignature");
+		// System.out.println("binaryPromotionSignature");
 		Type type1 = childTypes.get(0);
 		Type type2 = childTypes.get(1);
 	
@@ -446,7 +469,7 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 			typeCheckError(node, childTypes);
 			node.setType(PrimitiveType.ERROR);
 		}
-		System.out.println("next node: " + node.getParent());
+		// System.out.println("next node: " + node.getParent());
 	}
 
 	
@@ -539,9 +562,11 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 			else if (current instanceof ForStatementNode) {
 				node.setLabel((ForStatementNode)current);
 				found = true;
+				System.out.println("void visit(LoopJumpNode node)");
 				break;
 			}
 		}
+		System.out.println("found: " + found);
 		if (!found) {
 			loopParentError(node);
 		}
