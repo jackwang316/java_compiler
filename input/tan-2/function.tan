@@ -1,7 +1,8 @@
-subr int fin( void a, int b ){
-	return 5; 
+subr char test(int a){
+	return 'c';
 }
 
-main {
-	print "hello" \n;
+main{
+	const b := test(1);
+	print b \n;
 }

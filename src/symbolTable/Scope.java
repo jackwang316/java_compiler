@@ -18,14 +18,35 @@ public class Scope {
 	public static Scope createProgramScope() {
 		return new Scope(programScopeAllocator(), nullInstance());
 	}
+	public static Scope createParameterScope() {
+		return new Scope(parameterScopeAllocator(), nullInstance());
+	}
 	public Scope createSubscope() {
 		return new Scope(allocator, this);
 	}
 	
+	public Scope createProcedureScope() {
+		Scope proc = new Scope(procedureScopeAllocator(), this);
+		proc.allocator.allocate(8);
+		return proc;
+	}
+
 	private static MemoryAllocator programScopeAllocator() {
 		return new PositiveMemoryAllocator(
 				MemoryAccessMethod.DIRECT_ACCESS_BASE, 
 				MemoryLocation.GLOBAL_VARIABLE_BLOCK);
+	}
+
+	private static MemoryAllocator procedureScopeAllocator() {
+		return new NegativeMemoryAllocator(
+				MemoryAccessMethod.INDIRECT_ACCESS_BASE,
+				MemoryLocation.FRAME_POINTER);
+	}
+
+	private static MemoryAllocator parameterScopeAllocator() {
+		return new NegativeMemoryAllocator(
+				MemoryAccessMethod.INDIRECT_ACCESS_BASE,
+				MemoryLocation.FRAME_POINTER);
 	}
 	
 //////////////////////////////////////////////////////////////////////
@@ -57,6 +78,11 @@ public class Scope {
 	public void leave() {
 		allocator.restoreState();
 	}
+
+	public void enter() {
+		allocator.saveState();
+	}
+
 	public int getAllocatedSize() {
 		return allocator.getMaxAllocatedSize();
 	}
@@ -98,6 +124,30 @@ public class Scope {
 		private NullScope() {
 			super(	new PositiveMemoryAllocator(MemoryAccessMethod.NULL_ACCESS, "", 0),
 					null);
+		}
+		public String toString() {
+			return "scope: the-null-scope";
+		}
+
+		@Override
+		public Binding createBinding(IdentifierNode identifierNode, Type type, Constancy constancy) {
+			unscopedIdentifierError(identifierNode.getToken());
+			return super.createBinding(identifierNode, type, constancy);
+		}
+		// subscopes of null scope need their own strategy.  Assumes global block is static.
+		public Scope createSubscope() {
+			return new Scope(programScopeAllocator(), this);
+		}
+	}
+
+	public static Scope nullInstanceNegative() {
+		return NullScopeNegative.instance;
+	}
+	private static class NullScopeNegative extends Scope {
+		private static NullScope instance = new NullScope();
+
+		private NullScopeNegative() {
+			super(new NegativeMemoryAllocator(MemoryAccessMethod.NULL_ACCESS, "", 0), null);
 		}
 		public String toString() {
 			return "scope: the-null-scope";

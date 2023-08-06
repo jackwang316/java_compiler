@@ -2,6 +2,7 @@ package symbolTable;
 
 import asmCodeGenerator.codeStorage.ASMCodeFragment;
 import inputHandler.TextLocation;
+import semanticAnalyzer.signatures.FunctionSignature;
 import semanticAnalyzer.types.PrimitiveType;
 import semanticAnalyzer.types.Type;
 
@@ -11,7 +12,8 @@ public class Binding {
 	private MemoryLocation memoryLocation;
 	private String lexeme;
 	private Constancy constancy;
-	
+	private FunctionSignature signature = null;
+
 	public Binding(Type type, TextLocation location, MemoryLocation memoryLocation, String lexeme, Constancy constancy) {
 		super();
 		this.type = type;
@@ -37,6 +39,13 @@ public class Binding {
 	}
 	public Type getType() {
 		return type;
+	}
+
+	public void setSignature(FunctionSignature signature) {
+		this.signature = signature;
+	}
+	public FunctionSignature getSignature() {
+		return signature;
 	}
 	public TextLocation getLocation() {
 		return textLocation;

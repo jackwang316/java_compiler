@@ -32,11 +32,18 @@ import parseTree.nodeTypes.NewlineNode;
 import parseTree.nodeTypes.OperatorNode;
 import parseTree.nodeTypes.PrintStatementNode;
 import parseTree.nodeTypes.ProgramNode;
+import parseTree.nodeTypes.ReturnNode;
 import parseTree.nodeTypes.SpaceNode;
 import parseTree.nodeTypes.TabSpaceNode;
 import parseTree.nodeTypes.TypeNode;
 import parseTree.nodeTypes.WhileStatementNode;
 import parseTree.nodeTypes.StringConstantNode;
+import parseTree.nodeTypes.SubrBlockNode;
+import parseTree.nodeTypes.SubrCallNode;
+import parseTree.nodeTypes.SubrDefinitionNode;
+import parseTree.nodeTypes.SubrInvokeNode;
+import parseTree.nodeTypes.SubrParameterNode;
+import parseTree.nodeTypes.SubrTypeNode;
 import semanticAnalyzer.signatures.FunctionSignature;
 import static semanticAnalyzer.types.PrimitiveType.*;
 
@@ -72,6 +79,7 @@ public class ASMCodeGenerator {
 	public ASMCodeFragment makeASM() {
 		ASMCodeFragment code = new ASMCodeFragment(GENERATES_VOID);
 		code.append(MemoryManager.codeForInitialization());
+		code.append(initCallStack());
 		code.append( RunTime.getEnvironment() );
 		code.append( globalVariableBlockASM() );
 		code.append( programASM() );
@@ -104,6 +112,20 @@ public class ASMCodeGenerator {
 		return visitor.removeRootCode(root);
 	}
 
+	private ASMCodeFragment initCallStack() {
+		ASMCodeFragment code = new ASMCodeFragment(GENERATES_VOID);
+		code.add(DLabel, RunTime.STACK_POINTER);
+		code.add(DataI, 0);
+		code.add(DLabel, RunTime.FRAME_POINTER);
+		code.add(DataI, 0);
+		code.add(DLabel, RunTime.STACK_POINTER);
+		code.add(Memtop);
+		code.add(StoreI);
+		code.add(PushD, RunTime.FRAME_POINTER);
+		code.add(Memtop);
+		code.add(StoreI);
+		return code;
+	}
 
 	protected class CodeVisitor extends ParseNodeVisitor.Default {
 		
@@ -344,6 +366,29 @@ public class ASMCodeGenerator {
 			return null;
 		}
 
+		private ASMOpcode opcodeForLoad(Type type) {
+			if(type == PrimitiveType.INTEGER) {
+				return LoadI;
+			}
+			if(type == PrimitiveType.BOOLEAN) {
+				return LoadC;
+			}
+			if(type == PrimitiveType.CHARACTER) {
+				return LoadC;
+			}
+			if(type == PrimitiveType.STRING) {
+				return LoadI;
+			}
+			if(type == PrimitiveType.FLOATING) {
+				return LoadF;
+			}
+			if(type instanceof Array) {
+				return LoadI;
+			}
+			assert false: "Type " + type + " unimplemented in opcodeForStore()";
+			return null;
+		}
+
 
 		///////////////////////////////////////////////////////////////////////////
 		// expressions
@@ -387,6 +432,187 @@ public class ASMCodeGenerator {
 //				visitNormalBinaryOperatorNode(node);
 //			}
 			
+		}
+
+		public void visitEnter(SubrDefinitionNode node) {
+			newVoidCode(node);
+			ASMCodeFragment child = removeVoidCode(node.child(1));
+			code.append(child);
+		}
+
+		public void visitEnter(SubrBlockNode node) {
+			node.generateLabels();
+		}
+
+		public void visitLeave(SubrBlockNode node) {
+			newValueCode(node);
+
+			code.add(Label, node.getStartLabel());
+
+			// Put return address on Frame Stack below Dynamic Link
+			code.add(PushD, RunTime.STACK_POINTER, "%% store return addr.");
+			code.add(LoadI);
+			code.add(PushI, -8);
+			code.add(Add);
+			code.add(Exchange);
+			code.add(StoreI);
+
+			// Store Dynamic Link (current value of Frame Pointer) below the Stack Pointer
+			code.add(PushD, RunTime.STACK_POINTER, "%% store dyn. link");
+			code.add(LoadI);
+			code.add(PushI, -4);
+			code.add(Add);
+			code.add(PushD, RunTime.FRAME_POINTER);
+			code.add(LoadI);
+			code.add(StoreI);
+
+			// Move Frame Pointer to Stack Pointer
+			code.add(PushD, RunTime.FRAME_POINTER, "%% move frame pointer");
+			code.add(PushD, RunTime.STACK_POINTER);
+			code.add(LoadI);
+			code.add(StoreI);
+
+			// Move Stack Pointer to end of frame
+			code.add(PushD, RunTime.STACK_POINTER, "%% move stack pointer");
+			code.add(PushD, RunTime.STACK_POINTER);
+			code.add(LoadI);
+			code.add(PushI, node.getFrameSize());
+			code.add(Subtract);
+			code.add(StoreI);
+
+
+			// Lambda execution code
+			ASMCodeFragment childCode = removeVoidCode(node.child(1));
+			code.append(childCode);
+
+
+			// Runoff error handling
+			code.add(Label, node.getExitErrorLabel());
+			code.add(Jump, RunTime.FUNCTION_RUNOFF_RUNTIME_ERROR);
+
+			// Exit handshake
+			code.add(Label, node.getExitHandshakeLabel());
+
+			// Push the return address onto the accumulator stack
+			code.add(PushD, RunTime.FRAME_POINTER, "%% get return addr.");
+			code.add(LoadI);
+			code.add(PushI, -8);
+			code.add(Add);
+			code.add(LoadI);
+
+			// Replace the Frame Pointer with the dynamic link
+			code.add(PushD, RunTime.FRAME_POINTER, "%% restore frame pointer");
+			code.add(PushD, RunTime.FRAME_POINTER);
+			code.add(LoadI);
+			code.add(PushI, -4);
+			code.add(Add);
+			code.add(LoadI);
+			code.add(StoreI);
+
+			// Move Stack Pointer above current Parameter Scope
+			code.add(PushD, RunTime.STACK_POINTER, "%% pop frame stack");
+			code.add(PushD, RunTime.STACK_POINTER);
+			code.add(LoadI);
+			code.add(PushI, node.getFrameSize());
+			code.add(Add);
+			code.add(PushI, node.getArgSize());
+			code.add(Add);
+
+			// Decrease the stack pointer by the return value size
+			Type returnType = node.getReturnType();
+			code.add(PushI, returnType.getSize(), "%% store return val.");
+			code.add(Subtract);
+			code.add(StoreI);
+
+			// Bring the return value back to the top of the ASM accumulator stack.
+			// (Swap return value with return address)
+			code.add(Exchange);
+
+			// Store return value
+			code.add(PushD, RunTime.STACK_POINTER);
+			code.add(LoadI);
+			code.add(Exchange);
+
+			code.add(opcodeForStore(returnType));
+
+			code.add(Return);
+		}
+
+		public void visitLeave(SubrTypeNode node) {
+		}
+
+		public void visitLeave(SubrParameterNode node) {
+		}
+
+		public void visitLeave(SubrCallNode node) {
+			newVoidCode(node);
+		}
+
+		public void visitLeave(SubrInvokeNode node) {
+			newValueCode(node);
+
+
+			for (int i = 1; i < node.nChildren(); i++) {
+				Type argType = node.child(i).getType();
+				int argSize = argType.getSize();
+
+				// Move Stack Pointer
+				ASMCodeFragment argFrag = new ASMCodeFragment(CodeType.GENERATES_VALUE);
+				argFrag.add(PushD, RunTime.STACK_POINTER);
+				argFrag.add(PushD, RunTime.STACK_POINTER);
+				argFrag.add(LoadI);
+				argFrag.add(PushI, argSize);
+				argFrag.add(Subtract);
+				argFrag.add(StoreI);
+				code.append(argFrag);
+
+				// Put argument value
+				code.add(PushD, RunTime.STACK_POINTER, "%% store arg " + i);
+				code.add(LoadI);
+				ASMCodeFragment argValue = removeValueCode(node.child(i));
+				code.append(argValue);
+
+				code.add(opcodeForStore(argType));
+			}
+
+			if (node.child(0) instanceof IdentifierNode) {				
+				ASMCodeFragment identifier = removeAddressCode(node.child(0));
+				code.append(identifier);
+				code.add(LoadI);
+			}
+
+			// Call function
+			code.add(CallV);
+
+			// Get return value
+			Type returnType = node.getType();
+			code.add(PushD, RunTime.STACK_POINTER);
+			code.add(LoadI);
+			code.add(opcodeForLoad(returnType));
+
+			// Move the Stack Pointer up by the size of the return value
+			code.add(PushD, RunTime.STACK_POINTER, "%% restore stack pointer");
+			code.add(PushD, RunTime.STACK_POINTER);
+			code.add(LoadI);
+			code.add(PushI, returnType.getSize());
+			code.add(Add);
+			code.add(StoreI);
+		}
+
+		public void visitLeave(ReturnNode node) {
+			newVoidCode(node);
+			ASMCodeFragment returnValue = removeValueCode(node.child(0));
+			code.append(returnValue);
+			SubrBlockNode lambda = (SubrBlockNode) node.getLambda();
+			code.add(Jump, lambda.getExitHandshakeLabel());
+		}
+
+		public void visitLeave(SubrDefinitionNode node) {
+			newVoidCode(node);
+
+			ASMCodeFragment childCode = removeValueCode(node.child(1));
+			code.add(DLabel, node.getLabel());
+			code.append(childCode);
 		}
 
 		public void visitLeave(IndexNode node){

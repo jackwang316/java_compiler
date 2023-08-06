@@ -16,11 +16,19 @@ import parseTree.nodeTypes.NewlineNode;
 import parseTree.nodeTypes.OperatorNode;
 import parseTree.nodeTypes.PrintStatementNode;
 import parseTree.nodeTypes.ProgramNode;
+import parseTree.nodeTypes.ReturnNode;
 import parseTree.nodeTypes.SpaceNode;
 import parseTree.nodeTypes.TabSpaceNode;
 import parseTree.nodeTypes.TypeNode;
 import parseTree.nodeTypes.WhileStatementNode;
 import parseTree.nodeTypes.StringConstantNode;
+import parseTree.nodeTypes.SubrBlockNode;
+import parseTree.nodeTypes.SubrCallNode;
+import parseTree.nodeTypes.SubrDefinitionNode;
+import parseTree.nodeTypes.SubrInvokeNode;
+import parseTree.nodeTypes.SubrParameterListNode;
+import parseTree.nodeTypes.SubrParameterNode;
+import parseTree.nodeTypes.SubrTypeNode;
 
 // Visitor pattern with pre- and post-order visits
 public interface ParseNodeVisitor {
@@ -50,7 +58,7 @@ public interface ParseNodeVisitor {
 	void visitEnter(PrintStatementNode node);
 	void visitLeave(PrintStatementNode node);
 
-	void viistEnter(IndexNode node);
+	void visitEnter(IndexNode node);
 	void visitLeave(IndexNode node);
 
 	void visitEnter(IfStatementNode node);
@@ -61,6 +69,27 @@ public interface ParseNodeVisitor {
 	
 	void visitEnter(ProgramNode node);
 	void visitLeave(ProgramNode node);
+
+	void visitEnter(SubrDefinitionNode node);
+	void visitLeave(SubrDefinitionNode node);
+
+	void visitEnter(SubrInvokeNode node);
+	void visitLeave(SubrInvokeNode node);
+
+	void visitEnter(SubrCallNode node);
+	void visitLeave(SubrCallNode node);
+
+	void visitEnter(SubrParameterListNode node);
+	void visitLeave(SubrParameterListNode node);
+
+	void visitEnter(SubrParameterNode node);
+	void visitLeave(SubrParameterNode node);
+
+	void visitEnter(ReturnNode node);
+	void visitLeave(ReturnNode node);
+
+	void visitEnter(SubrBlockNode node);
+	void visitLeave(SubrBlockNode node);
 
 
 	// leaf nodes: visitLeaf only
@@ -74,6 +103,7 @@ public interface ParseNodeVisitor {
 	void visit(FloatingConstantNode node);
 	void visit(CharacterConstantNode node);
 	void visit(StringConstantNode node);
+	void visit(SubrTypeNode node);
 
 	
 	public static class Default implements ParseNodeVisitor
@@ -93,6 +123,44 @@ public interface ParseNodeVisitor {
 			defaultVisitEnter(node);
 		}
 		public void visitLeave(OperatorNode node) {
+			defaultVisitLeave(node);
+		}
+
+		public void visitEnter(SubrDefinitionNode node) {
+			defaultVisitEnter(node);
+		}
+		public void visitLeave(SubrDefinitionNode node) {
+			defaultVisitLeave(node);
+		}
+		public void visitEnter(SubrInvokeNode node) {
+			defaultVisitEnter(node);
+		}
+		public void visitLeave(SubrInvokeNode node) {
+			defaultVisitLeave(node);
+		}
+		public void visitEnter(SubrCallNode node){
+			defaultVisitEnter(node);
+		}
+		public void visitLeave(SubrCallNode node){
+			defaultVisitLeave(node);
+		}
+		public void visitEnter(ReturnNode node) {
+			defaultVisitEnter(node);
+		}
+		public void visitLeave(ReturnNode node) {
+			defaultVisitLeave(node);
+		}
+		@Override
+		public void visitEnter(SubrParameterListNode node) {
+			defaultVisitEnter(node);
+		}	
+		public void visitLeave(SubrParameterListNode node) {
+			defaultVisitLeave(node);
+		}
+		public void visitEnter(SubrParameterNode node) {
+			defaultVisitEnter(node);
+		}
+		public void visitLeave(SubrParameterNode node) {
 			defaultVisitLeave(node);
 		}
 		public void visitEnter(AssignmentStatementNode node) {
@@ -158,13 +226,18 @@ public interface ParseNodeVisitor {
 			defaultVisitLeave(node);
 		}
 
-		public void viistEnter(IndexNode node) {
+		public void visitEnter(IndexNode node) {
 			defaultVisitEnter(node);
 		}
 		public void visitLeave(IndexNode node) {
 			defaultVisitLeave(node);
 		}
-
+		public void visitEnter(SubrBlockNode node) {
+			defaultVisitEnter(node);
+		}
+		public void visitLeave(SubrBlockNode node) {
+			defaultVisitLeave(node);
+		}
 		public void visit(BooleanConstantNode node) {
 			defaultVisitForLeaf(node);
 		}
@@ -193,6 +266,9 @@ public interface ParseNodeVisitor {
 			defaultVisitForLeaf(node);
 		}
 		public void visit(TabSpaceNode node) {
+			defaultVisitForLeaf(node);
+		}
+		public void visit(SubrTypeNode node) {
 			defaultVisitForLeaf(node);
 		}
 

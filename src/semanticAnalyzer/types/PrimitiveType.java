@@ -55,6 +55,29 @@ public enum PrimitiveType implements Type {
 		}
 	}
 
+	public static Type parseType(Type type) {
+		if(type.equivalent(PrimitiveType.BOOLEAN)){
+			return PrimitiveType.BOOLEAN;
+		}
+		else if(type.equivalent(PrimitiveType.CHARACTER)){
+			return PrimitiveType.CHARACTER;
+		}
+		else if(type.equivalent(PrimitiveType.INTEGER)){
+			return PrimitiveType.INTEGER;
+		}
+		else if(type.equivalent(PrimitiveType.STRING)){
+			return PrimitiveType.STRING;
+		}
+		else if(type.equivalent(PrimitiveType.FLOATING)){
+			return PrimitiveType.FLOATING;
+		}
+		else if(type.equivalent(PrimitiveType.NO_TYPE)){
+			return PrimitiveType.NO_TYPE;
+		}else{
+			return PrimitiveType.ERROR;
+		}
+	}
+
 	@Override
 	public boolean equivalent(Type otherType) {
 		return this == otherType;

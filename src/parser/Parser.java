@@ -31,7 +31,9 @@ import semanticAnalyzer.types.PrimitiveType;
 import semanticAnalyzer.types.Type;
 import parseTree.nodeTypes.StringConstantNode;
 import parseTree.nodeTypes.SubrBlockNode;
+import parseTree.nodeTypes.SubrCallNode;
 import parseTree.nodeTypes.SubrDefinitionNode;
+import parseTree.nodeTypes.SubrInvokeNode;
 import parseTree.nodeTypes.SubrParameterListNode;
 import parseTree.nodeTypes.SubrParameterNode;
 import tokens.*;
@@ -103,8 +105,8 @@ public class Parser {
 		Type returnType = parseType();
 		readToken();
 		ParseNode identifier = parseIdentifier();
-
 		ParseNode definitionBlock = parseSubrBlock();
+		definitionBlock.child(0).setType(returnType);
 		return SubrDefinitionNode.withChildren(definition, identifier, definitionBlock);
 	}
 	
@@ -112,7 +114,6 @@ public class Parser {
 		if(!startsSubrBlock(nowReading)) {
 			return syntaxErrorNode("subr block");
 		}
-
 		Token blockToken = nowReading;
 		SubrParameterListNode parameterList = new SubrParameterListNode(previouslyRead);
 		expect(Punctuator.OPEN_PARENTHESIS);
@@ -120,17 +121,12 @@ public class Parser {
 			if(nowReading.isLextant(Punctuator.COMMA)){
 				readToken();
 			}
-
 			if(startsParameterType(nowReading)){
 				Type type = parseType();
-				if(type.toString().equals("void")){
-					return syntaxErrorNode("subr block");
-				}
 				readToken();
-				ParseNode identifier = parseIdentifier();
+				ParseNode identifier = parseExpression();
 				SubrParameterNode parameter = SubrParameterNode.withChildren(identifier.getToken(), type, identifier);
 				parameterList.appendChild(parameter);
-
 			}
 		}
 		expect(Punctuator.CLOSE_PARENTHESIS);
@@ -231,6 +227,9 @@ public class Parser {
 		if(startsMutation(nowReading)) {
 			return parseMutation();
 		}
+		if(startsCallStatement(nowReading)) {
+			return parseCallStatement();
+		}
 		if(startsReturnStatement(nowReading)) {
 			return parseReturnStatement();
 		}
@@ -249,6 +248,24 @@ public class Parser {
 		return syntaxErrorNode("statement");
 	}
 	
+
+	private ParseNode parseCallStatement() {
+		if(!startsCallStatement(nowReading)) {
+			return syntaxErrorNode("call");
+		}
+
+		Token callToken = nowReading;
+		readToken();
+
+		ParseNode callExpression = parseExpression();
+
+		expect(Punctuator.TERMINATOR);
+		return SubrCallNode.withChild(callToken, callExpression);
+	}
+	private boolean startsCallStatement(Token token){
+		return token.isLextant(Keyword.CALL);
+	}
+
 	private ParseNode parseReturnStatement() {
 		if(!startsReturnStatement(nowReading)) {
 			return syntaxErrorNode("return statement");
@@ -256,6 +273,11 @@ public class Parser {
 
 		Token returnToken = nowReading;
 		readToken();
+
+		if (nowReading.isLextant(Punctuator.TERMINATOR)) {
+			readToken();
+			return new ReturnNode(returnToken);
+		}
 
 		ParseNode expression = parseExpression();
 		expect(Punctuator.TERMINATOR);
@@ -543,9 +565,6 @@ public class Parser {
 		int i = 0;
 		do {
 			readToken();
-
-				
-
 			if(nowReading.isLextant(Punctuator.CLOSE_BRACKET)) {
 				if(i == 0){
 					return syntaxErrorNode("array creation");
@@ -708,7 +727,26 @@ public class Parser {
 		if(!startsIdentifier(nowReading)) {
 			return syntaxErrorNode("identifier");
 		}
+		
+		Token identifier = nowReading;
 		readToken();
+
+		if(previouslyRead.isLextant(Keyword.getReturnTypes())) {
+			expect(Punctuator.OPEN_PARENTHESIS);
+			ParseNode node = new SubrInvokeNode(identifier);
+			node.appendChild(new IdentifierNode(identifier));
+
+			while(!nowReading.isLextant(Punctuator.CLOSE_PARENTHESIS)) {
+				if(nowReading.isLextant(Punctuator.COMMA)){
+					readToken();
+				}
+				ParseNode expression = parseExpression();
+				node.appendChild(expression);
+			}
+			expect(Punctuator.CLOSE_PARENTHESIS);
+			return node;
+		}
+
 		return new IdentifierNode(previouslyRead);
 	}
 

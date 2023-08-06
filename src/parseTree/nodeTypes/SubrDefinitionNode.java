@@ -15,7 +15,7 @@ public class SubrDefinitionNode extends ParseNode{
     private FunctionSignature signature;
     private Binding binding;
     private Scope parameterScope;
-    private Scope subrScope;
+    private String label;
 
     public SubrDefinitionNode(Token token) {
         super(token);
@@ -74,6 +74,13 @@ public class SubrDefinitionNode extends ParseNode{
         undefinedError();
         return Binding.nullInstance();
     }
+
+    public void setLabel(String label) {
+		this.label = label;
+	}
+	public String getLabel() {
+		return this.label;
+	}
 
     public Scope getParameterScope() {
         findVariableBinding();

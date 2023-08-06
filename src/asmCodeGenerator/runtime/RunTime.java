@@ -17,9 +17,12 @@ public class RunTime {
 	public static final String GLOBAL_MEMORY_BLOCK    = "$global-memory-block";
 	public static final String USABLE_MEMORY_START    = "$usable-memory-start";
 	public static final String MAIN_PROGRAM_LABEL     = "$$main";
+	public static final String STACK_POINTER    				= "$stack-pointer";
+	public static final String FRAME_POINTER    				= "$frame-pointer";
 
 	public static final String ARR_LOC					= "$array-location";
 	public static final String STR_LOC					= "$string-location";
+	public static final String FUNCTION_RUNOFF_RUNTIME_ERROR = "$$function-runoff";
 
 	public static final String GENERAL_RUNTIME_ERROR = "$$general-runtime-error";
 	public static final String OUT_OF_BOUNDS_RUNTIME_ERROR = "$$out-of-bounds-runtime-error";
@@ -91,6 +94,7 @@ public class RunTime {
 		floatingDivideByZeroError(frag);
 		negativeIndexError(frag);
 		outOfBoundsError(frag);
+		functionRunoffError(frag);
 		
 		return frag;
 	}
@@ -105,6 +109,17 @@ public class RunTime {
 		frag.add(Printf);
 		frag.add(Halt);
 		return frag;
+	}
+
+	private void functionRunoffError(ASMCodeFragment frag) {
+		String functionRunoffMessage = "$errors-function-runoff";
+
+		frag.add(DLabel, functionRunoffMessage);
+		frag.add(DataS, "code ran off the end of the function");
+
+		frag.add(Label, FUNCTION_RUNOFF_RUNTIME_ERROR);
+		frag.add(PushD, functionRunoffMessage);
+		frag.add(Jump, GENERAL_RUNTIME_ERROR);
 	}
 
 	private void integerDivideByZeroError(ASMCodeFragment frag) {

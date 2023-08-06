@@ -15,6 +15,10 @@ public class Labeller {
 		return "-" + prefix + "-" + labelNumber + "-";
 	}
 
+	public String getPrefix() {
+		return this.prefix;
+	}
+
 	public String newLabel(String suffix) {
 		return prefix + suffix;
 	}

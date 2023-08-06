@@ -27,10 +27,16 @@ import parseTree.nodeTypes.NewlineNode;
 import parseTree.nodeTypes.OperatorNode;
 import parseTree.nodeTypes.PrintStatementNode;
 import parseTree.nodeTypes.ProgramNode;
+import parseTree.nodeTypes.ReturnNode;
 import parseTree.nodeTypes.SpaceNode;
 import parseTree.nodeTypes.TabSpaceNode;
 import parseTree.nodeTypes.TypeNode;
 import parseTree.nodeTypes.StringConstantNode;
+import parseTree.nodeTypes.SubrBlockNode;
+import parseTree.nodeTypes.SubrCallNode;
+import parseTree.nodeTypes.SubrDefinitionNode;
+import parseTree.nodeTypes.SubrInvokeNode;
+import parseTree.nodeTypes.SubrParameterNode;
 import semanticAnalyzer.signatures.FunctionSignature;
 import semanticAnalyzer.signatures.FunctionSignatures;
 import semanticAnalyzer.types.Array;
@@ -52,18 +58,23 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 	// constructs larger than statements
 	@Override
 	public void visitEnter(ProgramNode node) {
-		enterProgramScope(node);
+		enterScope(node);
 	}
 	public void visitLeave(ProgramNode node) {
 		leaveScope(node);
 	}
 	public void visitEnter(BlockStatementNode node) {
-		enterSubscope(node);
+		if (node.getParent() instanceof SubrBlockNode) {
+			createProcedureScope(node);
+		} else {
+			createSubscope(node);
+		}
+		
+		enterScope(node);
 	}
 	public void visitLeave(BlockStatementNode node) {
 		leaveScope(node);
 	}
-	
 	
 	///////////////////////////////////////////////////////////////////////////
 	// helper methods for scoping.
@@ -71,6 +82,19 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 		Scope scope = Scope.createProgramScope();
 		node.setScope(scope);
 	}	
+
+	private void createProcedureScope(ParseNode node) {
+		Scope baseScope = node.getLocalScope();
+		Scope scope = baseScope.createProcedureScope();
+		node.setScope(scope);
+	}
+
+	private void createSubscope(ParseNode node) {
+		Scope baseScope = node.getLocalScope();
+		Scope scope = baseScope.createSubscope();
+		node.setScope(scope);
+	}
+
 	private void enterSubscope(ParseNode node) {
 		Scope baseScope = node.getLocalScope();
 		Scope scope = baseScope.createSubscope();
@@ -79,9 +103,168 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 	private void leaveScope(ParseNode node) {
 		node.getScope().leave();
 	}
+
+	private void enterScope(ParseNode node) {
+		node.getScope().enter();
+	}
 	
 	///////////////////////////////////////////////////////////////////////////
 	// statements and declarations
+
+	private void verifyFunctionArguments(ParseNode node) {
+		SubrInvokeNode function = null;
+
+		if (node instanceof SubrCallNode) {
+			function = (SubrInvokeNode) node.child(0);
+		} else if (node instanceof SubrInvokeNode) {
+			function = (SubrInvokeNode) node;
+		}
+
+		assert function != null;
+
+		// Get the function signature
+		function.setBinding(function.getVariableBinding());
+		FunctionSignature signature = function.getBinding().getSignature();
+
+		if (signature == null) {
+			Token token = node.getToken();
+			logError("No signature defined for " + token.getLexeme() + " at " + token.getLocation());
+			node.setType(PrimitiveType.ERROR);
+			return;
+		}
+
+		// Get child types
+		List<Type> childTypes = new ArrayList<Type>();
+		function.getChildren().forEach((child) -> childTypes.add(child.getType()));
+		childTypes.remove(0); // Remove identifier node
+
+		// Check that number of arguments is the same
+		if (signature.accepts(childTypes)) {
+			//node.setSignature(signature);
+			node.setType(signature.resultType());
+		} else {
+			typeCheckError(function, childTypes);
+		}
+	}
+
+	@Override
+	public void visitLeave(SubrCallNode node){
+		if (!(node.child(0) instanceof SubrInvokeNode)) {
+			typeCheckError(node, Arrays.asList(node.child(0).getType()));
+		}
+
+		SubrInvokeNode function = (SubrInvokeNode) node.child(0);
+		function.setBinding(function.getVariableBinding());
+
+		List<Type> childTypes = new ArrayList<Type>();
+		function.getChildren().forEach((child) -> childTypes.add(child.getType()));
+		childTypes.remove(0); // Remove identifier node
+
+		FunctionSignature signature = function.getBinding().getSignature();
+
+		// Check that number of arguments is the same
+		if (signature.accepts(childTypes)) {
+			//node.setSignature(signature);
+			node.setType(signature.resultType());
+		} else {
+			typeCheckError(function, childTypes);
+		}
+		verifyFunctionArguments(node);
+	}
+
+	@Override
+	public void visitLeave(SubrInvokeNode node){
+		if (node.child(0) instanceof IdentifierNode) {
+			IdentifierNode identifier = (IdentifierNode) node.child(0);
+			identifier.setBinding(identifier.findVariableBinding());
+			Type functionType = identifier.getBinding().getType();
+
+			if (functionType == PrimitiveType.NO_TYPE) {
+				ParseNode parent = node.getParent();
+				while (parent != null && !(parent instanceof SubrCallNode)) {
+					parent = parent.getParent();
+				}
+
+				if (parent == null || !(parent instanceof SubrCallNode)) {
+					Token token = node.getToken();
+					String identifierName = identifier.getToken().getLexeme();
+					logError("Cannot use VOID function \"" + identifierName + "\" as an expression at " + token.getLocation());
+
+					node.setType(PrimitiveType.ERROR);
+					return;
+				}
+			}
+			verifyFunctionArguments(node);
+
+			node.setType(functionType);
+		}
+	}
+
+	@Override
+	public void visitLeave(SubrDefinitionNode node){
+	}
+
+	@Override
+	public void visitLeave(SubrBlockNode node){
+	}
+
+	@Override
+	public void visitLeave(ReturnNode node){
+		ParseNode parent = node.getParent();
+		while (parent != null && !(parent instanceof SubrBlockNode)) {
+			parent = parent.getParent();
+		}
+
+		if (parent == null) {
+			Token token = node.getToken();
+			logError("Cannot call return statement outside of a Lambda at " + token.getLocation());
+
+			node.setType(PrimitiveType.ERROR);
+			return;
+		}
+
+		Type lambdaReturnType = ((SubrBlockNode) parent).getReturnType();
+		Type returnType;
+		String returnTypeString = "";
+
+		// Handle void return
+		if (node.nChildren() == 0) {
+			returnType = PrimitiveType.NO_TYPE;
+		} else {
+			returnType = node.child(0).getType();
+		}
+
+		if (returnType instanceof Array) {
+			if (((Array)returnType).equals(lambdaReturnType)) {
+				node.setType(returnType);
+				return;
+			}
+			returnTypeString = returnType.infoString();
+		}
+		if (returnType instanceof SubrBlockNode) {
+			returnType = ((SubrBlockNode) returnType).getReturnType();
+			if (returnType == lambdaReturnType) {
+				node.setType(returnType);
+				return;
+			}
+			returnTypeString = returnType.infoString();
+		}
+		if (returnType instanceof PrimitiveType) {
+			if (returnType == lambdaReturnType) {
+				node.setType(returnType);
+				return;
+			}
+			returnTypeString = returnType.infoString();
+		}
+
+		node.setType(PrimitiveType.ERROR);
+
+		Token token = node.getToken();
+		logError("Cannot return type " + returnTypeString + " for Lambda with return type " + lambdaReturnType + " at " + token.getLocation());
+		return;
+
+	}
+
 	@Override
 	public void visitLeave(PrintStatementNode node) {
 	}
@@ -230,7 +413,6 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 			node.setType(new Array(node.child(0).getType()));
 		}
 	}
-
 	///////////////////////////////////////////////////////////////////////////
 	// simple leaf nodes
 	@Override
@@ -271,7 +453,7 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 	// IdentifierNodes, with helper methods
 	@Override
 	public void visit(IdentifierNode node) {
-		if(!isBeingDeclared(node)) {		
+		if(!isBeingDeclared(node) && !isSubrIdentifier(node) && isSubrArgs(node)) {		
 			Binding binding = node.findVariableBinding();
 			
 			node.setType(binding.getType());
@@ -279,14 +461,30 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 		}
 		// else parent DeclarationNode does the processing.
 	}
+
+	private boolean isSubrIdentifier(IdentifierNode node) {
+		return (node.getParent() instanceof SubrDefinitionNode) && (node == node.getParent().child(0));
+	}
+
+	private boolean isSubrArgs(IdentifierNode node) {
+		return (node.getParent() instanceof SubrParameterNode) && (node == node.getParent().child(0));
+	}
 	
 	private boolean isBeingDeclared(IdentifierNode node) {
 		ParseNode parent = node.getParent();
 		return (parent instanceof DeclarationNode) && (node == parent.child(0));
 	}
+
 	private void addBinding(IdentifierNode identifierNode, Type type, Constancy constancy) {
 		Scope scope = identifierNode.getLocalScope();
 		Binding binding = scope.createBinding(identifierNode, type, constancy);
+		identifierNode.setBinding(binding);
+	}
+
+	private void addBinding(IdentifierNode identifierNode, Type type, Constancy constancy, FunctionSignature signature) {
+		Scope scope = identifierNode.getLocalScope();
+		Binding binding = scope.createBinding(identifierNode, type, constancy);
+		binding.setSignature(signature);
 		identifierNode.setBinding(binding);
 	}
 	
